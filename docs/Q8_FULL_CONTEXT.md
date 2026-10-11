@@ -83,7 +83,7 @@ was written past the allocation. Our engine does not have that route. The fix fo
    82.5 for 3; code +3% for 3).
    Larger sizes at 160k (2026-10-09, `bench/tail_draft_ab.sh`, `docs/receipts/tail_draft_ab.jsonl`, with lookup): 6 against
    4 gives file rewrites +4%, edit calls +6%, new text -3% (prose and bash -8%); 8 is slower in all three groups
-   (-15% to -19%). 4 stays.
+   (file rewrites -15%, new text -19%, edit calls -11%). 4 stays.
    PCIe check (2026-10-09, `bench/tier_bw.sh`, `docs/receipts/tier_bw.log`): at 100k with MTP and lookup off, the line at
    64k and at 32k adds 51.3 and 99.1 ms per token for 1.22 and 2.35 GB of rows in system RAM, 23.7 GB/s both times;
    a pinned copy on this link moves 23.8 GB/s. Decode past the line is at the PCIe limit: only fewer bytes (q4_0
