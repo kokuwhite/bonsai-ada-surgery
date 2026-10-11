@@ -1,0 +1,50 @@
+# 8 GB research, 2026-10-06 to 2026-10-11 (ongoing)
+
+How to make Bonsai 2 27B (PTQ1_0 ternary, 48 gated-delta-net + 16 attention layers, MTP head) fast, correct and stable on
+one 8 GB card, to the end of its 262,144-token window. All runs on one RTX 2060 SUPER 8 GB (Turing, sm_75, PCIe 3.0)
+with the Windows desktop on the same card, unattended, from a job queue. Each experiment (P1 to P108) has a plan and a
+gate written before its result; the timestamped plan is in `NOTEBOOK.md` before the result entry.
+
+The companion folder `../depth-20261010/` (RTX 4070 12 GB, D01-D17) has the 12 GB side of the depth work: the sparse
+host-tail reads and tier-graphs were built there and checked here on 8 GB (P101-P107).
+
+Read `REPORT.md` first. For a single experiment, read `experiments/P###.md`. For the levers we can reuse on the next
+model, read `TOOLBOX.md`.
+
+| Path | What |
+| --- | --- |
+| `REPORT.md` | Bottom line, what shipped, what was rejected, results by day, open items |
+| `TOOLBOX.md` | Every lever, method and tool: how to turn it on, measured effect on 8 GB, status, model-specific or general |
+| `experiments/P###.md` | One record per experiment: setup, frozen gate, method, every number, deviations, verdict, later corrections, what it changed |
+| `experiments/index-*.md` | One row per experiment |
+| `runs.jsonl` | One JSON line per experiment: id, date, card, engine commit, script, env, metrics, verdict, receipts (same fields as `../depth-20261010/runs.jsonl`, for comparing future models and engines) |
+| `experiments/events-*.md` | Entries that are not experiments: incidents, rig baseline changes, releases, PRs, coordination, decisions |
+| `NOTEBOOK.md` | The full lab notebook, in time order, unchanged (plans, results, corrections, incidents) |
+| `scripts/` | Every script that ran an experiment: `pNN.sh`, `queue/NN-pNN-*.sh` (queue jobs), probes (`*.py`), `benchx/`, launch helpers (`serve.ps1`, `run_arm.sh`, `stop.ps1`), queue runner and fillers, Afterburner profile tools, the CPU attention bench |
+| `results-raw.zip` | Every receipt (1,120 files): `receipts/pNN/` summaries, per-run JSON lines, server command lines, text compares. The API key is redacted |
+| `releases/` | Release notes of the 8 GB bundles checked on this card |
+| `drafts/` | PR, issue and reply texts sent upstream (PrismML #325, #330, #314, #317, #338 and others) |
+
+Not included: one 2 GB KL logits dump (`receipts/p8c/kl_base_bundle_soa_f16_ub1.bin`, regenerate with `p8_build_ab.sh`),
+server stdout/stderr logs (557 MB; the lines each experiment used are in its receipts), and binaries.
+
+## The card and the method
+
+- RTX 2060 SUPER 8 GB, Windows 11, desktop on the card (1280x1024 from 2026-10-06 21:05), remote access by Chrome
+  Remote Desktop (~8 MiB GPU). Fan fixed at 100 % from 2026-10-06 21:41 (Afterburner slot 5). Clocks are stock
+  unless a record says otherwise. Memory +1000 MHz is a documented opt-in (P42: +2.5 % drafting decode); +1250
+  faulted the GPU and +1500 crashed the PC (P38, P39b). The clock is never changed while a server runs (P39c).
+- 32 GB RAM. 16 GB machines are simulated with committed ballast (`scripts/ballast.py`).
+- A/B arms run on the same binary where possible, alternated in order, with fixed prompts. Texts are compared only
+  within one session history (P92 to P94: the lookup drafter's history changes near-tie tokens).
+- Engine: fork `professorpalmer/llama.cpp-ada-ternary`; each record names its branch and commit. Launcher and patch
+  stack: this repo (`start-server.ps1`, `patches/`).
+
+## Running it again
+
+The scripts ran from `C:\bonsai\8gb\` (rig folder) with the repo at `C:\bonsai\bonsai-ada-surgery\` and the API key at
+`artifacts/api_key.txt` in the repo. Jobs were queued as files in `queue/pending/` and run one at a time by
+`scripts/queue_runner.sh` under a Windows scheduled task (a shell started from the app dies with the app). To rerun
+one experiment: build the engine commit its record names, copy the bin dir its record names, start the server with
+the launcher and variables in its record (or its `scripts/` file), then run the probe it names, e.g.
+`python scripts/benchx/quick_tps.py`, `python scripts/realtext_probe.py`, `python scripts/deep_soak.py`.

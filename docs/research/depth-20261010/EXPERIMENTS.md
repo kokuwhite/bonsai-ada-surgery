@@ -233,11 +233,13 @@ VRAM line 43,520 (f16 mask), host tail ~197k cells, graphs off.
 | P102c | `ae61c4cf3` | sparse 2.6; one sync per K write still logged |
 | P102d | `ae61c4cf3`, `GGML_CUDA_KV_TIER_REDIRECT=0` | 2.5; warning still there (not the redirect) |
 | P102e | `d6c6e9f01` | sync gone (0 warnings); decode sparse 4.3 (lookup off and on), with `SINKS=4096` 5.2; prefill 39, with sinks 6.2 |
+| P105 | `d6c6e9f01` | 160k: dense 9.7, sparse **18.3 (x1.9)**; code items with lookup 12.8 -> 21.5; needles 12/12, copies 10/10. 245k: copies 9/10, needles 12/12. MTP tail 4 (line 20,992, acceptance 0.55): dense 9.1, sparse 11.5 |
+| P106 | `028f606fc` | 160k: dense 9.7, sparse **18.5 (x1.9)**; 245k: 5.7 vs 4.9; 64k: 34.5 vs 29.0 (-16 %); follow-up prefill 160k 107 -> 85, 245k 79 -> 39-44, the same with `NOTRACK` (not the write tracking) |
 
-- **Verdict so far.** Not faster on the real 8 GB card. Causes found: the 2-query decode ops run the vec kernel, whose
-  128-cell tile skip lets a kept 64-cell page pull its neighbour in (fixed in `028f606fc`, a 32-cell warp skip, not yet
-  run there); and an unexplained prefill halving with the sparse settings on this recipe only (an isolation run is
-  proposed on #21). P105 (dense vs sparse at 160k / 245k on `d6c6e9f01`) is running.
+- **Verdict so far.** On the real 8 GB card: x1.9 at 160k (P105, P106), quality equal to dense; not yet faster at
+  245k (4.9 vs 5.7 with the `028f606fc` warp skip); costs 16 % at 64k, so a default needs a depth threshold; the
+  follow-up prefill drop is not the write tracking (P106). P107 (op timing, dense vs sparse at 245k) is queued.
+  Full records: `../depth-8gb-20261006/experiments/P101.md` to `P107.md`.
 
 ## D17 Tile skip at warp granularity (2026-10-11, `028f606fc`)
 

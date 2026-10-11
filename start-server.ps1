@@ -338,7 +338,7 @@ if (-not $Small -and $Help -match '--checkpoint-every-nt' -and -not $env:LLAMA_A
 # The server's system memory is the pinned K/V tail, its VRAM (under the Windows display driver model a process's commit
 # grows by about the size of its VRAM allocations: RTX 4070, 4k window, -ngl 0 2.3 GB private, -ngl 99 7.8 GB), the
 # context checkpoints (~170 MiB each, at most 32 per slot) and the prompt cache (default limit 8 GiB; one entry holds a
-# prompt's K/V plus copies of its checkpoints: ~1.3 GB for an 8k-token prompt, ~2 GB for 26.5k). With the defaults,
+# prompt's K/V plus copies of its checkpoints: ~1.3 GB for a 24k-token prompt at q4_0 K/V, ~2 GB for 26.5k). With the defaults,
 # 7 sequential thinking requests took the server from 9.6 to 18.3 GB of commit (RTX 2060 SUPER, 131k) and from 14.1 to
 # 21.7 GB (RTX 4070, 262k); on 16 GB of RAM the server failed with "bad allocation" and then exited (issue #16).
 # By system RAM, as the Mirai S launcher (bundle-20261010):

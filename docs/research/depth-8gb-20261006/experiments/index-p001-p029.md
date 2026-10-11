@@ -1,0 +1,35 @@
+# Index, P001-P029 (2026-10-06 18:35 to 2026-10-07 07:00)
+
+RTX 2060 SUPER 8 GB, Bonsai 2 27B PTQ1_0. Events of the same period: events-p001-p029.md.
+
+| ID | date | title | status | one-line result |
+| --- | --- | --- | --- | --- |
+| [P001](P001.md) | 2026-10-06 | First serve: fixed VRAM cost | PARTIAL | Fixed cost 5,874 MiB; the launcher's model (6,256; plan text 6,225) is 382 MiB high; 16,384 q8_0 cells leave ~500 MiB free. |
+| [P002](P002.md) | 2026-10-06 | Decode-by-depth record at stock, N=16384 q8_0 | PASS (record) | 38.6 / 36.9 / 32.6 / 13.5 / 6.0 / 3.0 tok/s at 0 / 4k / 16k / 32k / 64k / 120k; past the VRAM line decode is PCIe-bound. |
+| [P003](P003.md) | 2026-10-06 | Memory-clock sweep | FAIL; later VOID (P038) | +1000 = +1.0%, inside the 4.8% heat drift; identity exact at all offsets. P038 later measured +7.7% on the planar-PT engine. |
+| [P004](P004.md) | 2026-10-06 | Cooling, power and core-clock sweep | FAIL (per step) | +150 core at 215 W = +4.9% vs stock at most; card reached 87 C; left at stock. |
+| [P005](P005.md) | 2026-10-06 | Positions vs drafting at equal VRAM (+ P5b) | PROMOTED (B); P5b SUPERSEDED | q4_0 N=38,656 wins at 32k (32.0 vs 14.1 q8_0, 29.4 head); head costs ~600 MiB over budget. P5b "drafting not lossless on Turing" corrected: documented rounding behaviour on every card. Two arms void (stacked servers). |
+| [P006](P006.md) | 2026-10-06 | q8_0 vs q4_0 K/V KL on this card | PASS -> PROMOTED | q4_0: mean KL 0.002096, top-1 97.900% (1 flip in 48); q8_0: 0.000167, 99.417%; matches the 4070 within 5%. q4_0 becomes the 8 GB default. |
+| [P007](P007.md) | 2026-10-06 | One-column decode kernel: PT vs SOA_ISUM on Turing | PASS | PT (via BATCH_INVARIANT) 41.23 / 41.25 vs SOA 36.76 / 36.69: +12.3%; Turing fell through to the Ada default. |
+| [P008](P008.md) | 2026-10-06 | Engine fix: Turing takes PT at one column (+ P8b tests, P8c KL) | PROMOTED (#325, bc3e5aa02); P8c PARTIAL | +13.7% decode (43.28 vs 38.07); test-backend-ops 1516/1516; one-column KL 0.000146, top-1 99.389% (0.028 pp under the threshold, inside the CI: tie). |
+| [P009](P009.md) | 2026-10-06 | Core overclock soak (+ P9b with desk fans) | FAIL / FAIL (OPEN) | +150 / 215 W: 86 C without desk fans; 74 C with them, +3.5-4.1%, but 1 of 26 texts diverged (cause unsettled). Stock stays. |
+| [P010](P010.md) | 2026-10-06 | PrismML #209 and #314 on Turing (+ P10b) | #209 FAIL; #314 defaults REJECTED; MAX_KB=1024 PASS | #209: 0.0%. #314 4070 defaults: -2.4..-2.7% (3 of 3); 1 MiB cap: +0.5..+2.2%. Receipt comment posted to #314. |
+| [P011](P011.md) | 2026-10-06/07 | Margin soak: N=65,280 and 77,568 (+ P11b) | PASS (two passes); SUPERSEDED | 77,568 q4_0 positions hold decode (drift <= 0.9%, min free 244-257 MiB, shared memory flat). Prefill cliff found later (P014); not shipped. |
+| [P012](P012.md) | 2026-10-06 | Drafting made cheap: Q4_0 head, shared pool, draft ubatch | PROMOTED (C2) then replaced | q4 head -214 MiB PASS; pool -62 MiB (Mirai -188) FAIL; acceptance -2.7 pp. C2 at N=38,400: 51.5 / 47.8 / 43.1 / 23.9 vs B 43.9 / 39.1 / 34.4 / 27.6. Pool later caused one-token answers (P064). |
+| [P013](P013.md) | 2026-10-07 | sudoingX's 8 GB floor vs ours | PARTIAL | Floor 37.2 / 30.4 / 24.5 / 17.5 decode, 427 / 382 / 320 / 256 prefill. Ours wins decode at every depth, loses prefill; C2 VOID at 32k/60k (one-token answers). |
+| [P014](P014.md) | 2026-10-07 | Prefill anomaly at N=77,568 (+ P14b, P14c) | PASS / PASS / PARTIAL | A pressure cliff near ~270 MiB free (240 vs 417 tok/s), not BATCH_INVARIANT, not KV span; not deterministic (P14c: no cliff at 214 MiB free). P14c's "-6% vs floor at 32k" corrected by P023 (sequence mismatch). |
+| [P015](P015.md) | 2026-10-07 | Tail draft 1: spend the second GDN plane on positions | PROMOTED | Tail 1 saves 152 MiB -> N=47,360: 52.3 / 48.3 / 43.6 / 29.7; acceptance 0.803. The "+24% at 60k" compares with a 64k tail-2 number. |
+| [P016](P016.md) | 2026-10-07 | Where prefill time goes (op timing; P16 void, P16b) | VOID / PASS | Fresh 60k prefill 247.5 tok/s; FLASH_ATTN_EXT (in-place q4_0) 39.6%, PTQ1_0 MUL_MAT ~43.8%, GDN 7.5%. "Parity" claim used a different sequence (see P023). |
+| [P017](P017.md) | 2026-10-07 | Prefetch x drafting at 32k | PASS | All 8 requests full length; texts identical with prefetch on/off. The P013 stop followed a prompt-cache restore, not prefetch. |
+| [P018](P018.md) | 2026-10-07 | Replay P013's restore sequence | FAIL (tail 2) / PASS (tail 1) | Tail 2: 3/27 one-token answers (all at 32k of replay 3); tail 1: 0/27. Later attributed most likely to the shared pool race (P054/P064). |
+| [P019](P019.md) | 2026-10-07 | Deterministic prefill-scratch reservation | OPEN (never planned or run) | Named in the P14c result only. |
+| [P020](P020.md) | 2026-10-07 | Release candidate bin-rc, both modes x2 | PASS | Drafting 51.6 / 47.7 / 43.1 / 29.5, long 43.6 / 39.0 / 34.2 / 28.1; 0 one-token; repo q4-head script byte-identical. Prefill -5..-26% vs floor. Planned 10-min soak not run. |
+| [P021](P021.md) | 2026-10-07 | One-token bug: tail 4, tail 1, tail 2 cache-off | PASS (default) / OPEN (bug) | Tail 1 0/27, tail 4 0/18, tail 2 cache-off 0/9 (one replay); two arms refused by the stock guard under build load. |
+| [P022](P022.md) | 2026-10-07 | Packed 1-bit KQ mask (+ P22b draft-context fix) | PARTIAL / REJECTED; later CORRECTED (P024, P082) | -128 MiB and exact at 4k/16k; with drafting at 32k the output became "////..."; ub 1024 +2-3.5% (gate > 10% FAIL). 2026-10-09: the cause was the build's races, not the mask. |
+| [P023](P023.md) | 2026-10-07 | Which build gives +11% prefill at depth? | PASS | None: all builds 415-417 / 301-302; the 271 vs 301 was the request sequence. True floor gap: -15% (32k) / -21% (60k). |
+| [P024](P024.md) | 2026-10-07 | Packed mask without drafting, 20k-32k | PASS | Texts byte-identical at 20k/24k/28k/32k; corruption needs drafting + packed past 16k (later traced to races, P082). |
+| [P025](P025.md) | 2026-10-07 | f16 prefill from pool memory | PROMOTED (#330, c9a2a7dd0) | Long mode prefill +2 / +9 / +18 / +26% at 4k/16k/32k/60k (parity with the floor); drafting +2 / +9 / +18%; texts identical at 32k; decode unchanged; kernel tests 2994/2994. |
+| [P026](P026.md) | 2026-10-07 | f16 prefill + ub 1024 at N=58,112 | PARTIAL | Above the floor at 4k-32k (+1.5 / +2.4 / +2.6%); 60k cliff (154.5 / 174.8 tok/s; trace min free 83 MiB). |
+| [P027](P027.md) | 2026-10-07 | Long mode ub 1024 + f16 at N=53,248 | PASS (60k prefill a tie) -> PROMOTED | Prefill 432.7 / 391.1 / 328.2 / 256.0, decode 43.6 / 38.8 / 34.1 / 22.4; min free 118 MiB; 0 one-token. |
+| [P028](P028.md) | 2026-10-07 | RC2 verified on its own binaries | PASS -> PROMOTED (bundle-20261007) | Drafting 51.2 / 47.5 / 43.1 / 29.4 (prefill 411 / 369 / 309 / 192, acc. 0.803); long 43.7 / 39.0 / 34.3 / 22.5 (prefill 432.6 / 390.7 / 328.5 / 256.5); 0/24 one-token. |
+| [P029](P029.md) | 2026-10-07 | One-token replays on the final drafting config | PASS | 0 of 23 (replay 3 cut short by P028's stop); running total 0 of 77 for tail 1. |

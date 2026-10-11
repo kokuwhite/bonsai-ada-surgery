@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+cd /c/bonsai/8gb; R=receipts/p58; mkdir -p $R
+L='C:/bonsai/bonsai-ada-surgery/start-server-maintest.ps1'; KEY=C:/bonsai/bonsai-ada-surgery/artifacts/api_key.txt
+for d in 0 32000; do for f16 in 32768 0; do
+  powershell -NoProfile -ExecutionPolicy Bypass -File stop.ps1 >/dev/null 2>&1
+  schtasks //run //tn BonsaiAB_P3 >/dev/null; sleep 4; schtasks //run //tn BonsaiAB_P5 >/dev/null; sleep 6
+  powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1 -Tag p58_f16${f16}_d$d -Launcher "$L" -Vars "BONSAI_BIN=C:/bonsai/bonsai-ada-surgery/bin-lookup;BONSAI_LAYER=0;GGML_CUDA_FA_PREFILL_F16=$f16" >/dev/null 2>&1
+  for i in $(seq 1 120); do curl -s localhost:8080/health | grep -q ok && break; sleep 5; done
+  python lookup_ab.py --base http://127.0.0.1:8080 --key-file $KEY --tag f16${f16}_d$d --out $R/ab.jsonl --depth $d > $R/f16${f16}_d$d.out.txt 2>&1
+done; done
+powershell -NoProfile -ExecutionPolicy Bypass -File stop.ps1 >/dev/null 2>&1

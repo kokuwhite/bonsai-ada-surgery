@@ -1,0 +1,394 @@
+# Toolbox: every lever, method and tool tried on the 8 GB card
+
+## What this file is
+
+This file lists every lever, method and tool that the 8 GB mission tried, from 2026-10-06 to 2026-10-11. Use it to
+pick tools for the next model. Each row gives: what the tool does, how to turn it on, where it was measured (P
+numbers in the notebook), the measured effect on 8 GB, its status, and what is specific to this model.
+
+Sources: the lab notebook `NOTEBOOK.md` (the rig's DECISIONS.md, unchanged), the receipts
+(`results-raw.zip`, paths `receipts/pNN/...`), the rig scripts (`scripts/...`), and the repo docs `docs/8GB.md`,
+`docs/DEPTH.md` and `README.md`. Every number comes from the notebook or a receipt. When a number comes from a
+receipt and not from the notebook text, the row names the receipt. RTX 4070 numbers are marked "(4070)".
+
+**The model.** Ternary Bonsai 2 27B, `PTQ1_0` ternary weights (5,946,648,928 B file). 64 layers: 48 gated-delta-net
+(GDN, recurrent) layers and 16 full-attention layers. Attention: GQA 6 (24 query heads), 4 KV heads x 256 dims. One
+MTP draft head (ProCreations, grafted as `blk.64`). KV bytes per position (16 layers, K + V): q8_0 34,816 B, q4_0
+18,432 B. The staging buffer takes CellBytes / 16 per host position (q8_0 2,176 B, q4_0 1,152 B), so one more VRAM
+position costs 15/16 of a cell net (q4_0: 17,280 B, the P5 sizing figure). One GDN recurrent-state plane (rollback
+snapshot) is 149.6 MiB. Output head: 248k rows.
+
+**The card.** RTX 2060 SUPER 8 GB (8,192 MiB, 8,007 MiB usable), Turing sm_75, 34 SMs, 4 MB L2, GDDR6 448 GB/s
+peak, PCIe 3.0 x16 (~11 of ~13 GB/s used at depth), power limit 175 W (max slider 215 W), driver 591.86 (WDDM). The
+card also draws the Windows desktop (the only display adapter). Host: Ryzen 5 2600 (6 cores, AVX2), 32 GB DDR4-3000.
+Access through Chrome Remote Desktop.
+
+**Status words.** Shipped default = the 8 GB launcher turns it on. Opt-in = documented, off by default. Rejected =
+measured and not used. Open = not finished. Diagnostic = a tool for measurement, not for serving.
+
+**"New model" column.** What would need a new measurement on another model or card. "General" = the method transfers
+as is; the numbers do not.
+
+Contents:
+
+1. [VRAM budget and window sizing](#1-vram-budget-and-window-sizing)
+2. [KV cache format and tiering](#2-kv-cache-format-and-tiering)
+3. [Attention kernels](#3-attention-kernels)
+4. [Decode kernels](#4-decode-kernels)
+5. [Drafting](#5-drafting)
+6. [Memory, pool, RAM and checkpoints](#6-memory-pool-ram-and-checkpoints)
+7. [Clocks and thermals](#7-clocks-and-thermals)
+8. [Launcher logic](#8-launcher-logic)
+9. [Measurement methods](#9-measurement-methods)
+10. [Rig infrastructure](#10-rig-infrastructure)
+11. [Dead ends](#11-dead-ends)
+12. [How to start on a new model](#12-how-to-start-on-a-new-model)
+13. [Levers without numbers](#13-levers-without-numbers)
+
+---
+
+## 1. VRAM budget and window sizing
+
+The main finding of the mission: past the VRAM line, decode reads the host tail over PCIe on every step. Positions in
+VRAM are the product (P2). Every MiB returned buys ~32 positions at q8_0 and ~57 at q4_0 (P2).
+
+| Lever | What it does | How to turn it on | Where | Measured effect on 8 GB | Status | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| Measure the fixed cost | Solve Fixed = used at load - idle - N x CellBytes - (Ctx - N) x CellBytes / 16 from nvidia-smi at idle after load | `BONSAI_KV_VRAM_CELLS` pinned, read nvidia-smi before / after load | P1 | Fixed = 5,874 MiB vs launcher model 6,256 (382 MiB high). Server 6,656 MiB at N=16,384 q8_0, 501 MiB free | Method, done first | Re-measure per model, per KV type and per mode (weights, compute buffers, head, planes all change) |
+| Desktop resolution | A smaller desktop holds less VRAM | Windows display settings (Cary set 4K -> 1280x1024) | Baseline change 2026-10-06 21:41; P8b note | Idle 561-608 MiB at 4K -> 323 MiB at 1280x1024: ~250-280 MiB, ~15-17k q4_0 positions. Later idle 268 MiB (P34), 262 MiB (P44) | In use on the rig (owner's choice) | General (card and desktop) |
+| Display on the iGPU | Frees the compositor VRAM on the discrete card | Monitor on the motherboard output, apps on the iGPU | README (4070) | Not possible on this rig: the 2060 SUPER is the only display adapter | Not available here | General; measure on each rig |
+| Remote desktop cost | Chrome Remote Desktop own GPU cost | none | Note 2026-10-06 ~22:00 | remoting_desktop 8 MiB; dwm counter 762 MiB "dedicated usage" (counter includes evicted memory). Software-rendered RDP session: candidate, never run | Measured, no action | General |
+| VRAM margin (free MiB left at load) | Room for WDDM, the desktop and prefill transients | `BONSAI_VRAM_MARGIN` | P11, P11b, P14-P14c, P27, P28, P34 | Drafting holds at 225 MiB; long mode 400 MiB. N=77,568 (no head) held two soaks at 244-257 MiB free (drift <= 0.9 %) but prefill fell to ~240 tok/s when scratch grew under pressure | Shipped (225 / 400) | Re-measure; depends on desktop and prefill transients |
+| Margin soak (block design) | Proves an N holds: 4-min single-depth blocks, shared GPU memory and free VRAM sampled every 5 s | `scripts/p11b.sh`, `scripts/sample_mem.ps1` | P11, P11b | N=65,280: free 474 / 427 MiB, drift +0.4 %. N=77,568: 277 / 257 free; blocks 4k 43.78 / 43.70, 64k 27.42 / 27.46, min free 244 MiB, shared memory flat at 1,190 MiB | Method | General |
+| Prefill cliff vs free VRAM | Prefill scratch that grows under ~300 MiB free costs ~42 % of prefill | Keep margin; see P14c | P12 anomaly, P14, P14b, P14c | N=77,568: 239.7 tok/s vs N=38,656 417.2 (4k). N=58,112 (567 free) 417.3; N=77,568 (269 free) 238.6. P14c: same 77,568 / ub 512 config at 214 free: 416.0, no cliff. Not deterministic: load-time state | Avoided by margin; P19 (reserve scratch at load) never run | General for any engine that grows pool memory under pressure |
+| MTP head VRAM cost | Head weights + draft context + GDN snapshots + compute | Head file present | P5, P5b | Head with drafting ~967 MiB (plan assumed ~480). Weights alone resident without drafting ~95 MiB; drafting adds ~870 MiB | Measured | Re-measure (head size, draft window, planes) |
+| Q4_0 head requant | Requantizes `blk.64.*` Q8_0 -> Q4_0 | `build/make_mtp_q4head.ps1` (mirai tooling `requant_mtp.py`); strip proof: head removed = official sha256 | P12, P20 | -214 MiB (Mirai -204). File -212 MB. Acceptance 0.875 -> 0.848 (-2.7 pp, gate 2 pp FAIL), decode 51.82 -> 51.28 (-1.0 %) | Shipped default (cost accepted) | Re-measure acceptance per head |
+| Tail 1 instead of tail 2 | Rollback ring is sized max(draft, tail); one plane less | `BONSAI_SPEC_DEEP=1` (launcher default on 8 GB) | P15, P16 (verbose: 149.62 MiB per plane) | Server at N=38,400: tail 2 7,350 / tail 1 7,198 MiB (-152). N 38,400 -> 47,360. Decode 32k +1.2 %, 60k +24 % | Shipped default | Plane size = recurrent state size; re-measure |
+| Shared CUDA pool | One transient pool for target and draft contexts | `GGML_CUDA_SHARED_POOL=1`, `LLAMA_MTP_DRAFT_UBATCH=256` (patch 0037; safe only with 0045) | P12, P83 | P12: -62 MiB (Mirai -188: does not transfer). P83 (with 0045): ~51 MiB, N 50,176 -> 52,224, decode 64k +7 %, 96k +4 %, trace min 116 -> 131 MiB | Shipped default (with 0045; `BONSAI_POOL_MIB` 48) | Re-measure saving |
+| Packed 1-bit KQ mask | f16 mask (n_ctx x ubatch x 2 B) replaced by 1 bit per cell for batches of 32+ queries | `LLAMA_ARG_KQ_MASK_PACKED=1` / `--kq-mask-packed` (patches 0048/0049) | P22, P22b, P24, P82, P84 | -128 MiB at 131k (P22, exact f16 mask size). P82: load free 341 -> 449 (+108), trace min 115 -> 233. 256 MiB at 262k is the f16 size | Shipped default (drafting, 262k) | General; size scales with window x ubatch |
+| f16 mask growth with window | The f16 mask grows with the window; the launcher did not count it | Launcher term `MaskMiB` (fixed in P81 plan) | P77, P81 | 262k: load free 128 MiB less than 131k (P77 arm C: below 0 MiB free from the first request) | Fixed in launcher | General |
+| Tier staging buffer | VRAM staging of (Ctx - N) x CellBytes / 16 | Default with tiered KV | P75, P77 | Moves the VRAM line down 8,738 positions per extra 131k of window. 262k as served: N 41,472 vs 50,176 at 131k | Replaced by partial staging | General to the tiered cache |
+| Partial staging | Only the first S host positions get staging; the rest read in place | `GGML_CUDA_KV_TIER_STAGING_FRAC=f` (patch 0047); launcher `BONSAI_STAGE_CELLS` (81,920) | P81, P84, P85 | 262k with stage 80,896: no over-commit (min 127 MiB vs below 0). With packed mask + pool: 262k N 59,904 beats 131k preset at every depth (see section 2) | Shipped default (8 GB) | General |
+| Micro-batch 1024 cost | Larger compute buffers | `BONSAI_UBATCH=1024` (long mode default) | P26, P22 | +262 MiB server at N=58,112 with f16 prefill (P26); +142 MiB with packed mask (P22) | Long mode only | Re-measure |
+| Lookup drafting VRAM | Long lookup drafts use checkpoints, not planes | `BONSAI_LOOKUP=1` | P49b | Min free at 64k 82 MiB with lookup vs 90 without (+8 MiB); depth 0: 207 / 211 (receipts/p49b/summary.txt) | Shipped default | Re-measure |
+| DFlash 2 drafter VRAM | Separate drafter model | PrismML b10754 flags | P33 | ~645 MiB more than the MTP head (~38k q4_0 positions). Server 7,402 MiB at 16k window (Q2_K n3) | Rejected on 8 GB | Re-measure on a bigger card |
+| Window size 262k vs 131k | Full trained window; host tail in pinned RAM | `BONSAI_CTX=262144`; launcher auto with RAM >= 24 GB, drafting, packed mask + staging frac in the engine | P30, P75, P77, P81, P84, P85 | P30 (bin-rc2): loads, 43.1 tok/s at 4k. P75 (old preset): N 41,472, 64k 24.1 vs 30.7, free below 0. P84/P85 (packed + pool + partial): 262k decode 51.7 / 46.5 / 37.8 / 20.1 / 14.2 vs 131k preset 51.0 / 46.0 / 30.5 / 17.8 / 13.0 | Shipped default (with RAM >= 24 GB) | General; window cost depends on mask and staging |
+| Window for agent work | Smaller window keeps sessions in the fast range | `BONSAI_CTX=98304` or `131072` | docs/8GB.md | Guidance only. Pinned tail ~0.7 GB at 96k, ~1.3 GB at 131k, ~3.7 GB at 262k | Documented | General |
+| q8_0 quality mode | 2.3x fewer positions, better KL | `BONSAI_CTK=q8_0` | P5, P32 | N ~20,480 in drafting mode (P32) vs 47,360 at q4_0; HumanEval 159 vs 157 | Opt-in | Re-measure |
+| VRAM trace through a deep prefill | Free VRAM every 10 s through the whole run, nvidia-smi wrap corrected (values near 4194xxx = below 0) | `<arm>.mem.txt`, "trace min free" line | P75, P77 onward | Found the 262k over-commit (free 201 -> 21 MiB in 80 s, then below zero for 85 of 89 samples) | Method, standard gate | General |
+
+---
+
+## 2. KV cache format and tiering
+
+| Lever | What it does | How to turn it on | Where | Measured effect on 8 GB | Status | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| q8_0 K/V | 8.5-bit cache | `BONSAI_CTK=q8_0` | P2, P5, P6, P32 | KL vs f16 0.000167, top-1 99.417 % (1 in 171), PPL +0.017 %. 16,384 positions: 38.6 / 36.9 / 32.6 / 13.5 / 6.0 / 3.0 tok/s at 0 / 4k / 16k / 32k / 64k / 120k (P2) | Opt-in on 8 GB | Re-measure KL per model |
+| q4_0 K/V | 4.5-bit cache, 2.3x positions | `BONSAI_CTK=q4_0` (8 GB default) | P5, P6, P31, P32 | KL 0.002096, top-1 97.900 % (1 in 48), max KL 1.25, PPL +0.14 % (base f16 PPL 6.9740). 4070: 0.00218 / 97.93 %. P5 at equal VRAM: 32k 32.0 vs 14.1 (q8_0), 64k 13.7 vs 6.1. HumanEval 157 vs 159 (q8_0) | Shipped default | Re-measure KL and a task score |
+| q3_0 K/V (real type) | 14-byte blocks of 32 (3.5 bpw): ~22 % fewer bytes per cell | `-ctk q3_0 -ctv q3_0`, fork branch `kv-q3-0` WIP 6a4851286 | P100 (fake bits), P108 (pending) | Fake 3-bit grid on q4_0 storage: PPL 16k +0.60 %, 64k -0.02 % (gate < 1 % PASS). Estimate: VRAM line ~+28 % (58k -> ~75k), PCIe bytes -22 %, ~1.25-1.3x decode at depth. Build OK (P104 log). GPU tests not run | Open (P108 queued) | Quality of the grid is model-specific; re-measure |
+| 2-bit K/V | 2^2 levels of the q4_0 grid | `GGML_CUDA_KV_FAKE_BITS=2` (branch `kv-fakebits`) | P100 | PPL 16k +3.64 %, 64k +1.86 % | Rejected | Re-measure |
+| Fake-bits KV emulation | Keeps 2^b levels of the q4_0 grid in set_rows (pessimistic bound; no speed change) | `GGML_CUDA_KV_FAKE_BITS=3|2`, worktree `prism-fakekv` | P100 | See the two rows above | Diagnostic | General method: test a format's quality before building it |
+| Tiered KV cache | First N positions in VRAM, the rest in pinned host RAM in the same VA range; staging copies host rows first | `--kv-vram-cells` (patch 0028), `BONSAI_KV_VRAM_CELLS` | P1, P2 and all | Shared GPU memory 4,008 MiB = pinned tail (3,808) + host buffers (P1). Past the line decode falls 2.4x at 32k, ~11x at 120k (P2, N=16,384) | Shipped (base of the stack) | General |
+| Staging off | Attention reads all host rows in place, no staging buffer | `GGML_CUDA_KV_TIER_STAGING=0` | P77 | N 50,176 -> 54,784. Decode 64k 30.6 -> 38.5 (+26 %), 96k 17.8 -> 20.5. Prose prefill 96k 124 -> 49 (-60 %), 128k 101 -> 30 (-70 %). 262k window then costs nothing (C = B) | Rejected (prefill) | General |
+| Partial staging | Staging for the first f of each host tail; rest in place | `GGML_CUDA_KV_TIER_STAGING_FRAC=f` (0047), `BONSAI_STAGE_CELLS` | P81, P84, P85 | D (262k, stage 80,896, N 43,008): prefill = 131k up to N+S, min free 127 MiB; vs P75: 64k +12 %, 128k +24 %. G (131k, stage 40,960): +6-9 % decode at 64k-128k, prefill -8 % / -50 % at 96k / 128k (rejected at 131k) | Shipped default at 262k (8 GB) | General |
+| Stage min queries | Ops with fewer than q queries read in place | `GGML_CUDA_KV_TIER_STAGE_MIN_Q=q` (0047) | P81 F | MIN_Q=2 at N 50,176: 51.9 / 45.9 / 30.6 / 17.8 / 13.0 vs 51.8 / 46.3 / 30.6 / 17.7 / 13.0. No change on Turing (4070: staging +28 % at decode) | Off (no use here) | Card-specific; re-measure |
+| Tier prefill (0041) | Prefill rows past the line go to VRAM first, then to host in whole blocks; next layer's host rows copied on a second stream | In engine 8a6d2ea12 and later | P56 | Prefill +3 % at 64k, +9 % at 96k; free VRAM same | Shipped | General |
+| Tier-graphs (0053) | CUDA graphs off only for graphs whose attention reads the host tail, so the tier prefetch pipeline runs | Default in engine 4715804d6 / 90ca41e40; `GGML_CUDA_KV_TIER_GRAPHS=1` = old behaviour | P103, P103b | 128k 12.8 -> 14.8 (+16 %), 192k 7.9 -> 8.6 (+9 %), 245k 6.2 -> 6.7 (+8 %), 192k lookup off 7.8 -> 8.7 (+12 %). 4k / 32k identical in P103b (53.9 / 54.0 / 53.8 / 53.7) | Shipped | General |
+| Tier redirect / prefetch switches | Turn off the tier read redirect and prefetch (isolation arms) | `GGML_CUDA_KV_TIER_REDIRECT=0`, `GGML_CUDA_KV_TIER_PREFETCH=0` | P71 (arm d), P102d | P71: correct texts (22/22 same as reference). P102d: sparse 2.5 tok/s with redirect off, sync warning still 1 | Diagnostic | General |
+| Sparse host-tail reads (Quest-like) | Page bounds of K; keep the B cells of highest-bound pages + last R + VRAM part; kernels skip masked tiles | `GGML_CUDA_FA_SPARSE=B,P,R`, `GGML_CUDA_FA_SPARSE_FAST=1`, `GGML_CUDA_DISABLE_GRAPHS=1`, `LLAMA_ARG_KQ_MASK_PACKED=0`, `GGML_CUDA_KV_TIER_STAGE_MIN_Q=9` (fork `fa-sparse-proto`, issue #21) | P101, P102, P102b-e, P105, P106; P107 pending | Quality: 245k B=8192 copies 10/10, needles 12/12 (P101); P105 245k 9/10, 12/12; 160k 10/10, 12/12. Speed: 87e2ac160 2.9 vs dense 5.7 (P102); d6c6e9f01 245k 4.3 (P102e); 160k plain 9.7 -> 18.3 (+89 %), code items 12.82 -> 21.48 (P105); 028f606fc 160k 18.5, 245k 4.9, 64k 34.5 -> 29.0 (-16 %), 512-token follow-up 107 -> 85 (P106). 4070 160k: 13.6 -> 27.6 | Open (experiment) | Page size, budget and kernel path (vec vs MMA by query count) depend on model and draft size |
+| Sparse sinks | Select over the whole context, VRAM part too | `GGML_CUDA_FA_SPARSE_SINKS=4096` | P102e | 245k 5.2 tok/s, prefill 6.2 tok/s | Rejected (4070: 7/12 needles) | - |
+| Sparse write tracking | Cached page bounds follow K writes | default; `GGML_CUDA_FA_SPARSE_NOTRACK=1` off | P106 | NOTRACK 29.0 / 18.5 tok/s (64k / 160k) vs tracking 18.9 / 14.6 with op timing; follow-up prefill cost is from FA_SPARSE itself, not tracking. 4070: 208 stale ops without tracking | Needed for correctness | General |
+| K-first bounded reads (design A) | Read K for host rows, then V only for rows that carry mass above eps | Probe `GGML_CUDA_KV_TIER_KFIRST_STATS=1` (branch `kfirst-probe`) | P98, P98b | Union fraction of host rows for dropped mass <= 1e-4: 0.816 (64k) to 0.953 (256k) synthetic; 0.76-1.00 on real text. Host mass 0.72-0.95. Saves ~10 % of bytes at 1e-3 | Rejected (attention diffuse) | Head behaviour is model-specific; re-run the probe |
+| Mass criterion for sparse | Choose rows by softmax mass | - | P98b, correction 2026-10-10 | Wrong criterion: output is much less sensitive than mass (4070: B=8192 KL 0.0030, needles 12/12) | Corrected | Lesson: test outputs (KL, needles, copies), not mass |
+| Streaming vs retrieval head calibration | Rank the 64 KV heads by union fraction on ~230k tokens of real code | Probe 0e0dc757a, `scripts/queue/70-p104-head-calibration.sh` | P104 | No streaming heads: the most focused KV head (L35 h0) still needs 0.087 of the host cells at dropped mass <= 1e-2 (0.303 at 1e-3). Focus differs by layer: 3-23 diffuse (0.40-0.81 at 1e-2), 27-55 about 3x more focused (0.16-0.31), 59/63 diffuse (0.47/0.56) | Closed (DuoAttention-style split does not apply); per-layer sparse budget is a tuning item | Model-specific by nature: rerun on every new model before any head- or layer-split design |
+| CPU attention over the host tail | CPU computes partial attention for host rows, exact merge | test-backend-ops perf on CPU; `cpuattn/cpuattn_bench.cpp` | P95, P97 | Stock CPU kernel: 192k rows nb 2 278.0 ms per layer (PCIe ~19 ms). Dedicated AVX2 kernel: 9.5 ms per 16,384 rows -> ~110 ms at 192k | Rejected | GQA 6 x 1024 dims sets the arithmetic (~24k MAC per row for 2 tokens); re-check for a model with fewer heads |
+
+---
+
+## 3. Attention kernels
+
+| Lever | What it does | How to turn it on | Where | Measured effect on 8 GB | Status | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| In-place quantized K/V flash attention | FA reads q4_0 / q8_0 K/V in the kernel, no f16 copy | Patch 0009 (default) | P16, P16b | Prefill op share at 60k: FLASH_ATTN_EXT 39.6 %, PTQ1_0 MUL_MAT ~43.8 %, GDN 7.5 %, rest ~9 %. Fresh 60k prefill 247.5 vs sudo 255.7 (-3 %) | Shipped (decode path) | Head size 256 instances; re-check |
+| MMA route for 1-query decode | Quantized-KV GQA decode on the in-place MMA kernel instead of the vec kernel | Default (patch 0029); `GGML_CUDA_FA_MMA_DECODE_MIN_KV=0` = never MMA | P44 | q4_0: MMA 43.5 / 43.8 vs vec 41.2 / 41.3 at 4k (+6 %), 38.9 / 39.0 vs 32.9 at 16k (+18 %). q8_0: 43.7 vs 42.2 (+4 %), 38.9 vs 34.3 (+14 %) (receipts/p44). Posted on PrismML #317 | Shipped | GQA ratio decides the gain; re-measure |
+| f16 prefill from pool memory | Prefill-sized batches (> 8 queries) convert the q4_0 cache to f16 in transient pool memory sized by the real KV length; decode keeps in-place | `GGML_CUDA_FA_PREFILL_F16=N` (patch 0038, PrismML #330); 8 GB: 32768 drafting, 65536 long | P16 (rejected reserved copy), P23, P25 | Reserved f16 copy would be ~512 MiB at 131k (~30k positions). Pool version, long mode N=58,112: 415.0 / 350.4 / 271.0 / 199.9 -> 423.8 / 380.3 / 318.5 / 252.7 (+2 / +9 / +18 / +26 %); texts byte-identical; decode unchanged; FLASH_ATTN_EXT 2994/2994. Drafting: +2 / +9 / +18 % | Shipped default | General (any quantized cache) |
+| f16 prefill only for >= 64 queries | Lookup verify batches keep the in-place read | `GGML_CUDA_FA_PREFILL_F16_MIN_Q` (patch 0043) | P58 (superseded), P60, P70 | Neutral on Turing: quote d0 125.7 vs 124.1, 30k prefill 345.2 vs 344.8 (P60); P70 0/66 one-token, prefill 30k 339.4 vs 343.0. 4070: 195.4 -> 212.4 on file rewrites | Shipped (Ada gain) | Card-specific |
+| Micro-batch 1024 + f16 prefill | Half the per-chunk conversions over the cached context | `BONSAI_UBATCH=1024` (long mode default) | P22, P26, P27 | Packed + ub 1024 at N=67,840: 426 / 311 vs 417 / 300 (gate > 10 % FAIL, P22). ub 1024 + f16, N=58,112: 433.4 / 391.1 / 328.3, but 60k 154.5 (cliff, ~70 MiB left). N=53,248: 432.7 / 391.1 / 328.2 / 256.0, min free 118 MiB (P27) | Shipped (long mode) | Re-measure with margin |
+| Micro-batch 256 | Halves prefill transients | `BONSAI_UBATCH=256` | P14c | 400.7 vs 416.0 at 4k (-4 %); not needed for the cliff | Rejected | - |
+| Micro-batch at depth (4070) | ub 512 vs 1024 vs 2048 at 128k-192k | - | docs/DEPTH.md (4070) | Not measured on 8 GB | Not tested here | Re-measure |
+| Chunked prefill attention | Past the f16 limit, split KV into chunks of C cells: copy to VRAM, convert to f16, f16 MMA, fold with softmax max / sum | `GGML_CUDA_FA_CHUNK=32768` (patches 0051/0052; 8 GB preset sets it) | P89, P89b, P89c, P86b, P91, P92, P93 | Code-prompt prefill 234 -> 282.1 (64k), 121 -> 171.1 (128k), 58 -> 116.0 (192k), 25.4 -> 90.3 (250k) (before: P86, and P86b at 250k; chunked: receipts/p89/summary.txt). P91 launcher as shipped: decode 52.3 / 52.7 / 36.0 / 20.5 / 14.3 at 4k-128k, fresh 60k 35.0 / 35.1, trace min 111 MiB (receipts/p91). 512-token follow-up 153 -> 203 (64k). Decode unchanged. Tests 3005/3005. PPL at 64k: in place 7.2106, whole f16 7.2107, chunked 7.2074 (+/- 0.071). Texts 8/11 (near-tie plain items; whole-f16 vs chunked also 8/11) | Shipped default (8 GB) | General |
+| Packed mask (attention side) | MMA kernel reads the 1-bit mask; used only for batches >= 32 queries | `LLAMA_ARG_KQ_MASK_PACKED=1` | P22, P22b, P24, P82 | P22b: packed + MTP drafting wrote "////" at 32k (old build: shared staging key + pool race). P24: exact without drafting at 20k-32k. P82 (fixed engine): 22/22 identical with drafting at 32k / 64k; 64.9 vs 64.3 (32k), 51.1 vs 50.2 (64k) | Shipped default | General |
+| Draft-context f16 mask fix | Keep the f16 mask in the MTP draft context | prism-p22 2a558c87f | P22b | Changed nothing (32k / 60k 24.7 / 17.9) | Rejected (wrong cause) | - |
+| BATCH_INVARIANT attention split | Occupancy-independent split; needed with drafting | `GGML_CUDA_BATCH_INVARIANT=1` (launcher sets it with drafting) | P5, P7, P14 | Prefill: irrelevant (240.7 vs 239.7, P14). Does not make drafting bit-identical (P5b correction) | Shipped with drafting | General |
+| sudoingX f16 per-chunk convert | His fork converts K/V to f16 per chunk and runs f16 MMA | His branch `bonsai2` ff41412 | P13, P16, P23 | Floor prefill 427 / 382 / 320 / 256 vs ours in place (P20) 405 / 340 / 264 / 190. Closed by P25 / P27 | Reference floor | - |
+| Chunked GDN prefill (4070) | MMA kernel for the 48 GDN layers in prefill | Fork branch `gdn-chunked` | docs/DEPTH.md (4070) | Needs BF16 MMA; on Turing it falls back to the recurrent kernel. Not measured on 8 GB | Not applicable on Turing | Model-specific (GDN layers) |
+| V skip in the vec kernel (4070) | Skip V rows with weights < exp(-20) of the running max | `GGML_CUDA_FA_V_SKIP=1` (f6f2d146c) | Notebook 2026-10-11; docs/DEPTH.md (4070) | Not measured on 8 GB | Not tested here | - |
+
+---
+
+## 4. Decode kernels
+
+Where decode time goes on this card (P36b, P37c): 15.8 ms per token in ternary mat-vecs (~5.67 GB at 359 GB/s, 80 %
+of 448 GB/s peak), ~2.8 ms in small ops, ~3.5 ms other (22.1 ms total at 4k, plain, 8k window all in VRAM).
+Ceilings: all weights at peak = 80 tok/s; mat-vecs at 80 % with zero overhead = 64 tok/s raw.
+
+| Lever | What it does | How to turn it on | Where | Measured effect on 8 GB | Status | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| Planar PT one-column mat-vec on Turing | Turing takes the planar PT q8_1 layout at one column, as Ampere does (was Ada SOA_ISUM) | Patch 0036 (PrismML #325); `common.cuh` cc >= TURING && cc < ADA | P7, P8, P8b, P8c | P7: PT (via BI) 41.23 / 41.25 vs SOA 36.76 / 36.69 (+12.3 %). P8: new default 43.34 / 43.22 vs SOA 38.07 (+13.7 %), vs bundle BI 42.12 (+2.8 %). test-backend-ops MUL_MAT 1516/1516. One-column KL vs SOA 0.000146, top-1 99.389 % (gate 99.417 %: miss by 0.028 pp, inside one SE) | Shipped default | Arch gate; check which layout each arch takes |
+| BATCH_INVARIANT as a no-rebuild workaround | Forces PT + warp-reduce epilogue | `GGML_CUDA_BATCH_INVARIANT=1` | P7 | +12.3 % on the old engine with no rebuild | Superseded by 0036 | General trick: an env switch can expose a faster path |
+| Mat-vec launch shape | Rows per item x blocks per SM | `GGML_PTQ1_PT_TUNE=RxM` (prism-tune 3200e3761) | P78 | Weighted decode mat-vec time: 4x2 15.36 ms vs 4x4 default 15.46 ms (+0.6 %); n=2 +0.3 %; others 3-92 % slower | Rejected (default is right) | Re-sweep per arch and shapes |
+| ADD + RMS_NORM + MUL fusion | Fuses residual add, norm and scale on every NVIDIA GPU (was GB10 only) | Patch 0040 (PrismML #209, cklxx); dev switch `GGML_CUDA_ADD_RMS_FUSE=1` (P48 plan) | P10, P48 (cancelled), P56 | P10: #209 alone 0.0 % at 4k and 16k (texts identical). P56: decode +1-2 % within round spread; tests ADD 99/99, RMS_NORM 51/51 | Shipped (in the stack) | General |
+| Gate + up + SwiGLU fusion in all FFNs | Fixes the 24 of 64 FFNs where the allocator blocked the fusion | `GGML_CUDA_GLU_ALIAS_FUSE` (prism-fuse c87233fc1, branch `fuse-gateup`) | P55b, P76 | Census 1478 vs 1526 kernels (64 vs 40 gate-fused). Decode 44.0 / 44.0 / 43.9 vs 43.9 / 43.8 / 43.9 (+0.2 %). Tests MUL_MAT 1516/1516, MUL_MAT_VEC_FUSION 506/506; texts identical | Rejected (kept on branch for a megakernel) | General |
+| Norm -> FWHT quantize fusion | Fuse the 81 plain RMS norms into the Hadamard quantize | Not built | Decision 2026-10-09 | Estimate ~0.5 % (48 of 129 norms already fused by 0040) | Not built | Model-specific (Hadamard rotation) |
+| Merge same-input mat-vecs | GDN qkv 10240 + gate 6144; attn q + k + v | Not built | P37c | Estimate: 280 -> ~350 GB/s on ~3 ms of mat-vecs | Not built | Model-specific shapes |
+| Small-op fusion as a whole | Removing all small-kernel classes | Measured with the skip build | P37c, decision 2026-10-09 | All small ops skipped: 45.1-45.3 -> 51.7 tok/s (-2.8 ms, ~+14 %), spread over ~1,200 kernels of ~2.3 us. One class: 0.5-1.7 % | Stopped (megakernel only as last resort) | General method |
+| L2 prefetch of next weights (#314) | prefetch.global.L2 of the next weights | `GGML_CUDA_L2_PREFETCH_PCT`, `GGML_CUDA_L2_PREFETCH_MAX_KB`, `..._CTAS` (#314 e3d9df5) | P10, P10b, P43 | 4070 defaults (50 % / 16 MiB / 46 CTAs): -2.4 % (P10), -2.7 / -2.6 % (P10b). MAX_KB 1024: +0.73 / +0.52 (P10), +0.6..2.2 % (P10b). New commit e697877d9: off 41.4 / 41.2 / 41.2 vs on 40.7 / 41.3 / 41.3 at 4k (P43, no gain). Texts identical | Rejected (not in the 8 GB build) | L2 size dependent; re-tune per card |
+| CUDA graph optimizer | Graph reorder option | `GGML_CUDA_GRAPH_OPT=1` | P78 | 0: 43.0 / 42.7; 1: 40.5 / 36.4 | Rejected | Re-check per engine |
+| CUDA graphs | Decode runs as CUDA graphs | Default; `GGML_CUDA_DISABLE_GRAPHS=1` for timing; graphs-off tier path via 0053 | P16, P36b, P67, P103 | Graphs off is required for op timing; graphs-off did not fix the pool bug (P67 3/3 one-token) | Shipped default | General |
+| Op timing | Per-node GPU time | `GGML_CUDA_OP_TIMING=1` + `GGML_CUDA_DISABLE_GRAPHS=1` + `LLAMA_ARG_LOG_VERBOSITY=5` (patch 0033) | P16, P16b, P36, P36b, P106, P107 (pending) | Table prints every 100 timed graphs (P16: none for a 32k prefill = 64 ubatches). Decode under the timer 15 tok/s (shares only). 160k sparse: FLASH_ATTN_EXT 28.5 of 57.8 ms per graph (P106) | Diagnostic | General |
+| Mat-vec microbench | `test-backend-ops perf` for each decode shape at n=1 / n=2 | `test-backend-ops perf -o MUL_MAT` | P36b, P78 | 17408x5120 54.5 us (357 GB/s, 80 %), 5120x17408 56.9 us, 10240x5120 34.9 us, 6144x5120 23.7 us (290 GB/s); sum ~16.8 ms vs 22.9 ms measured | Diagnostic | Shapes are model-specific |
+| Kernel census | Real kernels per decode graph by name | `GGML_CUDA_GRAPH_STATS=1` + `LLAMA_ARG_LOG_VERBOSITY=5` (diag build) | P41, P41b, P55, P55b, P76 | P41 empty (no verbosity). P55b first mix: 1830 kernels with 2-column mat-vecs = the WARMUP graph (agent code read + log); P41b's census shows the same 1830-kernel mix (receipts/p41b). Real decode graph: 1574 kernels, all PTQ1_0 mat-vecs 1-column (241 <1,4>, 80 fusion, 40 gate) | Diagnostic | General; skip the warmup graph |
+| Skip build | Skips one op class in one-token graphs; cost = t(skip) - t(none) | `GGML_CUDA_SKIP_OPS` (dev worktree prism-p37, never shipped) | P37, P37b, P37c | Skip mat-vecs 157.5 tok/s (6.35 ms left); skip GDN 45.4 (~0); skip FA 45.7 (+1 %); skip small ops 51.7. Graph: 2,633 nodes per token. First two passes void (filter ne[1]==1 missed GDN / FA / ADD) | Diagnostic | General |
+| Megakernel | One persistent decode kernel | Not started | Decision 2026-10-09 | No data | Last resort | - |
+
+---
+
+## 5. Drafting
+
+| Lever | What it does | How to turn it on | Where | Measured effect on 8 GB | Status | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| MTP head, draft 1 | Speculative decoding with the grafted MTP head | `-mtp-procreations` file; `BONSAI_SPEC=1` (8 GB default); `--spec-type draft-mtp --spec-draft-n-max 1` | P5, P12, P15, P20, P28 | P5 (q8 head, N=16,384): 49.5 / 45.8 / 29.4 / 17.9 vs no head 41.9 / 36.6 / 32.0 / 13.7. P12 C2 (q4 head, pool, N=38,400): 51.5 / 47.8 / 43.1 / 23.9 vs B (N=77,568) 43.9 / 39.1 / 34.4 / 27.6. P28 release: 51.2 / 47.5 / 43.1 / 29.4 at 4k / 16k / 32k / 60k, acceptance 0.803 | Shipped default | Head quality and acceptance per model |
+| Long-context mode (no head) | All VRAM for positions | `BONSAI_MODEL=<plain file>` or `BONSAI_SPEC=0` | P11, P20, P27, P28, P34, P40c | P28: 43.7 / 39.0 / 34.3 / 22.5 decode, 432.6 / 390.7 / 328.5 / 256.5 prefill at N=53,248 | Documented mode (131k; 262k needs drafting) | Re-measure |
+| Draft 2 / 3 below the line | More MTP drafts per step | `BONSAI_SPEC=2|3` | P35 | d2 (N 37,120): code +3 % / +7 % at 4k / 16k, prose -10 %, 60k -19 %; acceptance 0.803 -> 0.665 (d2), 0.642 (d3) | Rejected | Head's 2nd position quality is model-specific |
+| Tail 2 / 3 / 4 past the line at 131k | More drafts past the VRAM line, one plane each | `BONSAI_SPEC_DEEP=N` | P47 | 4k/32k/64k/96k/126k: tail1 50.3 / 42.3 / 28.0 / 15.6 / 10.9; tail2 51.4 / 43.1 / 25.4 / 16.3 / 11.8; tail3 51.3 / 39.9 / 22.3 / 16.1 / 11.9; tail4 50.9 / 24.9 / 16.5 / 11.7 / 9.7. Best deep gain +9 % (gate +25 %) | Rejected as default | Plane size and PCIe speed decide |
+| Tail 2 at 262k for deep sessions | One more verified token per host read | `BONSAI_SPEC_DEEP=2`, `BONSAI_VRAM_MARGIN=375` | P80, P80b, P80c | P80c (chunk on): tail1 N 58,112 64k 31.5 / 200k 7.5 (acc 0.80); tail2 N 49,664 28.2 / 8.8 (acc 0.70): +17 % at 200k, -10 % at 64k. P80b 64k 31.7 vs 28.4 (200k timed out) | Opt-in (documented) | Re-measure |
+| Tail 4 with sparse at 160k | 5-query verify takes the MMA 64-cell tile map | `BONSAI_SPEC_DEEP=4`, margin 675 | P105 | Line 46,592 -> 20,992; acceptance 0.79 -> 0.55; dense 9.1, sparse 11.5 | Rejected on 8 GB | - |
+| Draft micro-batch | Smaller draft ubatch | `LLAMA_MTP_DRAFT_UBATCH=256` | P12, P67 | Part of the -62 MiB with the pool (P12). P67 b: default draft ubatch with pool 0/3 one-token | Shipped default | Re-measure |
+| Draft window | Draft context keeps the last W rows | `BONSAI_DRAFT_WINDOW` (16384) / `--spec-draft-window` | P65 c (confounded) | No clean number on 8 GB (P65 ran without the pool by accident) | Default 16384 | Re-measure |
+| Lookup drafting (ngram-mod) | n-gram drafter drafts up to 32 tokens of text already in context, in front of the MTP head; long drafts use checkpoints, not planes | `BONSAI_LOOKUP=1` (default since PR #9), `BONSAI_LOOKUP_N=32`, `--spec-lookup-n-max` (patch 0039) | P49, P49b, P50, P53, P57, P61, P70, fillers | P49b: d0 quote 58.2 -> 125.9, edit 56.9 -> 60.5, plain 52.5 -> 52.8 (11/11 same text); 64k quote 32.5 -> 69.3, edit 32.5 -> 37.7 (+16 %), plain 31.4 -> 31.3. P50 120k: quote 12.5-12.6 -> 41.2-44.3, edit -> 15.4-17.4 (receipts/p50). HumanEval 158/164 (P53). Soak 89 min, 0/33 one-token (P57) | Shipped default | General; gain depends on how much the answer copies the context |
+| DFlash 2 drafter | Separate block drafter | PrismML prism-b10754 flags; Schiltmans DFlash2-ft5 | P33 | Q2_K n3: 55.5 / 49.3 at 4k / 12k (vs ours 51.2 / 47.5), prefill 274 (-33 %), acceptance 0.561, +645 MiB. n7: 25.0 / 24.1 (acc 0.342). Q4_K_M n3: 38.6 / 38.6 | Rejected on 8 GB (candidate for 12 GB+) | Re-measure on a card with VRAM to spare |
+| Drafting identity | Drafting is not bit-identical to no drafting (attention split follows kernel instance) | - | P5b, P5b correction | MTP file without drafting == plain file (byte-identical); drafting differs from char 55 (prose). Documented on every card | Known behaviour | General; gate drafting on task quality / KL, not bytes |
+| One-token answers (tail 2 + restore) | First sampled token end-of-turn after a prompt-cache restore | P13 sequence: 4k -> "Say hi." -> 16k -> "Say hi." -> 32k | P13, P17, P18, P21, P29, P54 | Tail 2: 2 of 6 runs failed (P13, P18 r3; 3/27). Tail 1: 0 of 77 (P15 / P18 / P21 / P29). P54 (pool off): 0 of 81. Cause: the shared pool race | Closed (pool race, 0045) | Keep the replay as a regression test |
+
+---
+
+## 6. Memory, pool, RAM and checkpoints
+
+| Lever | What it does | How to turn it on | Where | Measured effect on 8 GB | Status | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| Shared pool race (bug) | Two CUDA streams reuse each other's freed blocks too early | Was: `GGML_CUDA_SHARED_POOL=1` without 0045 | P61, P64, P67, P68, P69 | Fresh 60k with MTP: 3/3 one-token in every pool-on arm (P64); pool off 0/3. Token id 248046 (end-of-turn) at logprob -0.29. 7 of 10 pool-on runs failed | Fixed | Test fresh long prompts with drafting on every engine |
+| Pool stream order (poolsync) | Each graph waits for the other stream's last graph | Patch 0045 (142d5105d) | P68, P69 | 0/18 (6 starts) vs 18/18 on 8a6d2ea12. Decode 31.6 vs 31.3 (pool-on control), 29.1 (pool off) | Shipped | General |
+| Pool off switch | Any value turned the pool on before | `GGML_CUDA_SHARED_POOL=0` (patch 0044) | P64 hotfix, P66 | Hotfix PR #10: drafting fixed cost 6469 -> 6531 MiB; P66 0/3 at 30k / 60k / 120k; prefill 344 / 254 / 172 | Shipped | - |
+| Pool log | Logs pool growth | `GGML_CUDA_POOL_LOG` (Mirai 1275aa4b8, in bin-p22) | P22 build | No numbers recorded | Diagnostic | - |
+| Pinned host tail | KV tail past the line in pinned RAM | Tiered KV | P1, P11 | Shared GPU memory 4,008 MiB at N=16,384 q8_0 = pinned tail 3,808 + host buffers; flat in soaks (1,190-1,384 MiB) | Shipped | Size = (Ctx - N) x CellBytes |
+| Context checkpoints inside a message | Checkpoint every N prompt tokens, so an edited long message restores the nearest one | `--checkpoint-every-nt N` / `LLAMA_ARG_CHECKPOINT_EVERY_NT` (patch 0046, PrismML #338); launcher `BONSAI_CKPT_EVERY` (8192) | P59, P71, P73, P79 | P59 wall after the first request 45-58 s vs 272-294 s, but wrong text (pool still on). P71 (pool off): 18-58 s vs 272-294 s, 22/22 identical. P73 launcher: 60.5 s vs 227.0 s, 11/11 same, working set 7,333 vs 6,834 MiB | Shipped default (8 GB 8192) | Hybrid / recurrent models only checkpoint at message starts; re-measure checkpoint size (~170 MiB here) |
+| GDN state gather switch | Isolation arm | `GGML_GDN_STATE_GATHER=1` | P71 c | Correct text | Diagnostic | Model-specific |
+| Prompt cache in RAM | Server keeps prompt states in RAM | `--cache-ram` / `LLAMA_ARG_CACHE_RAM` | P21, P54, P90, P94 | Cache off for the tail-2 test: 0/9 (P21), 0/81 with pool off (P54). P94: plain texts change across passes in one server with cache on AND off (state is the lookup history, not the cache) | Sized by RAM tiers | General |
+| Checkpoint count | Max checkpoints per slot | `--ctx-checkpoints` / `LLAMA_ARG_CTX_CHECKPOINTS` | P90, P90b | Default arm commit 9.6 -> 18.3 GB (+8.7) in 7 requests; capped (8 ckpt, 1 GiB cache) 9.6 -> 10.5 GB | Sized by RAM tiers | Checkpoint size is model-specific |
+| RAM-budget tiers | Prompt cache and checkpoints follow system RAM: >= 48 GB server defaults; 24-47 GB 4096 MiB / 32; < 24 GB: checkpoints 40 % of (free commit - VRAM - tail - 2 GB) / 170 MiB (4-32), cache half of the rest, 0 below 1536 MiB | Launcher (PR #18); `BONSAI_RAM_BUDGET=0` off; `BONSAI_RAM_GB` picks the tier | P90, P90b, P90c, P90d, P90e | P90c (v1, ballast ~13.4 GB free commit): cache 1580 MiB, 6 ckpt, 7/7, peak 11.8 GB, min free commit 682 MiB. P90d (v2): cache off, 6 ckpt, 7/7, peak 10.5 GB, min free commit 1,980 MiB. P90e: 24-47 GB tier 4096 / 32: peak 14.4 GB (defaults 18.3); BONSAI_RAM_GB=16: 4 ckpt, cache off, peak 10.5 GB | Shipped (issue #16 closed) | Re-measure checkpoint and cache entry sizes |
+| Prefill scratch reservation | Reserve prefill scratch at load (warm-up or pool pre-grow) to make the cliff deterministic | Candidate P19 | P14c | Never run | Open | - |
+
+---
+
+## 7. Clocks and thermals
+
+All clock changes are the owner's hardware choice; the launcher never sets them.
+
+| Lever | What it does | How to turn it on | Where | Measured effect on 8 GB | Status | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| Memory overclock, old engine | GDDR6 offset | Afterburner slots via tasks `BonsaiAB_P1..P5` | P3 | +1000 (7,800 MHz): +1.0 % over stock-hot, inside 4.8 % drift. Identity PASS at every step. Later shown void (pre-#325 engine, drift) | Superseded by P38 | Re-test after kernel changes |
+| Memory overclock, current engine | Same, on the PT engine, measured with llama-bench | Slots 1 / 2 = +500 / +1000 | P38, P39a, P39b, P39c, P42 | llama-bench tg256: stock 46.24 / 46.16; +500 48.16 / 48.14 (+4.2 %); +1000 49.80 / 49.72 (+7.7 %); +1250 50.39 (+8.9 %, P39a). Server drafting +1000: +0.5 / +3.4 / +3.8 % (P39b), 60-min soak +2.7 / +2.4 / +2.7 %, 0 texts outside the stock set (P42) | Opt-in, cap +1000 | Bandwidth share decides; re-test |
+| Memory +1250 / +1500 | Higher offsets | - | P39a, P39b | +1500: system bugcheck 0x00020001 and reboot. +1250: GPU fault after ~10 min (nvlddmkm 14 + 153, server CUDA error) | Rejected, never staged again | Card-specific |
+| Live clock switch | Switching Afterburner profiles while a server runs | - | P39c | Server died twice seconds after a live switch (no error, no driver event) | Rejected: set clocks before the server starts | General rule |
+| Core clock +50 / +100 / +150 with 215 W, fan 85 % | Core offset and power | Slots 2 / 3 / 4 (written by `afterburner/make_staged.py`, VF curve blank) | P4 | Core median 1815 -> 1995 MHz; decode 37.45 -> 39.27 (+4.9 %); +9.9 % clock -> +4.9 % decode; heat to 87 C | Rejected as baseline | Re-test |
+| Core +150 soak | 10-min soak at 215 W, fan 100 % | Slot 4 | P9, P9b | P9: 86 C (gate < 85 FAIL), +1.6..3.3 % (4k), +2.6..4.1 % (16k), 25/25 identical. P9b with desk fans: 74 C, +3.5-4.1 %, 25/26 identical (one 16k divergence at char 707, cause unresolved) | Rejected (stock stays) | - |
+| Power limit 215 W | Raise the 175 W cap | PowerLimit 122 (123 is silently ignored) | P4, P7 note | Slot 1 alone +1.8 % (38.13 vs 37.45). Stock decode is power-capped at 175 W (throttle 0x4) | Not used | - |
+| Fan 100 % | Fixed fan | Slot 5 FanMode=0, FanSpeed=100 | Baseline change 2026-10-06 21:41 | Part of the rig baseline from then on | Rig baseline | - |
+| Desk fans | External airflow | Physical | P8c note, P9b | +150 soak 86 C -> 74 C | Rig baseline | - |
+| Thermal drift | Core clock falls from 1875 to 1650 MHz past the 81 C target | - | P3 | Stock-vs-stock-again drift 1.68 tok/s (4.8 %) | Method lesson: alternate arms | General |
+| P2 state memory clock | Under CUDA load the card sits in P2 at 6,801 MHz, not 7,000 | - | P2, P3 | Offsets apply 1:1 in that state | Note | Card-specific |
+
+---
+
+## 8. Launcher logic
+
+The 8 GB preset lives in `start-server.ps1` (`$Small` block). It sizes everything at start; no tuning variables
+(P34).
+
+| Lever | What it does | How to turn it on | Where | Measured effect on 8 GB | Status | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| 8 GB detection | `$Small` = total VRAM <= 8,704 MiB | Auto; `BONSAI_8GB=0` off, `=1` on | P34 | Preset printed as measured | Shipped | Card-size threshold is general |
+| Headless detection from Windows | nvidia-smi reports `display_active Disabled` on WDDM while the card draws the desktop; Win32_VideoController resolution overrides it (only when no other adapter reports a display) | Auto (4042bb3, later merged) | Note 2026-10-06, launcher fix | Rig: nvidia-smi said headless, check corrected it (1280 wide). 4070 exception: both adapters report 1920 | Shipped | General (Windows) |
+| Fixed-cost constants per mode | Drafting 6531 MiB (6469 with pool before the hotfix), long ub 1024 6218, long ub 512 5955; + vision projector | Launcher | P11 (5,962 q4_0 no head), P34, Coordination 2, P64 | Auto N within launcher: drafting 53,760 (margin 225), long 58,880 (margin 400) at idle 268 MiB (P34) | Shipped | Re-measure all |
+| Margin per mode | 225 MiB drafting, 400 MiB long | `BONSAI_VRAM_MARGIN` | P27, P28, P34 | Min free in runs 118-150 MiB | Shipped | Re-measure |
+| Mask term | FixedMiB += mask(Ctx, ubatch, packed) - f16 mask at 131072 - pool | Launcher | P77, P81, P85 | Without it: 262k over-commit (P75, P77 C) | Shipped | General |
+| Partial staging sizing | Budget = (free - margin - fixed) - S x CellBytes / 16; N = floor(budget / CellBytes / 256) x 256; STAGING_FRAC = S / Ctx | Launcher, `BONSAI_STAGE_CELLS` 81,920 | P85 | N 58,880 (formula ~59,136); decode within 1.7 % of P84 pinned | Shipped | General |
+| Whole-tail staging sizing | N = floor((free - margin - fixed - Ctx x CellBytes / 16) / (CellBytes x 15/16) / 256) x 256 | Launcher | P1 formula | - | Shipped (when partial is off) | General |
+| Cell floor | Throws below 16,384 cells, even when pinned | Launcher | P5 deviation | Arm C could not meet the equal budget (~9.6k needed) | Shipped | General |
+| 262k gate | 262k only with drafting, an `-mtp` file, engine switches, and RAM >= 24 GB | Launcher `$Small262` | P85, P102d | `BONSAI_SPEC=0` keeps 131k (P102d arms void: HTTP 400 at 245k) | Shipped | General |
+| Old-engine warning | Warns when the engine lacks the 8 GB switches | Launcher | docs/8GB.md | - | Shipped | General |
+| Preset values | q4_0; draft 1 / tail 1; ub 512 drafting, 1024 long; f16 prefill 32768 / 65536; chunk 32768; draft ubatch 256; pool on (with 0046 engines); packed mask; checkpoints 8192; lookup 32; BATCH_INVARIANT with drafting; RAM tiers | Launcher | P34, P85, P88, P96 | Release checks: P96 bundle-20261010: N 57,600, decode 51.5 / 51.3 / 34.4 / 20.4 / 14.3, prefill 356 / 245 / 195 / 161 / 135, trace min 103 MiB | Shipped | Re-measure each value |
+| BONSAI_BIN in test copies | Branch launchers always ran `<repo>\bin` (an old engine) | Test copies `start-server-8gbtest.ps1` etc. honor `BONSAI_BIN` | Correction 2026-10-07 | P39b, P39c, P40 and P40b ran the wrong engine: 43.8 / 38.2 = 1.147 = the #325 gain | Fixed | General lesson: log the engine path in every receipt |
+
+---
+
+## 9. Measurement methods
+
+| Method | What it does | How | Where | What it found / numbers | Pitfalls | New model |
+| --- | --- | --- | --- | --- | --- | --- |
+| Pre-registered plan and gate | Plan, arms and gate written with a timestamp before the result | `NOTEBOOK.md` (the rig's DECISIONS.md) | All | Caught wrong conclusions: P5b, P22b, P40, P98b | Gates can be wrong (P5b byte identity; P34 N gate) - record and correct | General |
+| A/B on the same binary | Switch by env var, same bin | e.g. P7 (BI), P25, P44, P82 | Many | Isolates one change | A launcher copy can run another engine (P40) | General |
+| Alternated order | A / B / A / B (or 5 / 1 / 2 / 5 / 1 / 2) against heat and drift | `scripts/p7_kernel_ab.sh`, `scripts/p38.sh` | P7, P8, P10b, P35, P38, P103b | P103b showed P103's shallow -3 / -5 % was noise | One-run arms mislead (P103, P79) | General |
+| Drift arm | Repeat the first arm at the end | stock again / slot 1 again | P3, P4 | Stock drift 4.8 % (P3) | - | General |
+| Spread gate | Win only if gain > run-to-run spread | - | P3, P4, P10, P13, P27 | P27 60k +0.2 % called a tie | - | General |
+| Greedy text compare | Byte identity of greedy output per (depth, prompt) | `memclock_probe.py`, `p9_soak.py`, `lookup_ab.py` hashes | P3, P8, P10, P24, P25, P82 | Proves a change touches no values (prefetch, fusion, f16 prefill, packed mask) | Drafting is never bit-identical (P5b); near-tie plain items flip with any arithmetic change (P89); compare only within one session window (P93); lookup ngram history in one server changes later texts (P94); `lookup_ab.py` hashed the server tool-call id (P49 bug) | General |
+| KL / top-1 vs f16 K/V | Mean KL, top-1 agreement, PPL on wikitext-2, 16,384-token chunks x 4, scored at 8k-16k | `bench/kv_kl_sweep.ps1` | P6 | See section 2 | Server stopped for the run; tag logs per card | General |
+| One-column KL | `llama-perplexity -b 1 -ub 1` so every token is a 1-column decode | `scripts/p8c_kl_onecol.ps1` | P8 correction, P8c | Default perplexity runs 512-token ubatches (MMQ): KL 0.000000 (not evidence) | Pick a test that runs the changed kernel | General |
+| PPL at a long window | wikitext-2, 2 x 65,536 | `scripts/p89c.sh`, `scripts/p100.sh` | P89c, P100 | Chunk merge -0.05 %; 3-bit -0.02 % at 64k | Copy all DLLs with the exe (P89c) | General |
+| Needles | 12 facts deep in the context | `bench/needle_depth.py` | P101, P105 | 12/12 dense and sparse at 245k | - | General |
+| Exact copies | 10 short Python functions copied exactly | `bench/code_needle.py` | P101, P105 | 10/10 dense; sparse 9/10 at 245k (P105) | - | General |
+| HumanEval 164 | medium thinking, temp 0, 20,480 cap, layer off | `bench/humaneval_run.py --arm medium` | P31, P32, P53, P87, fillers | 157 (q4_0), 159 (q8_0), 158 (lookup, 262k, fillers) | stdin under headless conhost: add `< /dev/null` (P53) | General |
+| Deep agent soak | One conversation from ~133k real source to the end of the window | `scripts/deep_soak.py` | P99 | 18/18 turns, 0 one-token, min free 115 MiB, private 12.2 -> 14.5 GB; decode 10.3 (133k) to 5.4 (260k) | - | General |
+| Time soak | 10-60 min, decode first vs last 2 min, telemetry | `scripts/p9_soak.py` | P9, P39b, P42, P57 | P42 drift gate failed for both arms equally (request mix) | Never switch clocks live (P39c) | General |
+| One-token count | Count answers of 1 token | quick_tps / lookup_ab output | P13 onward | Found the pool race and the tail-2 restore failure | Use fresh long prompts (> 32k) AND the restore sequence | General |
+| Restore replay | 4k -> "Say hi." -> 16k -> "Say hi." -> 32k | `scripts/p18.sh` | P18, P21, P29, P54 | Reproduced tail-2 one-token 3/27 (P18) | - | General |
+| Fresh vs extending depth sequences | quick_tps extends the previous prompt or sends a fresh one | `bench/quick_tps.py --depth`, `QTPS_TIMEOUT` | P23, P61 | 4k -> 32k evaluates 4k-32k; 4k -> 16k -> 32k evaluates only 16k-32k (P20 271 vs P23 301) | Name the sequence in every prefill number | General |
+| Lookup A/B | quote / edit / plain items at a depth | `bench/lookup_ab.py` | P49 onward | See section 5 | Client timeout 1800 s too short for a cold 250k prefill (P75): use 5400-7200 s | General |
+| Ballast to simulate less RAM | Commits RAM with untouched pages, so the PC has the free commit of a smaller machine | `scripts/ballast.py`, `bench/commit_ballast.py` | P90c, P90d, P90e | ~13.4 GB free commit = a 16 GB machine | The page file can grow between runs (26.4 -> 53.4 GB free commit, P90e) | General |
+| RAM probe | Private bytes / working set / free commit every 5 s over 7 thinking requests | `scripts/ram_probe.py` | P90 family | See section 6 | - | General |
+| Op timing / census / skip build | See section 4 | - | P16b, P36b, P37c, P41b, P55b | - | Op timing needs graphs off; census first graph is warmup; skip filter must match node 0 | General |
+| K-first stats probe | Per decode op, union fraction of host rows for dropped mass <= eps | `GGML_CUDA_KV_TIER_KFIRST_STATS=1`, `scripts/realtext_probe.py` | P98, P98b, P104 | See section 2 | Synthetic filler may spread attention; use real text | General |
+| Kernel unit tests | `test-backend-ops` vs CPU | `-o MUL_MAT`, `FLASH_ATTN_EXT`, `ADD`, `RMS_NORM` | P8b, P22, P25, P56, P89, release checks | MUL_MAT 1516/1516, FLASH_ATTN_EXT 2994 / 3005 / 3007 by engine | Do not build from a tree that is being switched (P8 incident) | General |
+| llama-bench for clock tests | tg256 -r 3; less noise than a server | `scripts/p38.sh` | P38 | Showed +7.7 % where the server sweep showed nothing | - | General |
+| Floor comparison | Run a competitor recipe verbatim on the same card | `run_arm.sh` with `raw:` launcher | P13 | sudo spread < 0.5 % | Use the same depth sequence | General |
+| Release check | Download own asset, sha256, Expand-Archive, tests, sweep, fresh 60k x2, lookup d0 + d64k | queue scripts `P72b`, `P79`, `P88`, `P96` | P72b, P79, P79c, P88, P96 | All passed; P79 4k miss was noise (P79c 52.1 / 51.8 vs 52.1 / 52.1) | `tar` extraction failed (P72); recheck single readings | General |
+| Wrong-engine guard | Name the binary path in each receipt | `receipts/newest_bin` | Correction 2026-10-07 | - | - | General |
+
+---
+
+## 10. Rig infrastructure
+
+| Tool | What it does | How | Where | Notes / numbers | Status |
+| --- | --- | --- | --- | --- | --- |
+| `serve.ps1` / `stop.ps1` | Start the launcher hidden with logs; stop by PID tree | `-ExecutionPolicy Bypass` (machine policy is Restricted); serve refuses while any llama-server runs; stop waits and throws | P5 incident | P5 arms A / A-r2 invalid: stop.ps1 never ran; ~13 GB of servers on the 8 GB card | In use |
+| `run_arm.sh` | Generic arm: stop, wait for VRAM < 1,500 MiB, force stock clocks, serve, quick_tps at each depth, stop | `bash run_arm.sh <out> <tag> '<VARS>' [launcher] [depths]`; `raw:` launcher for foreign builds | P13 onward | Stock guard refuses an arm if the card reads 215 W; retries the apply until 175 W (P14b). Afterburner unreliable under full CPU load (P21) | In use |
+| Afterburner slots via scheduled tasks | Admin tasks `BonsaiAB_P1..P5` apply a profile with no prompt; `BonsaiAB_Install` installs a staged profile | `scripts/setup-afterburner-tasks.ps1`, `afterburner/make_staged.py`, `install-profile.ps1` | P3, P4, baseline change | Applying slot 5 while it is active does nothing: apply slot 3, then slot 5. Install took ~90 s. After a reboot Afterburner came up unapplied (fan 41 %) | In use |
+| Long jobs as scheduled tasks | Jobs outside the app's process tree | Task `BonsaiJob*` running `jobrun*.sh` under `conhost --headless` | P39c, P40 | App restart killed shell-launched jobs (13:37). Ctrl+C / console close ended a job (0xC000013A). Two job copies ran at once: lock directory added | In use |
+| Queue runner | Every 10 min, one instance: waits for live job locks, runs `queue/pending/*.sh` in order (running / done / failed), else rotates fillers | Task `BonsaiQueue`, `scripts/queue_runner.sh` | 2026-10-08 fix | GPU idle 01:44 -> 07:20 before it (session cron did not fire) | In use |
+| Fillers | Default sweeps when the queue is empty: A deep sweep, B lookup repeat, C HumanEval, on `receipts/newest_bin` | `scripts/filler_a_deep.sh`, `filler_b_lookup.sh`, `filler_c_humaneval.sh` | Fillers 2026-10-09 | Stable: 0 one-token, HumanEval 158. A lookup filler held P85 for 94 min: fillers now yield at the next safe point when a job is pending | In use |
+| Pause / resume | Stops job tasks, scripts and servers; interrupted job back to pending; stock clocks | `scripts/pause.ps1`, `resume.ps1`, `queue/PAUSE` | 2026-10-08 | Lets Cary serve the model | In use |
+| App check-in | Claude run every 2 h at :23: process results, refill the queue, answer PRs, upstream wins | App task `bonsai-8gb-checkin` | 2026-10-08 | Check-ins logged in the notebook | In use |
+| GitHub watcher | Wakes on new comments / PRs / pushes not by this rig | `scripts/gh_watch.sh`, `gh_post.sh` (records own comment ids in `gh_mine.txt`) | 2026-10-08 | - | In use |
+| VRAM / shared memory sampler | nvidia-smi free + llama-server GPU Process Memory counters | `scripts/sample_mem.ps1` | P11 onward | nvidia-smi wraps to 4194xxx below 0 (correct it) | In use |
+| Build checks | Build only counts if the exe files exist and the log has no "build stopped"; -j 4; up to 3 retries | `scripts/build_ahead6.sh` etc. | P75, P78, P81 | cicc crashed twice (ACCESS_VIOLATION, 0xC0000374) while build.bat returned 0 | In use |
+| One worktree per branch | Never switch a checkout that a build or server reads | `git worktree` | P8 incident | Mixed-source build killed | Rule |
+| Chains wait for GPU jobs | A chain waiting on a build must also wait on GPU jobs started meanwhile | - | P29 | P29 r3 cut short by P28's stop | Rule |
+| Scripts with backslashes | Write them with a file tool, not inline bash | - | P89b lesson, P55 | Log-path greps of P79 / P82 / P88 broken; P55 model path lost its file name | Rule |
+| Log level for switch lines | INFO lines do not reach the server log; use WARN | `LLAMA_ARG_LOG_VERBOSITY=4|5` for INFO | P41b, P101, P103 | - | Rule |
+| Self-kill guard | A kill command matched its own command line | - | P30 | ub 512 rerun never started | Rule |
+| `newest_bin` pointer | Fillers and sweeps use the newest validated engine | `receipts/newest_bin` | P56, P73 | - | In use |
+
+---
+
+## 11. Dead ends
+
+Each item was measured and not used (or was used and then withdrawn). The number is the reason.
+
+| Idea | Where | Why it was dropped | Could it work on another model / card? |
+| --- | --- | --- | --- |
+| CPU attention over the host tail | P95, P97 | ~110 ms per layer at 192k rows (dedicated AVX2) vs ~19 ms over PCIe | Fewer heads or a stronger CPU might change it |
+| 2-bit K/V | P100 | PPL +3.64 % (16k), +1.86 % (64k) | Re-test with rotation / per-channel K |
+| Micro-fusions | P76, decision 2026-10-09 | Gate+up fix +0.2 %; one small-op class 0.5-1.7 % | Megakernel only |
+| Tail 4 on 8 GB | P47, P105 | 32k -41 % at 131k; at 160k line 46,592 -> 20,992 and acceptance 0.55 | More VRAM |
+| Draft 2 / 3 | P35 | Prose -10 %, acceptance 0.665 / 0.642 | A head with a better 2nd position |
+| GRAPH_OPT | P78 | 40.5 / 36.4 vs 43.0 / 42.7 | Re-check per engine |
+| Mat-vec launch-shape tuning | P78 | Best +0.6 % | Other arch |
+| #314 L2 prefetch | P10, P10b, P43 | 4070 defaults -2.4..-2.7 %; tuned +0.6..2.2 %; new commit no gain | Large-L2 cards |
+| #209 fusion alone | P10 | 0.0 % | Shipped later as 0040 (+1-2 % within spread) |
+| DFlash 2 | P33 | +645 MiB, prefill -33 % | 12 GB+ |
+| Memory OC above +1000 | P39a, P39b | +1500 bugcheck; +1250 GPU fault | Card-specific |
+| Core +150 as baseline | P9, P9b | 86 C at fan 100 %; 1 of 26 outputs diverged with desk fans | Better cooling |
+| Live clock switch | P39c | Server died twice | Never |
+| Staging off | P77 | Prefill -60 % / -70 % at 96k / 128k | - |
+| Partial staging at 131k | P81 G | Prefill -50 % at 128k | - |
+| STAGE_MIN_Q=2 | P81 F | No change on Turing | 4070 staging +28 % |
+| 262k on the old preset | P75 | Free VRAM below 0 at depth | Fixed by P84 |
+| Micro-batch 256 | P14c | -4 % prefill, not needed | - |
+| ub 1024 at N=58,112 with f16 prefill | P26 | 60k prefill 154.5 (cliff, ~70 MiB left) | Fixed by N=53,248 (P27) |
+| Packed mask, first build | P22b | "////" output with drafting at 32k | Withdrawn: cause was the pool race and shared staging key; shipped later (P82) |
+| Draft-context f16 mask fix | P22b | Changed nothing | - |
+| Shared pool before 0045 | P12, P64 | 1-token answers to fresh long prompts | Shipped with 0045 (P83) |
+| `--checkpoint-every-nt` first test | P59 | Wrong output | Withdrawn: pool was on; correct in P71, shipped |
+| K-first bounded reads / top-k by mass | P98, P98b | Union fraction 0.76-1.00 at 1e-4 | Mass was the wrong criterion; sparse by output works (P101, P105) |
+| Sparse reads at 245k (so far) | P102-P106 | 4.3-4.9 vs dense 5.7; -16 % at 64k; follow-up prefill -20 / -45 % | Open; 160k is 1.9x |
+| f16 prefill min-Q 64 on Turing | P60, P70 | Neutral | Ada +8.7 % on file rewrites |
+| Decode "2 tokens per step" suspicion | P55b, P74 cancelled | It was the warmup graph | - |
+| 1-column KL with default perplexity | P8 correction | 512-token ubatches never run the 1-column kernel | Use `-b 1 -ub 1` |
+| PrismML official Windows release on Turing | P33 | No sm_75 code (issue #332); 13.3 zip PTX cannot JIT on driver 591.86; 12.4 zip loads after ~2 min JIT | Build for sm_75 |
+| Ollama / remote desktop as the long-mode "regression" | P40, P45 | The regression was the wrong engine (P40 correction) | - |
+| Speculative prefill (drop prompt tokens) | docs/DEPTH.md | Not tried on purpose: the model never sees dropped tokens | - |
+
+---
+
+## 12. How to start on a new model
+
+The order below follows what the notebook shows mattered most on this card. Each step names the P numbers to copy.
+
+1. **Rig baseline first.** Stock clocks, one server only, idle VRAM, desktop resolution, display detection (P1, P5
+   incident, note 2026-10-06). Set up `serve.ps1` / `stop.ps1` / `run_arm.sh` with the stock guard, the queue runner
+   and the fillers (section 10).
+2. **Measure the fixed cost** at a pinned N (P1). Compute bytes per position for the new model (attention layers x KV
+   heads x head dim x K+V). Update the launcher constants before any auto-sized run.
+3. **Record decode by depth** past a pinned VRAM line (P2). This shows how much the line is worth. On this card the
+   line was worth 2.4x-11x; clocks were worth ~5 %.
+4. **Find the decode kernel path per arch.** Check which mat-vec layout the arch takes at one column (P7). Run op
+   timing, a census (skip the warmup graph) and the mat-vec microbench (P36b, P37c, P55b). Compute the bandwidth
+   ceiling. If mat-vecs are near peak, stop kernel work early (P78, P76 decision).
+5. **Choose the KV type.** q4_0 vs q8_0 KL on the card (P6), then a task score (P31 / P32). Try a lower-bit format
+   with fake bits first (P100).
+6. **Find the safe margin.** Margin soak with block design (P11b) and a prefill-cliff check (P14 family). Keep a VRAM
+   trace through a deep prefill as a standard gate (P75 lesson).
+7. **Drafting.** Measure the head's VRAM cost (P5 / P5b), requantize it (P12), set draft and tail sizes from the
+   recurrent-plane cost (P15, P35, P47). Turn on lookup drafting (P49b). Check one-token answers with fresh long
+   prompts and the restore replay (P18, P64).
+8. **VRAM savers, in this order of value here:** tail 1 (152 MiB), packed mask (128 MiB at 131k, 256 at 262k),
+   shared pool with 0045 (~51 MiB), Q4_0 head (214 MiB), partial staging (for long windows) (P15, P82, P83, P12, P81).
+9. **Prefill.** f16 prefill from pool memory (P25), micro-batch per mode (P27), chunked prefill past the f16 limit
+   (P89). Name the depth sequence with every prefill number (P23).
+10. **Window.** Size the window by system RAM and mask / staging terms (P84, P85). Add RAM tiers for checkpoints and
+    the prompt cache (P90 family). Turn on checkpoints inside messages for hybrid models (P71, P73).
+11. **Depth.** Tier-graphs (P103), tail 2 for deep sessions (P80c), sparse host reads as an experiment (P105). Skip
+    CPU attention unless the head arithmetic is much smaller (P97).
+12. **Quality gates before shipping.** HumanEval (P31), needles and exact copies at depth (P101), PPL at a long
+    window (P89c), a deep agent soak (P99), a 60-90 min soak (P57).
+13. **Clocks last, opt-in only.** Memory offset with llama-bench first (P38), then a soak with text compare (P42).
+    Set clocks before the server starts. Cap below the first fault (P39).
+14. **Release check** on the downloaded asset (P72b, P88, P96).
+
+What to re-measure on any new model: fixed cost, bytes per position, recurrent plane size, checkpoint size, head
+cost and acceptance per draft position, KL of each KV type, the mat-vec shapes and their share of a step, and every
+launcher constant. What transfers as is: the methods in section 9, the infrastructure in section 10, and the
+engine patches that are not tied to `PTQ1_0` (pool order 0045, f16 prefill 0038, chunked prefill 0051, packed mask
+0048/0049, partial staging 0047, tier-graphs 0053, checkpoints 0046, RAM tiers).
+
+---
+
+## 13. Levers without numbers
+
+These levers appear in the notebook, but no 8 GB number exists for them:
+
+- Display on the iGPU (not possible on this rig; 4070 numbers only).
+- Software-rendered remote desktop session (candidate, never run).
+- Prefill scratch reservation at load (P19, never run).
+- `GGML_CUDA_POOL_LOG` (in the P22 build; no numbers recorded).
+- Draft window size (`BONSAI_DRAFT_WINDOW`): P65 arm c ran without the pool by accident (confounded).
+- Norm -> FWHT fusion (estimate ~0.5 % only, not built).
+- Merging same-input mat-vecs (estimate only, not built).
+- Megakernel (not started).
+- Chunked GDN prefill (4070 only; falls back to the recurrent kernel on Turing).
+- V skip in the vec kernel `GGML_CUDA_FA_V_SKIP=1` (4070 only).
+- Micro-batch at depth 512 / 1024 / 2048 (4070 only; on 8 GB only 256 / 512 / 1024 at shallow depth).
+- q3_0 real KV type on the GPU (P108 pending; only the fake-bits bound from P100).
+- Per-op timing of sparse vs dense at 245k (P107 pending).
+- Many tools on 8 GB (P63: 2 tools 43.8, 107 tools 34.8 tok/s, but depth confounded; no clean number).
+- Vision projector on the card (`BONSAI_MMPROJ_GPU`; not measured on 8 GB).
