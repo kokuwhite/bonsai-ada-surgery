@@ -28,6 +28,10 @@ step reads the rest of the cache over PCIe. `bundle-20261010` on the RTX 2060 SU
 | decode (tok/s) | 51.5 | 51.3 | 34.4 | 20.4 | 14.3 | 8.4 | 5.7 |
 | 512-token follow-up (tok/s) | 356 | 245 | 195 | 161 | 135 | 97 | 80 |
 
+Sources: 4k-128k are P96 (`bundle-20261010`, one server). The 192k and 245k columns come from earlier runs on the
+builds that led to that bundle: decode 192k 8.4 from P86 (P89: 8.1), decode and follow-up at the deep end from P89 /
+P86b, measured at 250k; follow-up 192k from P89. Records: `docs/research/depth-8gb-20261006/experiments/`.
+
 So pick the window by the work:
 
 - **Agent work** (coding agents, tool loops): set `BONSAI_CTX` to the depth you still find fast, e.g. `98304` (96k) or
@@ -226,7 +230,8 @@ prefill the lowest free VRAM during a 60k prefill was 118 MiB, with no cliff.
 
 On this card decode reads the ternary weights at about 80 % of the memory bandwidth, so the memory clock matters.
 llama-bench, plain decode: +500 MHz +4.2 %, +1000 MHz +7.7 %. With the drafting preset (server): +1000 MHz gives
-+2.4-2.7 % at 4k-32k, and a 60-minute soak gave byte-identical text with no driver errors. +1250 MHz faulted the GPU
++2.4-2.7 % at 4k-32k, and in a 60-minute soak the server stayed up with byte-identical text (the soak did not query
+the Windows event log). +1250 MHz faulted the GPU
 after about 10 minutes of load, and +1500 MHz stopped the PC (bugcheck). Set the clock before the server starts:
 switching it while a server runs stopped the server twice. Clocks are the owner's choice; the launcher does not touch
 them.

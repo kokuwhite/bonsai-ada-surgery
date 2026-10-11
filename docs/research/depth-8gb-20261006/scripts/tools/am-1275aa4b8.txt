@@ -1,0 +1,1 @@
+Applying: cuda: GGML_CUDA_POOL_LOG=1 logs each VMM pool growth step per backend instance (diagnostics for the draft context's VRAM)

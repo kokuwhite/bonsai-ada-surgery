@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+cd /c/bonsai/8gb; R=receipts/p72; mkdir -p $R
+D=/c/bonsai/8gb/release_8gbfix; rm -rf $D; mkdir -p $D
+gh release download bundle-20261008-8gbfix --repo professorpalmer/bonsai-ada-surgery -p 'bonsai-bundle-win-x64.zip' -D $D || { echo "download failed" > $R/summary.txt; exit 1; }
+sha256sum $D/bonsai-bundle-win-x64.zip > $R/zip.sha256; stat -c %s $D/bonsai-bundle-win-x64.zip >> $R/zip.sha256
+(cd $D && tar.exe -x -f bonsai-bundle-win-x64.zip)
+B=$(dirname "$(find $D -name llama-server.exe | head -1)"); rm -rf /c/bonsai/bonsai-ada-surgery/bin-8gbfix; cp -r "$B" /c/bonsai/bonsai-ada-surgery/bin-8gbfix
+ls /c/bonsai/bonsai-ada-surgery/bin-8gbfix > $R/files.txt
+L='C:/bonsai/bonsai-ada-surgery/start-server-maintest.ps1'; KEY=C:/bonsai/bonsai-ada-surgery/artifacts/api_key.txt
+V='BONSAI_BIN=C:/bonsai/bonsai-ada-surgery/bin-8gbfix;BONSAI_LAYER=0'
+for r in 1 2; do bash run_arm.sh $R fresh60k_r$r "$V" "$L" "60000"; done
+bash run_arm.sh $R sweep "$V" "$L" "4000 32000 64000"
+bash run_arm.sh $R long "$V;BONSAI_MODEL=Ternary-Bonsai-2-27B-PTQ1_0.gguf" "$L" "4000 32000"
+powershell -NoProfile -ExecutionPolicy Bypass -File stop.ps1 >/dev/null 2>&1
+schtasks //run //tn BonsaiAB_P3 >/dev/null; sleep 4; schtasks //run //tn BonsaiAB_P5 >/dev/null; sleep 6
+powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1 -Tag p72_ab -Launcher "$L" -Vars "$V" >/dev/null 2>&1
+for i in $(seq 1 120); do curl -s localhost:8080/health | grep -q ok && break; sleep 5; done
+python lookup_ab.py --base http://127.0.0.1:8080 --key-file $KEY --tag rel_d0 --out $R/ab.jsonl --depth 0 > $R/ab.txt 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -File stop.ps1 >/dev/null 2>&1
+{ cat $R/zip.sha256; for f in $R/fresh*.txt $R/sweep.txt $R/long.txt; do echo "$(basename $f .txt): $(grep -c '(1 tok)' $f) one-token; $(grep -E 'loaded|mean decode|min free' $f | tr '\n' ' ')"; done; echo "ab d0 one-token: $(grep -c '"n": 1,' $R/ab.jsonl) of $(wc -l < $R/ab.jsonl)"; } > $R/summary.txt
