@@ -30,3 +30,38 @@ mma mean decode 71.5 tok/s
 {"tag": "mma", "depth": 32000, "correct": 10, "of": 10}
 {"tag": "mma", "depth": 32000, "correct": 12, "of": 12}
 01:22 === done
+GATED_DELTA_NET (root-gdn2, 31c337bbb): ok 57 fail 0
+02:49 === gdn prefill A/B: speed depths 4000 32000 128000, quality depth 32000, root C:\Users\pwall\AppData\Local\Temp\root-gdn2
+02:49 arm recurrent (GGML_CUDA_GDN_MMA_DISABLE=1): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+recurrent code   depth   4000 (evaluated 4048): prefill  1203.9 tok/s  ttft   3.36s  decode  105.7 tok/s (400 tok)
+recurrent prose  depth   4000 (evaluated 512): prefill   939.1 tok/s  ttft   0.55s  decode   86.4 tok/s (400 tok)
+recurrent bash   depth   4000 (evaluated 516): prefill   952.5 tok/s  ttft   0.54s  decode   98.0 tok/s (400 tok)
+recurrent mean decode 96.7 tok/s
+recurrent code   depth  32000 (evaluated 28512): prefill  1021.3 tok/s  ttft  27.92s  decode  120.8 tok/s (400 tok)
+recurrent prose  depth  32000 (evaluated 512): prefill   689.4 tok/s  ttft   0.74s  decode   82.6 tok/s (400 tok)
+recurrent bash   depth  32000 (evaluated 516): prefill   701.8 tok/s  ttft   0.74s  decode  105.1 tok/s (400 tok)
+recurrent mean decode 102.8 tok/s
+recurrent code   depth 128000 (evaluated 95812): prefill   581.1 tok/s  ttft 164.89s  decode   80.3 tok/s (400 tok)
+recurrent prose  depth 128000 (evaluated 512): prefill   384.0 tok/s  ttft   1.33s  decode   59.9 tok/s (400 tok)
+recurrent bash   depth 128000 (evaluated 516): prefill   387.2 tok/s  ttft   1.33s  decode   77.1 tok/s (400 tok)
+recurrent mean decode 72.4 tok/s
+{"tag": "recurrent", "depth": 32000, "correct": 10, "of": 10}
+{"tag": "recurrent", "depth": 32000, "correct": 12, "of": 12}
+02:55 arm mma (): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+mma code   depth   4000 (evaluated 4048): prefill  1280.9 tok/s  ttft   3.16s  decode  105.8 tok/s (400 tok)
+mma prose  depth   4000 (evaluated 512): prefill   990.2 tok/s  ttft   0.52s  decode   87.2 tok/s (400 tok)
+mma bash   depth   4000 (evaluated 516): prefill  1007.8 tok/s  ttft   0.51s  decode   95.5 tok/s (400 tok)
+mma mean decode 96.2 tok/s
+mma code   depth  32000 (evaluated 28512): prefill  1080.5 tok/s  ttft  26.39s  decode  120.6 tok/s (400 tok)
+mma prose  depth  32000 (evaluated 512): prefill   713.7 tok/s  ttft   0.72s  decode   78.4 tok/s (400 tok)
+mma bash   depth  32000 (evaluated 516): prefill   722.8 tok/s  ttft   0.71s  decode  106.6 tok/s (400 tok)
+mma mean decode 101.9 tok/s
+mma code   depth 128000 (evaluated 95812): prefill   600.7 tok/s  ttft 159.50s  decode   80.2 tok/s (400 tok)
+mma prose  depth 128000 (evaluated 512): prefill   390.0 tok/s  ttft   1.31s  decode   60.7 tok/s (400 tok)
+mma bash   depth 128000 (evaluated 516): prefill   391.8 tok/s  ttft   1.32s  decode   81.3 tok/s (400 tok)
+mma mean decode 74.1 tok/s
+{"tag": "mma", "depth": 32000, "correct": 10, "of": 10}
+{"tag": "mma", "depth": 32000, "correct": 12, "of": 12}
+03:00 === done
+recurrent: 
+mma: 0.06.732.452 W ggml_cuda_op_gated_delta_net_impl: chunked GDN prefill (MMA) engaged: 121 tokens (116 by MMA), K 5, H 48, H_k 16, raw 1, gather 1, seqs 1

@@ -25,3 +25,34 @@ sparse-prefill mean decode 29.6 tok/s
 {"tag": "sparse-prefill", "depth": 160000, "correct": 11, "of": 12}
 01:08 sparse-prefill: 24 engaged lines; last: 14.28.089.531 W ggml_cuda_fa_sparse_mask: GGML_CUDA_FA_SPARSE B=8192 P=256 R=1024 fast: 23553 ops; this op 512 queries, host tail 126720 cells, keeps 32 of 495 
 01:08 === done
+02:16 === sparse prefill: depth 160000, sparse 8192,256,1024, root C:\Users\pwall\AppData\Local\Temp\root-sparse9
+02:16 arm sparse-decode (GGML_CUDA_FA_SPARSE=8192,256,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9): health=1; kv     tiered: cells 0..32768 in VRAM, 32768..262144 in system RAM; shared CUDA pool on (B
+sparse-decode code   depth 160000 (evaluated 159086): prefill   583.9 tok/s  ttft 272.44s  decode   34.6 tok/s (400 tok)
+sparse-decode prose  depth 160000 (evaluated 512): prefill   322.6 tok/s  ttft   1.59s  decode   25.8 tok/s (400 tok)
+sparse-decode bash   depth 160000 (evaluated 516): prefill   329.8 tok/s  ttft   1.56s  decode   33.0 tok/s (400 tok)
+sparse-decode mean decode 31.1 tok/s
+{"tag": "sparse-decode", "depth": 160000, "correct": 9, "of": 10}
+{"tag": "sparse-decode", "depth": 160000, "correct": 12, "of": 12}
+02:32 sparse-decode: 13 engaged lines; last: 15.42.664.933 W ggml_cuda_fa_sparse_mask: GGML_CUDA_FA_SPARSE B=8192 P=256 R=1024 fast: 12289 ops; this op 5 queries, host tail 126720 cells, keeps 32 of 495 pa
+02:32 === done
+02:32 === sparse prefill: depth 160000, sparse 8192,64,1024, root C:\Users\pwall\AppData\Local\Temp\root-sparse9
+02:32 arm sparse-decode (GGML_CUDA_FA_SPARSE=8192,64,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9): health=1; kv     tiered: cells 0..32768 in VRAM, 32768..262144 in system RAM; shared CUDA pool on (B
+sparse-decode code   depth 160000 (evaluated 159086): prefill   584.4 tok/s  ttft 272.21s  decode   21.6 tok/s (400 tok)
+sparse-decode prose  depth 160000 (evaluated 512): prefill   314.6 tok/s  ttft   1.63s  decode   15.1 tok/s (400 tok)
+sparse-decode bash   depth 160000 (evaluated 516): prefill   317.9 tok/s  ttft   1.62s  decode   20.0 tok/s (400 tok)
+sparse-decode mean decode 18.9 tok/s
+{"tag": "sparse-decode", "depth": 160000, "correct": 10, "of": 10}
+{"tag": "sparse-decode", "depth": 160000, "correct": 12, "of": 12}
+02:48 sparse-decode: 12 engaged lines; last: 16.06.592.315 W ggml_cuda_fa_sparse_mask: GGML_CUDA_FA_SPARSE B=8192 P=64 R=1024 fast: 11265 ops; this op 4 queries, host tail 126720 cells, keeps 128 of 1980 p
+02:48 === done
+FLASH_ATTN_EXT (root-sparse10, d6c6e9f01): ok 3007 fail 0
+03:02 === sparse prefill: depth 160000, sparse 8192,64,1024, root C:\Users\pwall\AppData\Local\Temp\root-sparse10
+03:02 arm sparse-decode (GGML_CUDA_FA_SPARSE=8192,64,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9): health=1; kv     tiered: cells 0..32768 in VRAM, 32768..262144 in system RAM; shared CUDA pool on (B
+sparse-decode code   depth 160000 (evaluated 159086): prefill   583.6 tok/s  ttft 272.61s  decode   31.7 tok/s (400 tok)
+sparse-decode prose  depth 160000 (evaluated 512): prefill   319.2 tok/s  ttft   1.60s  decode   22.0 tok/s (400 tok)
+sparse-decode bash   depth 160000 (evaluated 516): prefill   323.4 tok/s  ttft   1.60s  decode   29.2 tok/s (400 tok)
+sparse-decode mean decode 27.6 tok/s
+{"tag": "sparse-decode", "depth": 160000, "correct": 10, "of": 10}
+{"tag": "sparse-decode", "depth": 160000, "correct": 12, "of": 12}
+03:18 sparse-decode: 12 engaged lines; last: 15.34.718.890 W ggml_cuda_fa_sparse_mask: GGML_CUDA_FA_SPARSE B=8192 P=64 R=1024 fast: 11265 ops; this op 4 queries, host tail 126720 cells, keeps 128 of 1980 p
+03:18 === done
