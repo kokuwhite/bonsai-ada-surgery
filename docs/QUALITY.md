@@ -162,6 +162,34 @@ OpenAI clients that leave `max_tokens` at 4k will reproduce Killy's blanks even 
 new server default. Chat needs `max_tokens` ≥ 20k when thinking is on. Agents should keep
 thinking off and can stay at a small cap.
 
+### Thinking length and the system turn (measured 2026-10-10/11)
+
+Since 09-21 the GGUF template adds a system turn with short work rules ("Save long command
+output to a file ...") to every request. HumanEval 164, medium, greedy, raw server, the same
+engine for every arm (`bench/he_template_one.sh`, `receipts/he_template_ab.log`):
+
+| what the prompt has | pass | mean tokens | median | over 4k tokens |
+| --- | ---: | ---: | ---: | ---: |
+| work rules in the system turn (the template as served) | 160/164 | 2312 | 576 | 18 |
+| no work rules, no system turn | 159/164 | 932 | 710 | 3 |
+| the same work rules as a prefix of the first user turn | 160/164 | 956 | 676 | 3 |
+| system turn: "Reasoning effort is set to medium. Think as much as the task needs, then answer." + the rules | 161/164 | 2327 | 599 | 19 |
+| a community template's "terse" system block, no rules | 160/164 | 2454 | 594 | 21 |
+| work rules in the system turn, thinking budget 4096 | 160/164 | 1178 | 589 | 18 (capped near 4.1k) |
+| work rules in the system turn, thinking budget 2048 | 160/164 | 913 | 606 | 0 |
+
+- **A system turn, with any text, gives a long thinking tail** on about 11 % of the tasks
+  (18-21 runs past 4k tokens against 3). The median hardly moves. Without a system turn, or
+  with the same rules in the user turn, the tail goes away and the score stays.
+- **An effort sentence does not fix it** (2327 mean with the medium sentence).
+- **A thinking budget cuts the tail with the rules kept**: 2048 keeps 160/164 at 913 mean
+  tokens. The budget-message force-close lets the answer through.
+- The launcher maps every `reasoning_effort` except `medium` to `medium`
+  (`BONSAI_EFFORT_ALLOWED`), so a request's `low` does not reach the template.
+- **Not changed yet.** Whether the budget or the user-turn placement keeps agent work (tool
+  calls with the client's own system prompt) is measured next; until then the served template
+  and the 20480 budget stay.
+
 ## 3. Tool-call syntax (measured: format and grammar, not the model)
 
 Bonsai 2's native tool-call format is Qwen3-Coder XML, not JSON:

@@ -53,6 +53,23 @@ agreement 99.38%; q4_0 0.00218, 97.93%. The previous 12 GB routes to 262k all us
    prompt chunk past 119k costs 2.21-2.59 ms per token instead of 2.64-3.52, cumulative 542 -> 585 tok/s. Line at
    16k, prefill to 40k: 717 -> 983 tok/s (all-VRAM cache: 990). Greedy text identical; decode unchanged
    (`receipts/tier_ab.log`).
+   **The prefetch needs CUDA graphs off** (patch 0053, 2026-10-11). The prefetch above runs only for a graph that
+   runs without a CUDA graph, and the launcher keeps CUDA graphs on. So past the line, decode never had it: each
+   attention op waited for its own host-row copy. Now a graph whose attention reads the host tail runs without a
+   CUDA graph, and graphs below the line keep theirs. The server logs one line on each switch;
+   `GGML_CUDA_KV_TIER_GRAPHS=1` keeps the old behaviour. Mean decode (`bench/quick_tps.py`, code / prose / bash):
+   - RTX 4070, 12 GB recipe: 4k 95.2 -> 95.4, 32k 101.8 -> 102.3, 128k (below the line) 71.9 -> 71.8, 192k
+     23.6 -> **29.4**, 250k 12.7 -> **14.6**, 192k with lookup off 19.8 -> **25.0** tok/s (`receipts/depth_arms.log`).
+     The isolation that found it: `GGML_CUDA_DISABLE_GRAPHS=1` alone gave the same +26 % at 192k; the f16 mask
+     alone gave nothing (18.3).
+   - RTX 2060 SUPER, 8 GB recipe (#22): 128k 12.8 -> **14.8**, 192k 7.9 -> **8.6**, 245k 6.2 -> **6.7** tok/s;
+     4k and 32k the same within 0.2 tok/s (alternated twice).
+   - HumanEval 164 at medium on the release binaries: all 164 outputs identical (`receipts/release_20261011.log`).
+
+**Not affected: PrismML #346.** On PrismML's engine, prompt checkpoints evaluate the last 4 prompt tokens as their
+own batch. A 3-4 query batch with a quantized V takes a short-query MMA route that converts K and V to f16. That
+route needs scratch that `get_alloc_size` did not reserve when the in-place quantized kernel exists, so the f16 K
+was written past the allocation. Our engine does not have that route. The fix for PrismML's engine is PrismML #350.
 3. **Quantized-KV GQA decode on the MMA attention kernel** (default for <= 8 queries; `GGML_CUDA_FA_MMA_DECODE_MIN_KV`).
    Bonsai 2 has 24 query heads over 4 KV heads; the vector kernel reads each K/V row once per query head, the
    in-place MMA kernel from #221 once per KV head. 4k 78.1 -> 86.9, 16k 77.7 -> 111.6 tok/s.
