@@ -18,3 +18,14 @@ pass@1 96.95%  (159/164)  arm=medium effort=- temp=0.0 max_tokens=24576  1310.7s
 wrote artifacts/humaneval-norules\summary.json
 norules: mean tokens 932 median 710, over 4k: 3
 23:07 === norules done
+00:15 === tiergraphs: template model, root C:\Users\pwall\AppData\Local\Temp\root-graphs, kwargs none, health=0
+01:10 === tiergraphs: template model, root C:\Users\pwall\AppData\Local\Temp\smoke-0053, kwargs none, health=1
+pass@1 0.0%  (0/164)  arm=medium effort=- temp=0.0 max_tokens=24576  0.4s
+wrote artifacts/humaneval-tiergraphs\summary.json
+tiergraphs: mean tokens 0 median 0, over 4k: 0
+01:10 === tiergraphs done
+01:23 === tiergraphs: template model, root C:\Users\pwall\AppData\Local\Temp\smoke-0053, kwargs none, health=1
+pass@1 97.56%  (160/164)  arm=medium effort=- temp=0.0 max_tokens=24576  3135.4s
+wrote artifacts/humaneval-tiergraphs\summary.json
+tiergraphs: mean tokens 2312 median 576, over 4k: 18
+02:15 === tiergraphs done

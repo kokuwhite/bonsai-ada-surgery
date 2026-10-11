@@ -1,0 +1,32 @@
+01:11 === gdn prefill A/B: speed depths 4000 32000 128000, quality depth 32000, root C:\Users\pwall\AppData\Local\Temp\root-gdn
+01:11 arm recurrent (GGML_CUDA_GDN_MMA_DISABLE=1): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+recurrent code   depth   4000 (evaluated 4048): prefill  1200.6 tok/s  ttft   3.37s  decode  103.9 tok/s (400 tok)
+recurrent prose  depth   4000 (evaluated 512): prefill   931.4 tok/s  ttft   0.55s  decode   84.6 tok/s (400 tok)
+recurrent bash   depth   4000 (evaluated 516): prefill   945.2 tok/s  ttft   0.55s  decode   96.1 tok/s (400 tok)
+recurrent mean decode 94.9 tok/s
+recurrent code   depth  32000 (evaluated 28512): prefill  1021.4 tok/s  ttft  27.91s  decode  119.6 tok/s (400 tok)
+recurrent prose  depth  32000 (evaluated 512): prefill   677.7 tok/s  ttft   0.76s  decode   80.9 tok/s (400 tok)
+recurrent bash   depth  32000 (evaluated 516): prefill   694.9 tok/s  ttft   0.74s  decode  102.9 tok/s (400 tok)
+recurrent mean decode 101.1 tok/s
+recurrent code   depth 128000 (evaluated 95812): prefill   581.2 tok/s  ttft 164.86s  decode   80.4 tok/s (400 tok)
+recurrent prose  depth 128000 (evaluated 512): prefill   382.9 tok/s  ttft   1.34s  decode   59.8 tok/s (400 tok)
+recurrent bash   depth 128000 (evaluated 516): prefill   386.1 tok/s  ttft   1.34s  decode   76.6 tok/s (400 tok)
+recurrent mean decode 72.3 tok/s
+{"tag": "recurrent", "depth": 32000, "correct": 10, "of": 10}
+{"tag": "recurrent", "depth": 32000, "correct": 12, "of": 12}
+01:17 arm mma (): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+mma code   depth   4000 (evaluated 4048): prefill  1199.1 tok/s  ttft   3.38s  decode  105.6 tok/s (400 tok)
+mma prose  depth   4000 (evaluated 512): prefill   942.4 tok/s  ttft   0.54s  decode   86.1 tok/s (400 tok)
+mma bash   depth   4000 (evaluated 516): prefill   951.4 tok/s  ttft   0.54s  decode   98.1 tok/s (400 tok)
+mma mean decode 96.6 tok/s
+mma code   depth  32000 (evaluated 28512): prefill  1019.4 tok/s  ttft  27.97s  decode  120.7 tok/s (400 tok)
+mma prose  depth  32000 (evaluated 512): prefill   688.9 tok/s  ttft   0.74s  decode   82.0 tok/s (400 tok)
+mma bash   depth  32000 (evaluated 516): prefill   699.2 tok/s  ttft   0.74s  decode  104.7 tok/s (400 tok)
+mma mean decode 102.5 tok/s
+mma code   depth 128000 (evaluated 95812): prefill   581.3 tok/s  ttft 164.84s  decode   79.3 tok/s (400 tok)
+mma prose  depth 128000 (evaluated 512): prefill   380.4 tok/s  ttft   1.35s  decode   59.0 tok/s (400 tok)
+mma bash   depth 128000 (evaluated 516): prefill   382.5 tok/s  ttft   1.35s  decode   76.1 tok/s (400 tok)
+mma mean decode 71.5 tok/s
+{"tag": "mma", "depth": 32000, "correct": 10, "of": 10}
+{"tag": "mma", "depth": 32000, "correct": 12, "of": 12}
+01:22 === done

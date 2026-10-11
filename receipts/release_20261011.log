@@ -3,3 +3,8 @@ switch lines: 1
 wrote artifacts/humaneval-tiergraphs\summary.json
 tiergraphs: mean tokens 0 median 0, over 4k: 0
 01:10 === tiergraphs done
+01:23 gate 2 (rerun): HumanEval on the release bundle bins
+switch lines: 1
+wrote artifacts/humaneval-tiergraphs\summary.json
+tiergraphs: mean tokens 2312 median 576, over 4k: 18
+02:15 === tiergraphs done
