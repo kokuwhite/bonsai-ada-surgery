@@ -3,9 +3,9 @@
 # 27 tools, 47k characters of tool definitions and no sampler fields) with lookup on and off. Served recipe with the
 # layer on. Each request is sent greedy (same text in both arms) and with the server's default sampling (as the
 # client sent it). Also the first test of bench/capture_replay.py.
-#   bash bench/issue7_replay_ab.sh   -> receipts/issue7_replay_ab.{log,jsonl}
+#   bash bench/issue7_replay_ab.sh   -> docs/receipts/issue7_replay_ab.{log,jsonl}
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/issue7_replay_ab.log; OUT=receipts/issue7_replay_ab.jsonl
+REPO="$(pwd -W)"; LOG=docs/receipts/issue7_replay_ab.log; OUT=docs/receipts/issue7_replay_ab.jsonl
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 CAP=logs/captured_requests.jsonl
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }

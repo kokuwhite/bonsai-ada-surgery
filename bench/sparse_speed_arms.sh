@@ -3,10 +3,10 @@
 # One server session per arm through quick_tps at DEPTHS (default 192000 250000). Arms: dense as shipped (graphs on,
 # packed mask); dense with graphs off + f16 mask (the prototype's fair baseline); sparse fast B cells (page P, recent R),
 # decode reading the host tail in place so only selected pages cross PCIe. RAM guard on.
-#   ARMS="sparse" bash bench/sparse_speed_arms.sh <root>   -> receipts/sparse_speed.log (ARMS: dense-shipped dense-fair sparse)
+#   ARMS="sparse" bash bench/sparse_speed_arms.sh <root>   -> docs/receipts/sparse_speed.log (ARMS: dense-shipped dense-fair sparse)
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"
-LOG=receipts/sparse_speed.log; DEPTHS=${DEPTHS:-192000 250000}; SP=${SPARSE:-8192,256,1024}
+LOG=docs/receipts/sparse_speed.log; DEPTHS=${DEPTHS:-192000 250000}; SP=${SPARSE:-8192,256,1024}
 # every arm: lookup drafting off by default (its verify batches of 10-33 queries are outside the fast path), so decode
 # is MTP only (2-query verify steps); SPEED_ENV="" keeps the launcher default
 SPEED_ENV=${SPEED_ENV-BONSAI_LOOKUP=0}

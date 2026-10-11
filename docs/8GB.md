@@ -159,7 +159,7 @@ q4_0 also missed. For exact-syntax work that fits in ~20k tokens, `BONSAI_CTK=q8
 The drafting mode also takes lookup drafting (patch 0039, on by default; `BONSAI_LOOKUP=0` turns it off): an n-gram
 drafter proposes up to 32 tokens of text that is already in the context, and the MTP head drafts new text. A long
 lookup draft uses the server's state checkpoint, not more recurrent-state planes, so the VRAM line does not change.
-`bench/lookup_ab.py`, drafting preset, decode tok/s (`receipts/lookup_ab_8gb.jsonl`):
+`bench/lookup_ab.py`, drafting preset, decode tok/s (`docs/receipts/lookup_ab_8gb.jsonl`):
 
 | depth | file rewrite | edit call | plain |
 | --- | --- | --- | --- |
@@ -177,7 +177,7 @@ a prompt that changes inside one long message (an edited tool result, a file sen
 start: about 4.5 minutes at 64k on this card. Patch 0046 (`--checkpoint-every-nt`) also keeps a checkpoint every N
 tokens inside a message; the 8 GB preset sets 8192 when the engine has it (`BONSAI_CKPT_EVERY` changes it, 0 turns it
 off). RTX 2060 SUPER, `lookup_ab.py` at 64k, requests after the first: 18-58 s instead of 272-294 s, and the text of all
-22 requests is identical to the run without it (`receipts/ckpt_every_nt_8gb.jsonl`). Each checkpoint takes about
+22 requests is identical to the run without it (`docs/receipts/ckpt_every_nt_8gb.jsonl`). Each checkpoint takes about
 170 MiB of system RAM (at most 32).
 
 ## What decides it on 8 GB

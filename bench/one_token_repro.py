@@ -14,7 +14,7 @@ ap.add_argument("--base", required=True)
 ap.add_argument("--key-file", required=True)
 ap.add_argument("--depths", default="20000,30000,33000,40000,60000")
 ap.add_argument("--tag", default="")
-ap.add_argument("--out", default="receipts/one_token_repro.jsonl")
+ap.add_argument("--out", default="docs/receipts/one_token_repro.jsonl")
 a = ap.parse_args()
 key = open(a.key_file).read().strip()
 

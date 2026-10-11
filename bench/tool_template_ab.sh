@@ -3,10 +3,10 @@
 # user, kept local in tmp/templates-sharp/, not committed). Raw server (layer off), product launcher defaults otherwise.
 # Per arm: the suite's coding (12) + workspace (10) items (bench/plans/tools_template.json), then the tool-call syntax
 # stress test. One server at a time; RAM guard on for the whole run.
-#   bash bench/tool_template_ab.sh [template file]   -> receipts/tool_template_ab.log, artifacts/eval/tooltpl_<arm>/
+#   bash bench/tool_template_ab.sh [template file]   -> docs/receipts/tool_template_ab.log, artifacts/eval/tooltpl_<arm>/
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; TPL="${1:-tmp/templates-sharp/bonsai-sharp.jinja}"; TPLW="$(cygpath -w "$(realpath "$TPL")")"
-LOG=receipts/tool_template_ab.log
+LOG=docs/receipts/tool_template_ab.log
 # PLAN: another suite plan (e.g. bench/plans/tools_workspace.json); TAG keeps output dirs apart (tooltpl_<TAG>_<arm>)
 PLAN=${PLAN:-bench/plans/tools_template.json}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }

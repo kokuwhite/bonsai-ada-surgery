@@ -3,10 +3,10 @@
 # lookup_ab.py sends one long filler and changes only the end of that one user message, so without mid-message
 # checkpoints each request is processed again from the start. Per arm: wall time, text hashes, checkpoints created
 # and restored, and the server's system RAM (peak working set, private bytes).
-#   bash bench/ckpt_ab.sh <root> name|N|depth ...   -> receipts/ckpt_every_nt_12gb.jsonl, receipts/ckpt_ab.log
+#   bash bench/ckpt_ab.sh <root> name|N|depth ...   -> docs/receipts/ckpt_every_nt_12gb.jsonl, docs/receipts/ckpt_ab.log
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; ROOT="$(cygpath -w "${1:?root}")"; shift
-OUT=receipts/ckpt_every_nt_12gb.jsonl; LOG=receipts/ckpt_ab.log
+OUT=docs/receipts/ckpt_every_nt_12gb.jsonl; LOG=docs/receipts/ckpt_ab.log
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }

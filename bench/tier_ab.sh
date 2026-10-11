@@ -3,10 +3,10 @@
 # <depth> with the cost of each 2,048-token prefill chunk (server log), then greedy text past the line (lookup_ab.py,
 # quote + plain at 30k). The summary compares the text of every arm with the first arm.
 #   bash bench/tier_ab.sh <depth> <arm> ...    arm = name|root|VAR=value,VAR=value   (root "repo" = this repository)
-#   -> receipts/tier_ab.log, receipts/tier_ab.jsonl
+#   -> docs/receipts/tier_ab.log, docs/receipts/tier_ab.jsonl
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; DEPTH="${1:-40000}"; shift
-LOG=receipts/tier_ab.log; OUT=receipts/tier_ab.jsonl
+LOG=docs/receipts/tier_ab.log; OUT=docs/receipts/tier_ab.jsonl
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }
@@ -35,7 +35,7 @@ stop_srv
 PYTHONUTF8=1 python - "${TAGS[@]}" <<'PY' | tee -a "$LOG"
 import json, sys, collections
 tags = sys.argv[1:]
-rows = [json.loads(l) for l in open("receipts/tier_ab.jsonl", encoding="utf-8")]
+rows = [json.loads(l) for l in open("docs/receipts/tier_ab.jsonl", encoding="utf-8")]
 by = collections.defaultdict(dict)
 for r in rows:
     if r["tag"] in tags:

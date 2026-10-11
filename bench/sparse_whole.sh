@@ -3,10 +3,10 @@
 # follows the budget): dense vs sparse with sinks, decode and draft verify (fast path), tile skip on. 12 GB recipe with
 # its normal VRAM line, layer off, f16 mask, graphs off. Per arm: quick_tps at SPEED_DEPTH, code_needle (exact copies)
 # and needle_depth (12 facts) at DEPTH.
-#   bash bench/sparse_whole.sh <root with the engine>   -> receipts/sparse_whole.{log,jsonl}
+#   bash bench/sparse_whole.sh <root with the engine>   -> docs/receipts/sparse_whole.{log,jsonl}
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"
-LOG=receipts/sparse_whole.log; OUT=receipts/sparse_whole.jsonl; DEPTH=${DEPTH:-160000}; SPEED_DEPTH=${SPEED_DEPTH:-192000}; SP=${SPARSE:-8192,256,1024}; SINKS=${SINKS:-1024}
+LOG=docs/receipts/sparse_whole.log; OUT=docs/receipts/sparse_whole.jsonl; DEPTH=${DEPTH:-160000}; SPEED_DEPTH=${SPEED_DEPTH:-192000}; SP=${SPARSE:-8192,256,1024}; SINKS=${SINKS:-1024}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &

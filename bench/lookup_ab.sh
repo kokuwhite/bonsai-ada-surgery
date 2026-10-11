@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# H1: MTP alone vs MTP plus a lookup drafter, same launcher, layer off. -> receipts/lookup_ab.jsonl, logs/lookup_<arm>.*
+# H1: MTP alone vs MTP plus a lookup drafter, same launcher, layer off. -> docs/receipts/lookup_ab.jsonl, logs/lookup_<arm>.*
 #   bash bench/lookup_ab.sh [arms...]   arm = name:spec-type[:extra args with commas for spaces]
 cd "$(dirname "$0")/.." || exit 1
-ROOT="$(pwd -W)"; OUT=receipts/lookup_ab.jsonl
+ROOT="$(pwd -W)"; OUT=docs/receipts/lookup_ab.jsonl
 ARMS=("$@"); [ ${#ARMS[@]} -eq 0 ] && ARMS=("mtp:draft-mtp" "mod+mtp:ngram-mod,draft-mtp" "simple+mtp:ngram-simple,draft-mtp")
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }
 ours() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/serve_owner.ps1 -Root "$1"; }  # 8080 is served from <root>/bin

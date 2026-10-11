@@ -2,10 +2,10 @@
 # Sparse fast path: do cached page bounds follow deep prompt edits? Two arms on the same engine, both with
 # GGML_CUDA_FA_SPARSE_CHECK=1 (logs attention ops whose cached bounds are stale): writes tracked (the fix) and
 # GGML_CUDA_FA_SPARSE_NOTRACK=1 (the old behaviour). bench/sparse_edit.py per arm. 12 GB recipe, layer off, RAM guard on.
-#   bash bench/sparse_edit.sh <root with the prototype engine>   -> receipts/sparse_edit.log
+#   bash bench/sparse_edit.sh <root with the prototype engine>   -> docs/receipts/sparse_edit.log
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"
-LOG=receipts/sparse_edit.log; SP=${SPARSE:-8192,256,1024}; DEPTH=${DEPTH:-160000}
+LOG=docs/receipts/sparse_edit.log; SP=${SPARSE:-8192,256,1024}; DEPTH=${DEPTH:-160000}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &

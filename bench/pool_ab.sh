@@ -3,9 +3,9 @@
 # Phase 1: VRAM used after a 32k request, pool off vs on, same VRAM line -> the saving S (MiB).
 # Phase 2: pool on with BONSAI_POOL_MIB = S - 32 (the VRAM line moves up): decode at 131k and 180k against pool off,
 #          and fresh long prompts for 1-token answers (the race that patch 0045 fixed).
-#   bash bench/pool_ab.sh   -> receipts/pool_ab.log
+#   bash bench/pool_ab.sh   -> docs/receipts/pool_ab.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/pool_ab.log
+REPO="$(pwd -W)"; LOG=docs/receipts/pool_ab.log
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }
 start_srv() { # NAME "ENV ASSIGNMENTS"
@@ -34,6 +34,6 @@ done
 stop_srv
 say "fresh long prompts with the pool on (1-token check)"
 bash bench/one_token_ab.sh "pool-on|$REPO|BONSAI_TIER=1,BONSAI_CTX=262144,BONSAI_SHARED_POOL=1,BONSAI_POOL_MIB=$S" > logs/pool_ab_onetoken.run.log 2>&1
-grep -A6 "arm pool-on" receipts/one_token_ab.log | tail -6 | tee -a "$LOG"
+grep -A6 "arm pool-on" docs/receipts/one_token_ab.log | tail -6 | tee -a "$LOG"
 stop_srv
 say "=== done"

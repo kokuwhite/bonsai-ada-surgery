@@ -20,7 +20,7 @@ since #221), i7-13700K with 32 GB, Bonsai 2 27B `PTQ1_0` with the ProCreations M
 | 258k | 229 | 14.7 | q8_0 did not fit |
 
 2026-10-08: measured again on the current engine (patches through 0041, lookup drafting on), with new text and code
-decode separately: README speed table, `receipts/depth_table_0041.log`. Prefill at 131k / 180k / 258k is now 649 /
+decode separately: README speed table, `docs/receipts/depth_table_0041.log`. Prefill at 131k / 180k / 258k is now 649 /
 547 / 436 tok/s.
 
 ![Decode by context depth](img/decode.png)
@@ -45,26 +45,26 @@ agreement 99.38%; q4_0 0.00218, 97.93%. The previous 12 GB routes to 262k all us
    **Prefill writes past the line** (patch 0041, 2026-10-08). Each prefill micro-batch writes 512 new K/V rows into
    every attention layer. Past the line those rows are in system RAM, and the quantizing `set_rows` kernel wrote
    them in small pieces over PCIe: a fixed ~0.68 ms per prefill token, the same at a 16k and a 119k line, with or
-   without staging and drafting (`docs/INT8_ATTENTION.md`, `receipts/tier_step.log`). Now `set_rows` writes through
+   without staging and drafting (`docs/INT8_ATTENTION.md`, `docs/receipts/tier_step.log`). Now `set_rows` writes through
    the all-VRAM alias, and a write-back kernel copies the new host-part rows to RAM as whole 16-byte stores. The
    host rows of the next attention layer are copied into staging on a second stream while the layers before it
    compute (`GGML_CUDA_KV_TIER_REDIRECT=0` / `GGML_CUDA_KV_TIER_PREFETCH=0` turn the parts off). Each KV cache gets
    its own staging buffers, because the draft context runs on its own stream. Served line, one 159k prefill: each
    prompt chunk past 119k costs 2.21-2.59 ms per token instead of 2.64-3.52, cumulative 542 -> 585 tok/s. Line at
    16k, prefill to 40k: 717 -> 983 tok/s (all-VRAM cache: 990). Greedy text identical; decode unchanged
-   (`receipts/tier_ab.log`).
+   (`docs/receipts/tier_ab.log`).
    **The prefetch needs CUDA graphs off** (patch 0053, 2026-10-11). The prefetch above runs only for a graph that
    runs without a CUDA graph, and the launcher keeps CUDA graphs on. So past the line, decode never had it: each
    attention op waited for its own host-row copy. Now a graph whose attention reads the host tail runs without a
    CUDA graph, and graphs below the line keep theirs. The server logs one line on each switch;
    `GGML_CUDA_KV_TIER_GRAPHS=1` keeps the old behaviour. Mean decode (`bench/quick_tps.py`, code / prose / bash):
    - RTX 4070, 12 GB recipe: 4k 95.2 -> 95.4, 32k 101.8 -> 102.3, 128k (below the line) 71.9 -> 71.8, 192k
-     23.6 -> **29.4**, 250k 12.7 -> **14.6**, 192k with lookup off 19.8 -> **25.0** tok/s (`receipts/depth_arms.log`).
+     23.6 -> **29.4**, 250k 12.7 -> **14.6**, 192k with lookup off 19.8 -> **25.0** tok/s (`docs/receipts/depth_arms.log`).
      The isolation that found it: `GGML_CUDA_DISABLE_GRAPHS=1` alone gave the same +26 % at 192k; the f16 mask
      alone gave nothing (18.3).
    - RTX 2060 SUPER, 8 GB recipe (#22): 128k 12.8 -> **14.8**, 192k 7.9 -> **8.6**, 245k 6.2 -> **6.7** tok/s;
      4k and 32k the same within 0.2 tok/s (alternated twice).
-   - HumanEval 164 at medium on the release binaries: all 164 outputs identical (`receipts/release_20261011.log`).
+   - HumanEval 164 at medium on the release binaries: all 164 outputs identical (`docs/receipts/release_20261011.log`).
 
 **Not affected: PrismML #346.** On PrismML's engine, prompt checkpoints evaluate the last 4 prompt tokens as their
 own batch. A 3-4 query batch with a quantized V takes a short-query MMA route that converts K and V to f16. That
@@ -81,10 +81,10 @@ was written past the allocation. Our engine does not have that route. The fix fo
 5. **Draft size past the VRAM line** (`--spec-draft-n-max-tail 4`): a PCIe-bound step makes each extra verify
    column nearly free. +26% code / +15% prose at 180k for 4 vs 2. Below the line 2 stays best (prose at 16k: 87 vs
    82.5 for 3; code +3% for 3).
-   Larger sizes at 160k (2026-10-09, `bench/tail_draft_ab.sh`, `receipts/tail_draft_ab.jsonl`, with lookup): 6 against
+   Larger sizes at 160k (2026-10-09, `bench/tail_draft_ab.sh`, `docs/receipts/tail_draft_ab.jsonl`, with lookup): 6 against
    4 gives file rewrites +4%, edit calls +6%, new text -3% (prose and bash -8%); 8 is slower in all three groups
    (-15% to -19%). 4 stays.
-   PCIe check (2026-10-09, `bench/tier_bw.sh`, `receipts/tier_bw.log`): at 100k with MTP and lookup off, the line at
+   PCIe check (2026-10-09, `bench/tier_bw.sh`, `docs/receipts/tier_bw.log`): at 100k with MTP and lookup off, the line at
    64k and at 32k adds 51.3 and 99.1 ms per token for 1.22 and 2.35 GB of rows in system RAM, 23.7 GB/s both times;
    a pinned copy on this link moves 23.8 GB/s. Decode past the line is at the PCIe limit: only fewer bytes (q4_0
    K/V) or more VRAM make it faster.

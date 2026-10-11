@@ -3,10 +3,10 @@
 # over PCIe for the host tail), so a larger ubatch reads it fewer times per prompt. Product launcher (12 GB recipe
 # unless the card says otherwise), layer off, one server per arm, quick_tps at DEPTHS (cold prefill of the deep
 # prompt, then the follow-up). RAM guard on.
-#   bash bench/ubatch_depth.sh [root]   -> receipts/ubatch_depth.log   (UBS="512 1024 2048", DEPTHS="128000 192000")
+#   bash bench/ubatch_depth.sh [root]   -> docs/receipts/ubatch_depth.log   (UBS="512 1024 2048", DEPTHS="128000 192000")
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:-.}")"
-LOG=receipts/ubatch_depth.log; DEPTHS=${DEPTHS:-128000 192000}; UBS=${UBS:-512 1024 2048}
+LOG=docs/receipts/ubatch_depth.log; DEPTHS=${DEPTHS:-128000 192000}; UBS=${UBS:-512 1024 2048}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Issue #16: server private bytes and system commit during 7 sequential thinking requests (bench/ram_probe.py),
 # 12 GB recipe at 262k (defaults vs LLAMA_ARG_CTX_CHECKPOINTS=8 + LLAMA_ARG_CACHE_RAM=1024), then Mirai S defaults.
-# Layer off (requests go to the server directly). -> receipts/ram_ab.log, receipts/ram_ab.jsonl, logs/ram_<arm>.csv
+# Layer off (requests go to the server directly). -> docs/receipts/ram_ab.log, docs/receipts/ram_ab.jsonl, logs/ram_<arm>.csv
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/ram_ab.log; MIRAI=/c/Users/pwall/Projects/mirai-s-serve; MIRAIW="$(cd $MIRAI && pwd -W)"
+REPO="$(pwd -W)"; LOG=docs/receipts/ram_ab.log; MIRAI=/c/Users/pwall/Projects/mirai-s-serve; MIRAIW="$(cd $MIRAI && pwd -W)"
 N=${RAM_N:-7}; DEPTH=${RAM_DEPTH:-24000}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_all() { powershell -NoProfile -ExecutionPolicy Bypass -File "$MIRAI/tooling/stop.ps1" >/dev/null 2>&1; rm -f "$MIRAI/logs/product.stop"
@@ -32,7 +32,7 @@ arm() { # name, root ("bonsai" or "mirai"), env...
   fi
   if wait_health; then
     say "arm $NAME ($*): health=1; $(grep '^kv\|^ckpt' logs/ram_$NAME.launcher.log | tr '\n' ' ' | cut -c1-200)"
-    PYTHONUTF8=1 python bench/ram_probe.py --base http://127.0.0.1:8080 --key-file "$KEY" --n $N --depth $DEPTH --tag "$NAME" 2>&1 | tee -a receipts/ram_ab.jsonl | tee -a "$LOG"
+    PYTHONUTF8=1 python bench/ram_probe.py --base http://127.0.0.1:8080 --key-file "$KEY" --n $N --depth $DEPTH --tag "$NAME" 2>&1 | tee -a docs/receipts/ram_ab.jsonl | tee -a "$LOG"
   else say "arm $NAME: no health"; fi
   sleep 5
   touch logs/ram.stop; sleep 3

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Effective PCIe bandwidth of decode past the VRAM line: the same 100k context with the whole cache in VRAM and with
 # the VRAM line pinned lower. MTP and lookup off (one token per step), layer off. Extra ms per token / tail bytes.
-#   bash bench/tier_bw.sh name:cells ...   (cells empty = automatic line)  -> receipts/tier_bw.log
+#   bash bench/tier_bw.sh name:cells ...   (cells empty = automatic line)  -> docs/receipts/tier_bw.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/tier_bw.log; DEPTH=${DEPTH:-100000}
+REPO="$(pwd -W)"; LOG=docs/receipts/tier_bw.log; DEPTH=${DEPTH:-100000}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }
 for A in "$@"; do

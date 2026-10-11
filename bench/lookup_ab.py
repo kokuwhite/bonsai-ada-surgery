@@ -8,7 +8,7 @@ Workloads, thinking off, greedy:
 Per request: decode tok/s, completion tokens, draft tokens proposed / accepted, and a hash of the text (a draft only
 changes speed; arms must give the same text, up to the rounding-level differences MTP itself has).
 
-  python bench/lookup_ab.py --base http://127.0.0.1:8080 --key-file artifacts/api_key.txt --tag mtp --out receipts/lookup_ab.jsonl
+  python bench/lookup_ab.py --base http://127.0.0.1:8080 --key-file artifacts/api_key.txt --tag mtp --out docs/receipts/lookup_ab.jsonl
 """
 import argparse, ast, hashlib, json, os, time, urllib.request
 

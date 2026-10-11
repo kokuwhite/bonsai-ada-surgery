@@ -56,7 +56,7 @@ if ($Mmproj) {
     Remove-Item Env:LLAMA_ARG_MMPROJ -ErrorAction SilentlyContinue   # passed explicitly below
     $MmprojGpu = $env:BONSAI_MMPROJ_GPU -eq '1'
     $MmprojArgs = @('--mmproj', $Mmproj)
-    # GPU: count the file size. Measured 346 MiB at load for the 600 MiB Q8_0 file (receipts/vision_probe.log), so this
+    # GPU: count the file size. Measured 346 MiB at load for the 600 MiB Q8_0 file (docs/receipts/vision_probe.log), so this
     # over-counts a little, on the safe side.
     if ($MmprojGpu) { $MmprojMiB = [int]((Get-Item $Mmproj).Length / 1MB) } else { $MmprojArgs += '--no-mmproj-offload' }
 }
@@ -161,7 +161,7 @@ $Spec = if ($env:BONSAI_SPEC) { [int]$env:BONSAI_SPEC } elseif ((Split-Path $Mod
 $SpecDeep = if ($env:BONSAI_SPEC_DEEP) { [int]$env:BONSAI_SPEC_DEEP } elseif ($Small) { 1 } else { 4 }
 $Ubatch = if ($env:BONSAI_UBATCH) { [int]$env:BONSAI_UBATCH } elseif ($Small -and $Spec -eq 0) { 1024 } else { 512 }
 # 12 GB recipe: one CUDA pool for the main and the MTP draft context and a 256-token draft micro-batch, as the Mirai S
-# serve does. Measured on the RTX 4070 (receipts/pool_ab.log): 74 MiB less VRAM after a 32k request, so the VRAM line
+# serve does. Measured on the RTX 4070 (docs/receipts/pool_ab.log): 74 MiB less VRAM after a 32k request, so the VRAM line
 # moves up ~1.3k positions (118,784 -> 120,064); decode 39.3 -> 41.0 tok/s at 131k, 20.7 -> 21.2 at 180k, the same at
 # 32k; fresh 20k-60k prompts: normal answers. Safe with MTP drafting only since patch 0045 (the two streams are
 # ordered), so it is on only with an engine that has 0046 (every bundle with 0046 has 0045); BONSAI_SHARED_POOL=0 turns
@@ -177,9 +177,9 @@ if ($PoolOn -and $Spec -gt 0) {
 }
 # Packed (1-bit) KQ mask (patches 0048/0049): the f16 mask is Ctx x ubatch x 2 bytes (128 MiB at 131k, 256 MiB at 262k);
 # packed it is 1/16 of that. With MTP drafting at 32k and 64k: 22 of 22 texts identical to the f16 mask (RTX 2060
-# SUPER, P82; RTX 4070, receipts/pr13_ada.log). On with an engine that has it: 8 GB cards in drafting mode, and the
+# SUPER, P82; RTX 4070, docs/receipts/pr13_ada.log). On with an engine that has it: 8 GB cards in drafting mode, and the
 # 12 GB recipe, where the 240 MiB it saves at 262k move the VRAM line up (RTX 4070: 120,064 -> 128,000 positions,
-# decode 40.9 -> 48.2 tok/s at 131k and 21.2 -> 23.0 at 180k, prefill the same; receipts/mask12_ab.log).
+# decode 40.9 -> 48.2 tok/s at 131k and 21.2 -> 23.0 at 180k, prefill the same; docs/receipts/mask12_ab.log).
 # LLAMA_ARG_KQ_MASK_PACKED=0 turns it off.
 $Packed = $false
 $MaskSavedMiB = 0
@@ -226,10 +226,10 @@ if ($Spec -gt 0) {
     $env:GGML_CUDA_BATCH_INVARIANT = '1'
     # Lookup drafting (patch 0039): a lookup drafter in front of the MTP head drafts text that is already in the
     # context (file rewrites, edit calls, quoted logs) up to BONSAI_LOOKUP_N tokens; the head drafts new text with its
-    # own small draft size. Measured (receipts/lookup_ab.jsonl, same text in every arm): file rewrites 117 -> 352 tok/s
+    # own small draft size. Measured (docs/receipts/lookup_ab.jsonl, same text in every arm): file rewrites 117 -> 352 tok/s
     # at 4k and 63 -> 164 at 130k, edit calls +19% / +25%, plain text unchanged. 32 is the best limit for edit calls;
     # 64 is faster on full rewrites (420 / 183) and slower on edits. BONSAI_LOOKUP=0 turns it off.
-    # 8 GB (RTX 2060 SUPER, drafting preset, receipts/lookup_ab_8gb.jsonl): file rewrites 58 -> 126 tok/s at depth 0
+    # 8 GB (RTX 2060 SUPER, drafting preset, docs/receipts/lookup_ab_8gb.jsonl): file rewrites 58 -> 126 tok/s at depth 0
     # and 32 -> 69 at 64k, edits +6 % / +16 %, plain unchanged, same text at depth 0. Lowest free VRAM 82 MiB with
     # lookup, 90 MiB without it at the same depth: lookup adds about 8 MiB.
     # BONSAI_SPEC_TYPE: the whole --spec-type list (overrides the above). BONSAI_SPEC_ARGS: extra drafter flags.
@@ -320,7 +320,7 @@ if ($Tier) {
 # Checkpoints inside long messages (patch 0046) on the 12 GB recipe too. A prompt that changes inside one long message
 # (an edited tool result, a file sent again) then restores the nearest checkpoint instead of reading the whole prompt
 # again: RTX 4070, 64.5 -> 15.5 s at 64k and 230 -> 49 s at 160k per request, text identical
-# (receipts/ckpt_every_nt_12gb.jsonl). It costs no VRAM, and it does not raise the server's limit of 32 checkpoints per
+# (docs/receipts/ckpt_every_nt_12gb.jsonl). It costs no VRAM, and it does not raise the server's limit of 32 checkpoints per
 # slot (~170 MiB of system RAM each), which the server already fills in a long session with checkpoints at the ends of
 # requests; it only places some inside long messages too. Long prompts that need no restore take about 1 s longer.
 # BONSAI_CKPT_EVERY=0 turns it off; a number sets the spacing in tokens.
@@ -406,7 +406,7 @@ if ($Spec -gt 0) {
     Write-Host "spec   draft $Spec$(if ($TierCells -gt 0) { " ($SpecDeep past the VRAM line)" })$(if ($HasTier) { ", draft window $DraftWindow" }) (MTP on)$(if ($LookupOn -and -not $env:BONSAI_SPEC_TYPE) { "; lookup drafting up to $LookupN (BONSAI_LOOKUP=0 turns it off)" } elseif ($SpecType -ne 'draft-mtp') { "; types $SpecType" })$(if ($env:BONSAI_SPEC_ARGS) { " $($env:BONSAI_SPEC_ARGS)" })"
 } elseif ($env:BONSAI_SPEC) {
     Write-Host "spec   draft 0: MTP is OFF because BONSAI_SPEC=$($env:BONSAI_SPEC) is set in this window. Decode is slower:"
-    Write-Host "       at 138k context, 25 tok/s with MTP against 11.6 without (RTX 4070, receipts/issue7_repro.log)."
+    Write-Host "       at 138k context, 25 tok/s with MTP against 11.6 without (RTX 4070, docs/receipts/issue7_repro.log)."
     Write-Host "       To turn MTP on: Remove-Item Env:BONSAI_SPEC (or open a new window), then start again."
     Write-Host "       With MTP off, the server warns 'model has unused tensor blk.64...': that is the MTP head, not an error."
 } else {
@@ -432,7 +432,7 @@ if ($Mmproj) { Write-Host "vision $(Split-Path $Mmproj -Leaf) on the $(if ($Mmpr
 # it adds exact API cards for the Python modules involved (generated from the sandbox runtime) and checks the
 # model's code for names that do not exist; for plain requests without client tools it gives the model a
 # sandboxed Python tool (CPython on WASI: no host files, network or processes). Clients need no changes.
-# Measured: research/quality-20260929/REPORT.md. Needs Python 3 and layer\fetch_runtime.ps1 run once; without
+# Measured: docs/research/quality-20260929/REPORT.md. Needs Python 3 and layer\fetch_runtime.ps1 run once; without
 # them the plain server starts as before.
 $LayerDir = Join-Path $Root 'layer'
 $Layer = $env:BONSAI_LAYER -ne '0'

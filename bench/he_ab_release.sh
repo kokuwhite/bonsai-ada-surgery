@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Release gate: HumanEval 164 at medium on the raw server (layer off), product root vs a candidate root, greedy.
-#   bash bench/he_ab_release.sh <name> <candidate root>   -> artifacts/humaneval-<name>-{old,new}/, receipts/he_ab_release.log
+#   bash bench/he_ab_release.sh <name> <candidate root>   -> artifacts/humaneval-<name>-{old,new}/, docs/receipts/he_ab_release.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; NAME=${1:?name}; CAND=${2:?candidate root}; LOG=receipts/he_ab_release.log
+REPO="$(pwd -W)"; NAME=${1:?name}; CAND=${2:?candidate root}; LOG=docs/receipts/he_ab_release.log
 MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 for A in "old|$REPO" "new|$CAND"; do

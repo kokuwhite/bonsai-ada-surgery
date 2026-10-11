@@ -2,9 +2,9 @@
 # Chunked gated-delta-net prefill (MMA) vs the recurrent kernel on the same binary: perplexity on wikitext-2 (no KL
 # base file, so RAM stays at one chunk of logits, ~2 GB at -c 2048). Every chunk is prefilled in 512-token micro-batches,
 # so the MMA path runs on every GDN layer. Gate: the two estimates agree within ~0.1 % and the chunks track.
-#   bash bench/gdn_ppl_ab.sh <root with llama-perplexity>   -> receipts/gdn_ppl_ab.log
+#   bash bench/gdn_ppl_ab.sh <root with llama-perplexity>   -> docs/receipts/gdn_ppl_ab.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; ROOT="$(cygpath -u "${1:?root}")"; LOG=receipts/gdn_ppl_ab.log
+REPO="$(pwd -W)"; ROOT="$(cygpath -u "${1:?root}")"; LOG=docs/receipts/gdn_ppl_ab.log
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; TEXT="$REPO\\artifacts\\eval\\wiki.test.raw"
 CTX=${CTX:-2048}; CHUNKS=${CHUNKS:-32}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }

@@ -166,7 +166,7 @@ thinking off and can stay at a small cap.
 
 Since 09-21 the GGUF template adds a system turn with short work rules ("Save long command
 output to a file ...") to every request. HumanEval 164, medium, greedy, raw server, the same
-engine for every arm (`bench/he_template_one.sh`, `receipts/he_template_ab.log`):
+engine for every arm (`bench/he_template_one.sh`, `docs/receipts/he_template_ab.log`):
 
 | what the prompt has | pass | mean tokens | median | over 4k tokens |
 | --- | ---: | ---: | ---: | ---: |

@@ -2,10 +2,10 @@
 # Retrieval deep in the host tail: dense tiered cache vs GGML_CUDA_FA_SPARSE budgets. 12 GB recipe, VRAM line pinned
 # at 32,768 cells (most of a 160k prompt in the host tail), layer off, drafting on, f16 mask, CUDA graphs off in every
 # arm (the emulation needs both). bench/needle_depth.py, 12 facts.
-#   bash bench/needle_ab.sh <root with the emulation engine> [budgets...]   -> receipts/needle_ab.{log,jsonl}
+#   bash bench/needle_ab.sh <root with the emulation engine> [budgets...]   -> docs/receipts/needle_ab.{log,jsonl}
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"; shift
-LOG=receipts/needle_ab.log; OUT=receipts/needle_ab.jsonl; DEPTH=${DEPTH:-160000}
+LOG=docs/receipts/needle_ab.log; OUT=docs/receipts/needle_ab.jsonl; DEPTH=${DEPTH:-160000}
 B=("$@"); [ ${#B[@]} -eq 0 ] && B=(4096 2048)
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; sleep 4; }

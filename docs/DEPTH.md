@@ -3,7 +3,7 @@
 Work log for speed at 128k-262k context, where the KV cache does not fit in VRAM and its tail lives in pinned system
 RAM (the tiered cache). Everything here is measured on this repo's model (Ternary Bonsai 2 27B `PTQ1_0`) with the
 receipts named in each section. What shipped is marked **shipped**; the rest are experiments on fork branches, not in
-a release. Every experiment, with its gate, setup and receipts: [`research/depth-20261010/`](../research/depth-20261010/).
+a release. Every experiment, with its gate, setup and receipts: [`docs/research/depth-20261010/`](research/depth-20261010/).
 
 - [Where the time goes](#where-the-time-goes)
 - [CUDA graphs and the tier prefetch (patch 0053, next bundle)](#cuda-graphs-and-the-tier-prefetch-patch-0053-next-bundle)
@@ -28,7 +28,7 @@ read the cache, so the cost per cache cell is small, but at depth there are a lo
 - **8 GB recipe, RTX 2060 SUPER (PCIe 3.0, ~11 GB/s).** About 43k-59k cells fit. At 245k, ~3.5 GB crosses the link
   per step: ~320 ms, which is the measured 5.7 tok/s with MTP (~1.8 tokens per step).
 
-Per-op timing (`GGML_CUDA_OP_TIMING=1`, graphs off, `receipts/depth_arms.log`, tag `optime6`), RTX 4070, 192k, dense:
+Per-op timing (`GGML_CUDA_OP_TIMING=1`, graphs off, `docs/receipts/depth_arms.log`, tag `optime6`), RTX 4070, 192k, dense:
 attention plus the wait for the staged host rows is ~35 % of a step. The wait shows up on the op just before
 attention (ROPE, 22 %), because that is where the stream waits for the copy. So at this depth on 12 GB, both the copy
 and the attention itself matter.
@@ -65,7 +65,7 @@ host tail is masked. If the kernel then skips masked rows, they never cross PCIe
 | `d6c6e9f01` | tile map entries of 64 cells (page-64 masks skip at their own size) |
 | `028f606fc` | vec kernel also skips a warp's 32 cells when all are masked |
 
-**Correctness of the cached bounds** (`bench/sparse_edit.sh`, `receipts/sparse_edit.log`; RTX 4070, 160k, a file at
+**Correctness of the cached bounds** (`bench/sparse_edit.sh`, `docs/receipts/sparse_edit.log`; RTX 4070, 160k, a file at
 91 % of the context replaced, 24,966 tokens written again deep in the host tail, then the same request again):
 
 | arm | ops with stale bounds (base / edit / again) | device vs host page choice | answer |
@@ -81,7 +81,7 @@ Python functions). RTX 4070 with the VRAM line pinned at 32,768 cells unless not
 | run | budget B, page | needles | exact copies |
 | --- | --- | --- | --- |
 | dense | - | 12/12 | 10/10 |
-| 160k, host tail (`receipts/needle_ab.log`, `code_needle_ab.log`) | 8192, 64 | 12/12 | 10/10 |
+| 160k, host tail (`docs/receipts/needle_ab.log`, `code_needle_ab.log`) | 8192, 64 | 12/12 | 10/10 |
 | 160k, host tail | 4096, 64 | 12/12 | 8/10 |
 | 160k, host tail, decode only (`sparse_prefill.log`) | 8192, 256 | 12/12 | 9/10 (misses `_div_nearest` in two runs) |
 | 160k, host tail, decode only | 8192, 64 | 12/12 | 10/10 |
@@ -97,7 +97,7 @@ prefill and selection over the VRAM part lose retrieval at these settings.
 ### Speed
 
 RTX 4070, 160k, VRAM line pinned at 32,768 cells (an 8 GB-like layout: ~127k cells of host tail), dense prefill,
-mean decode over code / prose / bash (`receipts/sparse_prefill.log`):
+mean decode over code / prose / bash (`docs/receipts/sparse_prefill.log`):
 
 | arm | decode | vs dense |
 | --- | ---: | ---: |
@@ -111,7 +111,7 @@ The first sparse arm was slower than dense because its decode ops (MTP verify, 5
 then read every masked host tile in place over PCIe. The dense arm moves the same rows by DMA, which is faster than SM
 reads of host memory. With the tile map, only the kept pages cross the link.
 
-RTX 4070, 12 GB recipe's own line (121,344 cells), 192k (`receipts/sparse_whole.log`): dense 22.8 tok/s, host tail
+RTX 4070, 12 GB recipe's own line (121,344 cells), 192k (`docs/receipts/sparse_whole.log`): dense 22.8 tok/s, host tail
 sparse 25.2, whole context sparse 36.3 (but 7/12 needles, see above).
 
 RTX 2060 SUPER, 8 GB recipe (#21; VRAM line ~46k with the f16 mask; MTP tail 1, so decode ops have 2 queries and run
@@ -149,7 +149,7 @@ ggml-org/llama.cpp#29353 for the 48 gated-delta-net layers in prefill, with thre
 - **Fused state gather.** The served graph reads the live state straight from its cache row; the MMA path copies those
   rows into a contiguous state first. Without this the kernel never engaged in the server (first A/B: no change).
 
-Results (`bench/gdn_prefill_ab.sh`, `receipts/gdn_prefill_ab.log`; RTX 4070, 12 GB recipe, drafting on; recurrent vs
+Results (`bench/gdn_prefill_ab.sh`, `docs/receipts/gdn_prefill_ab.log`; RTX 4070, 12 GB recipe, drafting on; recurrent vs
 MMA, same binary): prefill 4k 1203.9 -> 1280.9 tok/s (+6.4 %), 32k 1021.3 -> 1080.5 (+5.8 %), 128k 581.1 -> 600.7
 (+3.4 %); decode unchanged; exact copies 10/10 and needles 12/12 at 32k in both arms. `GATED_DELTA_NET` op tests 57/57
 (7 new cases in this model's shape). It needs BF16 MMA (Ampere GA10x, Ada and newer); on Turing the runtime check falls
@@ -185,7 +185,7 @@ model never sees the dropped tokens, now or in later turns, which does not fit a
 
 ## Receipts
 
-`receipts/`: `sparse_edit.log`, `needle_ab.log` / `.jsonl`, `code_needle_ab.log` / `.jsonl`, `sparse_speed.log`,
+`docs/receipts/`: `sparse_edit.log`, `needle_ab.log` / `.jsonl`, `code_needle_ab.log` / `.jsonl`, `sparse_speed.log`,
 `sparse_prefill.log` / `.jsonl`, `sparse_whole.log` / `.jsonl`, `vskip_ab.log`, `ubatch_depth.log`,
 `gdn_prefill_ab.log`, `depth_arms.log`. Scripts in `bench/` with the same names. The RTX 2060 SUPER runs are on #21
 (P101-P105) and #22 (P103).

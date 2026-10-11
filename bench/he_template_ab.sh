@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # HumanEval 164 at medium, raw server (layer off), greedy, with a chat template file. Arms differ only in
 # chat_template_kwargs, so the A/B isolates one template block (default: the third-party terse block, terse on/off).
-#   bash bench/he_template_ab.sh <template file> [name]  -> artifacts/humaneval-<name>-{on,off}/, receipts/he_template_ab.log
+#   bash bench/he_template_ab.sh <template file> [name]  -> artifacts/humaneval-<name>-{on,off}/, docs/receipts/he_template_ab.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; TPLW="$(cygpath -w "$(realpath "${1:?template}")")"; NAME=${2:-terse}; LOG=receipts/he_template_ab.log
+REPO="$(pwd -W)"; TPLW="$(cygpath -w "$(realpath "${1:?template}")")"; NAME=${2:-terse}; LOG=docs/receipts/he_template_ab.log
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &

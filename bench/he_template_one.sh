@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # HumanEval 164 at medium, raw server (layer off), greedy, with one chat template file; also saves the server's own
 # render of a HumanEval-style request (/apply-template) next to the results.
-#   bash bench/he_template_one.sh <template file | -> <name> [kwargs json]  -> artifacts/humaneval-<name>/, receipts/he_template_ab.log
+#   bash bench/he_template_one.sh <template file | -> <name> [kwargs json]  -> artifacts/humaneval-<name>/, docs/receipts/he_template_ab.log
 # template "-": the model's own template. HE_ROOT=<dir>: start that root's launcher and bin (default: this repo).
 # HE_EXTRA: more humaneval_run.py flags (e.g. --prefix-file f).
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; TPL=${1:?template}; NAME=${2:?name}; KW=${3:-}
 TPLW=""; [ "$TPL" != "-" ] && TPLW="$(cygpath -w "$(realpath "$TPL")")"
 ROOTW="$REPO"; [ -n "$HE_ROOT" ] && ROOTW="$(cygpath -w "$HE_ROOT")"
-LOG=receipts/he_template_ab.log; OUT=artifacts/humaneval-$NAME
+LOG=docs/receipts/he_template_ab.log; OUT=artifacts/humaneval-$NAME
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &

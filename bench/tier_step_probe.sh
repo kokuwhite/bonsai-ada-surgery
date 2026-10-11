@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Prefill cost step at the tiered-KV line. The served 159k prefill costs 0.012 ms per token for each 1k of depth
 # below the VRAM line (119,040 cells), then jumps by about 0.67 ms per token at the line and grows twice as fast
-# past it (receipts/prefill_depth_fit.txt). With the line pinned low (BONSAI_KV_VRAM_CELLS), a short prefill shows
+# past it (docs/receipts/prefill_depth_fit.txt). With the line pinned low (BONSAI_KV_VRAM_CELLS), a short prefill shows
 # the same step, so each arm takes about a minute. The arms change one thing each, to find the cause.
-#   bash bench/tier_step_probe.sh [depth] [arm ...]      arm = name:VAR=value,VAR=value   -> receipts/tier_step.log
+#   bash bench/tier_step_probe.sh [depth] [arm ...]      arm = name:VAR=value,VAR=value   -> docs/receipts/tier_step.log
 # Per arm: one quick_tps prefill to <depth>, then the cost of each 2,048-token prefill chunk from the server log.
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; DEPTH="${1:-40000}"; shift
-LOG=receipts/tier_step.log
+LOG=docs/receipts/tier_step.log
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 ARMS=("$@")
 [ ${#ARMS[@]} -gt 0 ] || ARMS=("line16k:BONSAI_KV_VRAM_CELLS=16384" "line16k-ctx64k:BONSAI_KV_VRAM_CELLS=16384,BONSAI_CTX=65536" "line16k-nostage:BONSAI_KV_VRAM_CELLS=16384,GGML_CUDA_KV_TIER_STAGING=0" "line16k-mtpoff:BONSAI_KV_VRAM_CELLS=16384,BONSAI_SPEC=0" "allvram:BONSAI_TIER=0,BONSAI_CTX=65536")

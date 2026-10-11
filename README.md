@@ -172,7 +172,7 @@ sampler holds the tool-call grammar, and the grammar copy found each stack entry
 every grammar rule: about 15 ms per draft step with 107 tool schemas (an agent client with many MCP servers). Now
 a binary search over the rule start addresses. 107 tools at 63k: 41.8 -> 61.2 tok/s on a plan-like answer,
 47.6 -> 69.9 greedy, a request with three tool calls 60.1 -> 87.7; 2 tools give 63.5. Same output: same token counts,
-same acceptance, same tool-call hash (`receipts/issue7_fix_ab.log`). Requests without tools do not change.
+same acceptance, same tool-call hash (`docs/receipts/issue7_fix_ab.log`). Requests without tools do not change.
 `bundle-20261008-tier` makes **prefill past the VRAM line** faster (patch 0041). Each prefill micro-batch wrote its new
 K/V rows to system RAM in small pieces over PCIe once the prompt passed the line (~0.68 ms per prompt token). Now
 the rows go to VRAM first and then to system RAM as whole 16-byte stores, and the next layer's system-RAM rows
@@ -182,7 +182,7 @@ unchanged. The speed table above is measured again with this bundle (the Septemb
 context, up to 32 tokens at a time, and the MTP head drafts new text. When the answer copies the context (file
 rewrites, edit calls, quoted logs), decode is much faster; on new text it is unchanged, and the output is the same:
 file rewrites 117 -> 352 tok/s at 4k and 63 -> 164 at 130k, edit calls +19% / +25%, plain text 90 -> 90.5
-(`receipts/lookup_ab.jsonl`). The layer also sends an SSE keep-alive comment every 15 s while the server is silent,
+(`docs/receipts/lookup_ab.jsonl`). The layer also sends an SSE keep-alive comment every 15 s while the server is silent,
 so a long prefill does not drop through a proxy or a tunnel. `bundle-20261007-8gb` added patches 0036-0038 for 8 GB cards (the Turing one-column decode, the shared CUDA pool,
 f16 prefill from pool memory; all off on 12 GB cards unless set) and the 8 GB launcher preset (`docs/8GB.md`).
 Greedy output on the 12 GB recipe is identical to the previous bundle. `bundle-20261007-budget` added patch 0035: the server reports a forced close of the thinking (see *Reasoning budget
@@ -199,7 +199,7 @@ What the bundles between those two added runs beside the engine:
   processes) with the user's text available as `input.txt`. Clients need no changes. Measured, paired, same seeds:
   the long-exact-work suite 17 -> 28 of 37 (13 rescues, 2 losses) and 17 -> 29 on a second seed set, AIME 2025
   52 -> 56 of 60, MMLU-Pro 71 -> 76 of 100, HumanEval and MATH-500 unchanged; details and raw results in
-  [`research/quality-20260929/REPORT.md`](research/quality-20260929/REPORT.md).
+  [`docs/research/quality-20260929/REPORT.md`](docs/research/quality-20260929/REPORT.md).
 - `bundle-20261004`: the layer's tool loop at 12 rounds (the one loss mechanism, measured 7 of 9 vs 4 of 9 on the
   cases that hit the old cap), and the full AppWorld run of this serve: 70.8% task goal completion on all 168
   `test_normal` tasks (95% CI 63.6-77.2) against the published 64.3% for the 2.13-bpw file on the stock fork, with
@@ -233,7 +233,7 @@ every `BONSAI_*`, `LLAMA_ARG_*` and `GGML_*` variable that is set, and it says w
 | `BONSAI_HARNESS_PROOF` | 1 | 0 = pass effort words and output caps through unchanged |
 | `BONSAI_EFFORT_ALLOWED` | medium | effort words the template sees; others become medium |
 | `BONSAI_PORT`, `BONSAI_MODEL` | 8080, auto | |
-| `BONSAI_MMPROJ` / `BONSAI_MMPROJ_GPU` | none / 0 | vision projector (`Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf` from prism-ml, in `models\`; `LLAMA_ARG_MMPROJ` is picked up too). Default: the image encoder runs on the CPU, no VRAM and no speed cost, ~0.3 s more per image. `BONSAI_MMPROJ_GPU=1`: on the card, and the VRAM line gives up its size (`receipts/vision_probe.log`). A projector the sizing does not know about can over-commit the card and collapse prefill (issue #4, found by @Milor123) |
+| `BONSAI_MMPROJ` / `BONSAI_MMPROJ_GPU` | none / 0 | vision projector (`Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf` from prism-ml, in `models\`; `LLAMA_ARG_MMPROJ` is picked up too). Default: the image encoder runs on the CPU, no VRAM and no speed cost, ~0.3 s more per image. `BONSAI_MMPROJ_GPU=1`: on the card, and the VRAM line gives up its size (`docs/receipts/vision_probe.log`). A projector the sizing does not know about can over-commit the card and collapse prefill (issue #4, found by @Milor123) |
 
 ### Getting more positions into VRAM
 
@@ -331,7 +331,7 @@ isolation canaries). It needs Python 3 on PATH. Without the runtime the plain se
 `"api_lint": false`, `"input_file": false`.
 
 Measured on one RTX 4070, small paired task sets, plans and gates frozen before results (details and limits in
-[research/quality-20260929/REPORT.md](research/quality-20260929/REPORT.md)):
+[docs/research/quality-20260929/REPORT.md](docs/research/quality-20260929/REPORT.md)):
 
 | | raw server | with the layer |
 | --- | ---: | ---: |

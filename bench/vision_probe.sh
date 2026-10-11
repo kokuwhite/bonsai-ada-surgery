@@ -3,9 +3,9 @@
 # server on :8080: A no projector; B the old launcher with LLAMA_ARG_MMPROJ (the reported setup); C the new launcher,
 # projector on the CPU (default); D the new launcher with BONSAI_MMPROJ_GPU=1 and the cache pinned to A's cells, so
 # the VRAM difference is the projector's own cost. Per arm: VRAM at load, decode/prefill at 16k (bench/quick_tps.py),
-# and for B-D one image request (logs/test_image.png). Output: receipts/vision_probe.log
+# and for B-D one image request (logs/test_image.png). Output: docs/receipts/vision_probe.log
 cd "$(dirname "$0")/.." || exit 1
-LOG=receipts/vision_probe.log; MM="Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf"
+LOG=docs/receipts/vision_probe.log; MM="Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf"
 MODEL="Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop() { powershell -NoProfile -Command "Get-Process llama-server -ErrorAction SilentlyContinue | Where-Object { \$_.Path -like 'C:\Users\pwall\Projects\bonsai-2-27b-serve\*' } | Stop-Process -Force" >/dev/null 2>&1; sleep 4; }

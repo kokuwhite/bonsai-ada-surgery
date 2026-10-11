@@ -21,7 +21,7 @@ ap.add_argument("--tools", type=int, default=110, help="number of tools (Pi + MC
 ap.add_argument("--steps", type=int, default=35)
 ap.add_argument("--step-chars", type=int, default=6000, help="characters of each tool result")
 ap.add_argument("--tag", default="")
-ap.add_argument("--out", default="receipts/cache_reuse_repro.jsonl")
+ap.add_argument("--out", default="docs/receipts/cache_reuse_repro.jsonl")
 a = ap.parse_args()
 key = open(a.key_file).read().strip()
 WORDS = ["ledger", "harbor", "copper", "signal", "orchard", "granite", "lantern", "meadow", "falcon", "cipher"]

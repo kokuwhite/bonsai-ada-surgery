@@ -3,10 +3,10 @@
 # (GGML_CUDA_GDN_MMA_DISABLE=1 = before). Product launcher (12 GB recipe, drafting on: K > 1 snapshots, so the MMA +
 # recurrent split runs), layer off. Per arm: quick_tps at each of SPEED_DEPTHS (prefill and decode), code_needle (exact
 # copies) and needle_depth (12 facts) at DEPTH.
-#   bash bench/gdn_prefill_ab.sh <root with the engine>   -> receipts/gdn_prefill_ab.{log,jsonl}
+#   bash bench/gdn_prefill_ab.sh <root with the engine>   -> docs/receipts/gdn_prefill_ab.{log,jsonl}
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"
-LOG=receipts/gdn_prefill_ab.log; OUT=receipts/gdn_prefill_ab.jsonl; DEPTH=${DEPTH:-32000}; SPEED_DEPTHS=${SPEED_DEPTHS:-4000 32000 128000}
+LOG=docs/receipts/gdn_prefill_ab.log; OUT=docs/receipts/gdn_prefill_ab.jsonl; DEPTH=${DEPTH:-32000}; SPEED_DEPTHS=${SPEED_DEPTHS:-4000 32000 128000}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &

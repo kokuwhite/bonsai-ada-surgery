@@ -137,7 +137,7 @@ the 3060 has the same ratio so it is not an Ada quirk.
 ## Depth work, 2026-10-10 / 11
 
 Decode and prefill past the VRAM line (tier graphs, sparse host-tail reads, chunked gated-delta-net prefill, and
-what did not help): [`DEPTH.md`](DEPTH.md). Receipts in `receipts/`:
+what did not help): [`DEPTH.md`](DEPTH.md). Receipts in `docs/receipts/`:
 
 - `depth_arms.log`: per-op timing at 192k; release graphs / mask isolation (graphs off +26 % at 192k).
 - `sparse_edit.log`: cached page bounds after a deep prompt edit (tracking on: 0 stale ops; off: 208).

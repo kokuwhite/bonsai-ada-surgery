@@ -34,4 +34,4 @@ we did about each. Numbers are the sources' own (not reproduced here unless an e
 | Prefix and recurrent-state reuse across agent turns (SGLang hybrid radix cache; exact-boundary state snapshots in new hybrid-model engines) | our checkpoints already reuse prefixes; the side-request fix (D01) keeps a deep slot for its conversation |
 | Tape-replay rollback for speculative decoding on hybrid models (closed llama.cpp PR #29763; ReplaySSM idea) | not built; would remove the ~150 MiB per draft token of state snapshots on 8 GB |
 | Gate/up + GLU fusion in the MMQ kernel (llama.cpp PR #29948, +2-7 % prefill on 27B models) | not ported: conflicts with the ternary matmul path |
-| Thinking length and the system turn, thinking budgets (community reports on Qwen3.x) | measured in `research/thinking-20261010/` |
+| Thinking length and the system turn, thinking budgets (community reports on Qwen3.x) | measured in `docs/research/thinking-20261010/` |

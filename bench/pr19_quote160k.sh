@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # PR #19 open point: the 160k quote that differed with the chunk on. 12 GB recipe, bundle bin, drafting + lookup,
 # quote items only at depth 160k, arms off / on / off / on, texts saved.
-#   bash bench/pr19_quote160k.sh <root>   -> receipts/pr19_quote160k.{log,jsonl}, artifacts/pr19_quote160k/*.txt
+#   bash bench/pr19_quote160k.sh <root>   -> docs/receipts/pr19_quote160k.{log,jsonl}, artifacts/pr19_quote160k/*.txt
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"
-LOG=receipts/pr19_quote160k.log; OUT=receipts/pr19_quote160k.jsonl
+LOG=docs/receipts/pr19_quote160k.log; OUT=docs/receipts/pr19_quote160k.jsonl
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; sleep 4; }
 i=0
