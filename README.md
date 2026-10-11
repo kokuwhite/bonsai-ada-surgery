@@ -259,7 +259,7 @@ to the integrated GPU in **Settings > System > Display > Graphics**.
 | --- | --- | --- |
 | 12 GB | defaults | this README |
 | 16 GB and up | defaults | the whole q8_0 window fits: the tier switches itself off |
-| 8 GB (2060 Super, 3060 Ti, 4060) | defaults (the launcher detects the card), plus `build\make_mtp_q4head.ps1` | q4_0, 262k window with 24 GB of RAM or more (131k below that), Q4_0 head, ~59k positions in VRAM; 2060 SUPER with the desktop on it: decode 51 / 46 / 38 / 20 / 14 tok/s at 4k / 32k / 64k / 96k / 128k, 5.7 at 250k. [docs/8GB.md](docs/8GB.md) |
+| 8 GB (2060 Super, 3060 Ti, 4060) | defaults (the launcher detects the card), plus `build\make_mtp_q4head.ps1` | q4_0, 262k window with 24 GB of RAM or more (131k below that), Q4_0 head, ~59k positions in VRAM; 2060 SUPER with the desktop on it: decode 51 / 46 / 38 / 20 / 14 tok/s at 4k / 32k / 64k / 96k / 128k, 5.7 at 250k. For agent work, `BONSAI_CTX=98304` or `131072` keeps sessions in the fast range ([choosing the window](docs/8GB.md#choosing-the-window)). [docs/8GB.md](docs/8GB.md) |
 
 Past the VRAM line decode is bound by PCIe (4.0 x16 here, ~23 GB/s). PCIe 3.0 or x8 slots halve those rows.
 
