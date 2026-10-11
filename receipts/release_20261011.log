@@ -1,0 +1,5 @@
+smoke 20261011 FLASH_ATTN_EXT: ok 3007 fail 0
+switch lines: 1
+wrote artifacts/humaneval-tiergraphs\summary.json
+tiergraphs: mean tokens 0 median 0, over 4k: 0
+01:10 === tiergraphs done
