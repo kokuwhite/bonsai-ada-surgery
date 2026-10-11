@@ -151,7 +151,8 @@ def run_program(program: str, timeout: float) -> str:
 
 
 def chat(base: str, key: str, prompt: str, arm: str, max_tokens: int, timeout: float,
-         temp: float = 0.0, effort: str = "", extra_kwargs: dict | None = None, prefix: str = "", system: str = "") -> dict:
+         temp: float = 0.0, effort: str = "", extra_kwargs: dict | None = None, prefix: str = "", system: str = "",
+         budget: int = -1) -> dict:
     # arm "app": what a chat app or harness sends. No chat_template_kwargs, the OpenAI top-level
     # reasoning_effort field if --effort is given, and the server's own sampling unless --temp >= 0.
     kwargs = None
@@ -180,6 +181,8 @@ def chat(base: str, key: str, prompt: str, arm: str, max_tokens: int, timeout: f
         body["chat_template_kwargs"] = kwargs
     if effort:
         body["reasoning_effort"] = effort
+    if budget >= 0:
+        body["reasoning_budget_tokens"] = budget   # per request; the server's forced close applies
     if temp >= 0:
         body["temperature"] = temp
         if temp == 0:
@@ -251,6 +254,7 @@ def main() -> None:
     parser.add_argument("--kwargs", default="", help='extra chat_template_kwargs as JSON, e.g. {"terse": false}')
     parser.add_argument("--prefix-file", default="", help="text put before the task in the user message")
     parser.add_argument("--system-file", default="", help="a system message with this text")
+    parser.add_argument("--budget", type=int, default=-1, help="reasoning_budget_tokens per request (-1: server default)")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--timeout", type=float, default=8.0)
     parser.add_argument("--request-timeout", type=float, default=900.0)
@@ -295,6 +299,7 @@ def main() -> None:
                     json.loads(args.kwargs) if args.kwargs else None,
                     open(args.prefix_file, encoding="utf-8").read().strip() if args.prefix_file else "",
                     open(args.system_file, encoding="utf-8").read().strip() if args.system_file else "",
+                    args.budget,
                 )
             except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
                 gen = {
