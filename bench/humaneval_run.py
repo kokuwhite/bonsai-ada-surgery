@@ -151,7 +151,7 @@ def run_program(program: str, timeout: float) -> str:
 
 
 def chat(base: str, key: str, prompt: str, arm: str, max_tokens: int, timeout: float,
-         temp: float = 0.0, effort: str = "", extra_kwargs: dict | None = None) -> dict:
+         temp: float = 0.0, effort: str = "", extra_kwargs: dict | None = None, prefix: str = "") -> dict:
     # arm "app": what a chat app or harness sends. No chat_template_kwargs, the OpenAI top-level
     # reasoning_effort field if --effort is given, and the server's own sampling unless --temp >= 0.
     kwargs = None
@@ -167,6 +167,8 @@ def chat(base: str, key: str, prompt: str, arm: str, max_tokens: int, timeout: f
         "Do not write tests.\n\n"
         + prompt
     )
+    if prefix:
+        user = prefix + "\n\n" + user
     body = {
         "model": "bonsai-2-27b",
         "messages": [{"role": "user", "content": user}],
@@ -247,6 +249,7 @@ def main() -> None:
     parser.add_argument("--effort", default="", help="top-level reasoning_effort to send (e.g. high, as Cline/Kilo/Open WebUI do)")
     parser.add_argument("--max-tokens", type=int, default=0)
     parser.add_argument("--kwargs", default="", help='extra chat_template_kwargs as JSON, e.g. {"terse": false}')
+    parser.add_argument("--prefix-file", default="", help="text put before the task in the user message")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--timeout", type=float, default=8.0)
     parser.add_argument("--request-timeout", type=float, default=900.0)
@@ -289,6 +292,7 @@ def main() -> None:
                     args.temp,
                     args.effort,
                     json.loads(args.kwargs) if args.kwargs else None,
+                    open(args.prefix_file, encoding="utf-8").read().strip() if args.prefix_file else "",
                 )
             except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
                 gen = {

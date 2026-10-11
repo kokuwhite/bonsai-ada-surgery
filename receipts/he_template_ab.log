@@ -13,3 +13,8 @@ pass@1 96.95%  (159/164)  arm=medium effort=- temp=0.0 max_tokens=24576  1305.9s
 wrote artifacts/humaneval-terse-off\summary.json
 terse off: mean tokens 932 median 710
 21:43 === terse done
+22:45 === norules: template gguf_template.jinjaC:\Users\pwall\Projects\bonsai-2-27b-serve\tmp\templates-sharp\gguf_template.jinja, root C:/Users/pwall/Projects/bonsai-2-27b-serve, kwargs none, health=1
+pass@1 96.95%  (159/164)  arm=medium effort=- temp=0.0 max_tokens=24576  1310.7s
+wrote artifacts/humaneval-norules\summary.json
+norules: mean tokens 932 median 710, over 4k: 3
+23:07 === norules done
