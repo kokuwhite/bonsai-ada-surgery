@@ -15,7 +15,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names ll
 GUARD=$!
 trap 'touch logs/ramguard.stop; wait $GUARD 2>/dev/null; powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1' EXIT
 powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; sleep 4
-env BONSAI_LAYER=0 ${TPLW:+LLAMA_ARG_CHAT_TEMPLATE_FILE="$TPLW"} powershell -NoProfile -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','$ROOTW\\start-server.ps1' -RedirectStandardOutput '$REPO\\logs\\heone_$NAME.launcher.log' -RedirectStandardError '$REPO\\logs\\heone_$NAME.server.log'"
+env BONSAI_LAYER=0 BONSAI_MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf" ${TPLW:+LLAMA_ARG_CHAT_TEMPLATE_FILE="$TPLW"} powershell -NoProfile -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','$ROOTW\\start-server.ps1' -RedirectStandardOutput '$REPO\\logs\\heone_$NAME.launcher.log' -RedirectStandardError '$REPO\\logs\\heone_$NAME.server.log'"
 ok=0; for k in $(seq 1 120); do sleep 2; curl -s -m 2 http://127.0.0.1:8080/health | grep -q ok && { ok=1; break; }; done
 TPLNAME=model; [ -n "$TPLW" ] && TPLNAME=$(basename "$TPLW")
 say "=== $NAME: template $TPLNAME, root $ROOTW, kwargs ${KW:-none}${HE_EXTRA:+, $HE_EXTRA}, health=$ok"
