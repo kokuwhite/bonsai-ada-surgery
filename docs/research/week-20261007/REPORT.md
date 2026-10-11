@@ -93,6 +93,6 @@ names that doc. No receipt in `docs/receipts/` was first added between 2026-10-0
 - W47: which `shlex.py` text is the exact copy cannot be checked from the repo. Add a receipt line that shows it.
 - W19: "46 vs 30 ms per draft step" is only in the commit message. Add the log lines to the receipt.
 - W39: the `LLAMA_ARG_MMAP=1` arm did not start; rerun if needed.
-- W31 vs `docs/Q8_FULL_CONTEXT.md`: draft 8 edit calls are -10.7 %, not -15 to -19 %. Check and correct the doc.
-- `docs/8GB.md`: "~110 ms per layer" (CPU attention; the P95 receipt has 278.04 ms for the generic kernel) and
-  "before: 28.2 / 28.2" have no receipt in the repo.
+- Corrected in the same change as this log: `docs/Q8_FULL_CONTEXT.md` now gives draft 8 per group (-15 / -19 /
+  -11 %, W31); `docs/8GB.md` cites the P95 receipt (278 ms per layer, generic CPU kernel) and marks the ~110 ms AVX2
+  figure and the 28.2 baseline as having no receipt in this repo.
