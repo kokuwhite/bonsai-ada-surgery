@@ -110,6 +110,10 @@ sensitive than the mass. Keeping only the 8,192 host cells with the highest page
 Quest-style; ~4-6 % of the host tail) gave the same results as the full cache: at 245k on this card, 12/12 needle facts
 and 10/10 exact code copies in one run, 9/10 in another. Speed on this card so far: +68 % decode at 160k on code items
 (12.8 -> 21.5 tok/s), not yet faster at 245k. An experiment only (fork branch `fa-sparse-proto`), not in a release.
+On an RTX 4070 with the same layout (VRAM line pinned at 32,768 cells, 160k), 64-cell pages with the kernel skipping
+masked tiles give 2x dense decode (13.6 -> 27.6 tok/s) with 10/10 copies and 12/12 needles; on this card the decode
+ops run a different kernel path, and that fix is being tested. Full log, quality and speed tables:
+[`DEPTH.md`](DEPTH.md#sparse-reads-of-the-host-tail).
 
 A whole session at depth on `bundle-20261010` (P99): one conversation over Python source, 133k tokens at the start,
 then 17 turns of 2.6k-22k new tokens each up to 259.5k (the next turn no longer fit the window). 18 of 18 turns
