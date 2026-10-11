@@ -16,6 +16,29 @@ Measured 2026-10-06/07 on an RTX 2060 SUPER 8 GB (Turing sm_75, PCIe 3.0 x16, st
 one slot, 131,072-token window, greedy, thinking off, `bench/quick_tps.py` (4k -> 16k -> 32k -> 60k, each depth
 extending the previous prompt). Plans and gates were written before each run; raw log and receipts on the rig.
 
+## Choosing the window
+
+The window size itself costs no speed: a 262k window decodes as fast as a 131k window at the same depth (see the next
+section). What slows a session down is how deep it gets. Past the VRAM line (~58k positions on this card) every decode
+step reads the rest of the cache over PCIe. `bundle-20261010` on the RTX 2060 SUPER (PCIe 3.0), launcher defaults,
+`quick_tps.py` (decode = mean of three prompts; follow-up = a 512-token request at that depth):
+
+| depth | 4k | 32k | 64k | 96k | 128k | 192k | 245k |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| decode (tok/s) | 51.5 | 51.3 | 34.4 | 20.4 | 14.3 | 8.4 | 5.7 |
+| 512-token follow-up (tok/s) | 356 | 245 | 195 | 161 | 135 | 97 | 80 |
+
+So pick the window by the work:
+
+- **Agent work** (coding agents, tool loops): set `BONSAI_CTX` to the depth you still find fast, e.g. `98304` (96k) or
+  `131072`. Agent harnesses compact or summarize the conversation when it nears the window, so a smaller window keeps a
+  long session in the fast range. It also takes less system RAM: the pinned tail past the VRAM line is ~0.7 GB at 96k
+  and ~1.3 GB at 131k, against ~3.7 GB at 262k.
+- **Long documents** (a whole code base, a book, needle lookups): keep 262k. Decode is slow past ~150k, but the
+  document fits, and the answers stay correct to the end (P99 below: 18 turns from 133k to 259.5k).
+
+A PCIe 4.0 x16 card (RTX 3060 Ti / 3070 class) should be faster past the line (see the end of the next section).
+
 ## The 262k window (patches 0047-0049)
 
 With an engine that has patches 0047-0049 and 24 GB of system RAM or more, the drafting mode uses the full 262,144-token
@@ -80,9 +103,18 @@ What does not help, measured on this card:
 - **Attention for the host rows on the CPU.** A dedicated AVX2 kernel (int8 K dots, each row loaded once for the 6 heads
   of a group) needs ~110 ms per layer for 192k rows and 2 tokens; PCIe needs ~19 ms. The arithmetic (~24k multiply-adds
   per row) is more than a 6-core CPU does in that time.
-- **Reading only the high-weight host rows.** At depth this model spreads its attention widely: on 180k tokens of
-  Python source, keeping 99 % of the attention mass needs 19-81 % of the host rows (per group of 6 heads), and 99.9 %
-  needs 50-97 %. So a sparse read cannot cut the PCIe bytes much without changing the output.
+
+In progress (issue #21): **sparse reads of the host rows.** The attention mass is spread widely at depth (on 180k
+tokens of Python source, 99 % of it needs 19-81 % of the host rows per group of 6 heads), but the output is much less
+sensitive than the mass. Keeping only the 8,192 host cells with the highest page bound per step (pages of 64 cells,
+Quest-style; ~4-6 % of the host tail) gave the same results as the full cache: at 245k on this card, 12/12 needle facts
+and 10/10 exact code copies in one run, 9/10 in another. Speed on this card so far: +68 % decode at 160k on code items
+(12.8 -> 21.5 tok/s), not yet faster at 245k. An experiment only (fork branch `fa-sparse-proto`), not in a release.
+
+A whole session at depth on `bundle-20261010` (P99): one conversation over Python source, 133k tokens at the start,
+then 17 turns of 2.6k-22k new tokens each up to 259.5k (the next turn no longer fit the window). 18 of 18 turns
+answered, 0 one-token answers, the answers stayed correct to the end, lowest free VRAM 115 MiB, server RAM 12.2 ->
+14.5 GB. Decode 10.3 tok/s at 133k, 7.3 at 197k, 5.4 at 260k; each turn's new tokens at 130 -> 80 tok/s.
 
 ## Two modes
 
