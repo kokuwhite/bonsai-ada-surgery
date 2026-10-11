@@ -6,7 +6,7 @@
 #   DEPTHS="192000" bash bench/depth_arms.sh <arms file> <tag>   -> receipts/depth_arms.log
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
-ARMS_FILE=${1:?arms file}; TAG=${2:?tag}; LOG=receipts/depth_arms.log; DEPTHS=${DEPTHS:-192000}
+ARMS_FILE=${1:?arms file}; TAG=${2:?tag}; LOG=${DEPTH_ARMS_LOG:-receipts/depth_arms.log}; DEPTHS=${DEPTHS:-192000}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &
