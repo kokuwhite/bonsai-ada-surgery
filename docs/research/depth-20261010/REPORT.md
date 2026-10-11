@@ -2,7 +2,7 @@
 
 Speed past the VRAM line on one RTX 4070 12 GB (PCIe 4.0), with the RTX 2060 SUPER 8 GB (PCIe 3.0) runs from #21 /
 #22. Paired arms on the same binary where possible; gates declared before results (see README for where).
-Experiment entries: `EXPERIMENTS.md`; machine-readable: `runs.jsonl`.
+Experiment entries: `EXPERIMENTS.md`; machine-readable: `runs.jsonl` (with `gpu_h`, RTX 4070 hours from receipt timestamps: 17.4 h for this folder).
 
 ## Bottom line
 
@@ -23,7 +23,7 @@ Experiment entries: `EXPERIMENTS.md`; machine-readable: `runs.jsonl`.
 5. **Chunked gated-delta-net prefill: +3-6 % prefill, quality held on retrieval, HumanEval 158 vs 160** (D14). The
    two flips are long-thinking items; a perplexity gate decides (queued).
 6. **No gain:** V skip (D12), a larger prefill micro-batch (D13: 512 is best), a third-party template for tool work
-   (D15). **Void:** KL at depth (D05), which froze the PC and produced the RAM guard rule.
+   (D15). **KL at depth (D05):** one chunk measured (B = 8192: mean KLD 0.0030, same top-1 97.7 %); the longer runs froze the PC and produced the RAM guard rule.
 
 ## Promoted / rejected
 

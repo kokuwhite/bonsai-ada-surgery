@@ -61,17 +61,29 @@ of 10 short Python functions from `artifacts/eval/pycode.raw`).
 - **Verdict.** B = 8192 (page 64) passes; B = 4096 fails. B = 8192 is the budget from here on.
 - **Receipts.** `docs/receipts/code_needle_ab.log`, `.jsonl`.
 
-## D05 Sparse reads: KL on wikitext and Python source (2026-10-10 12:54-13:23), VOID
+## D05 Sparse reads: KL on wikitext (2026-10-10 10:02-11:16, then 12:54-13:23)
 
 - **Question.** KL divergence of sparse vs dense logits at depth.
 - **Gate.** None declared.
-- **Setup.** `llama-perplexity --kl-divergence-base` at `-c 65536` (`bench/sparse_kl.sh`).
-- **Result.** No numbers. The PC froze twice (12:55 and about 13:10). From the Windows event log: low virtual memory
-  naming `llama-perplexity`. The KL base keeps about n_ctx / 2 x 248,320 vocab x 4 bytes = ~32 GB of logits on a
-  32 GB machine. A rerun at the safe size (`-c 16384`) still wrote nothing usable before it was abandoned.
-- **Verdict.** Void. Lasting changes: `tools/ramguard.ps1` (kills `llama-server` / `llama-perplexity` when free
-  commit < 6 GB or free RAM < 1.5 GB) in every heavy script, and the rule "estimate a run's RAM first; KL at most
-  16k context with this vocab". Quality is measured with retrieval (D03, D04) instead.
+- **Setup.** `llama-perplexity --kl-divergence-base` on wikitext-2 with a 64k-class window, one chunk (the first
+  attempt with three chunks wrote 16 GB of logits per chunk and was restarted with `--chunks 1`); the exact flags of this
+  early run were not kept, because `bench/sparse_kl.sh` was rewritten afterwards (13:49) with safe defaults.
+- **Result (one chunk).**
+
+  | arm | mean KLD | same top-1 | max KLD | 99.9 % KLD |
+  | --- | ---: | ---: | ---: | ---: |
+  | dense base | | | | |
+  | B = 8192 | 0.002998 | 97.720 % | 0.624 | 0.155 |
+  | B = 4096 | 0.008089 | 96.356 % | 3.135 | 0.370 |
+
+  Base perplexity 7.9458 +/- 0.11443. Two lines at 10:21 are void (an old instance ran against a deleted base file).
+  The follow-up runs at 64k (wikitext and Python source, 12:54-13:23) froze the PC twice (12:55 and about 13:10). From
+  the Windows event log: low virtual memory naming `llama-perplexity`; the KL base keeps about n_ctx / 2 x 248,320 vocab
+  x 4 bytes = ~32 GB of logits on a 32 GB machine. A rerun at the safe size (`-c 16384`) wrote nothing usable.
+- **Verdict.** Consistent with D03 / D04: B = 8192 is close to dense, B = 4096 lossier. One chunk only, so it is a
+  check, not a gate. Lasting changes: `tools/ramguard.ps1` (kills `llama-server` / `llama-perplexity` when free commit
+  < 6 GB or free RAM < 1.5 GB) in every heavy script, and the rule "estimate a run's RAM first; KL at most 16k context
+  with this vocab".
 - **Receipts.** `docs/receipts/sparse_kl.log`.
 
 ## D06 Vec kernel skips fully masked tiles (2026-10-10, `346b123b5`)
