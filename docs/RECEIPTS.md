@@ -134,6 +134,19 @@ Both cards lose ~46% from fresh to 77k deep. At 77k the q4_0 KV read is only abo
 from bandwidth-bound; that is the next kernel to open up for deep-context work, and
 the 3060 has the same ratio so it is not an Ada quirk.
 
+## Depth work, 2026-10-10 / 11
+
+Decode and prefill past the VRAM line (tier graphs, sparse host-tail reads, chunked gated-delta-net prefill, and
+what did not help): [`DEPTH.md`](DEPTH.md). Receipts in `receipts/`:
+
+- `depth_arms.log`: per-op timing at 192k; release graphs / mask isolation (graphs off +26 % at 192k).
+- `sparse_edit.log`: cached page bounds after a deep prompt edit (tracking on: 0 stale ops; off: 208).
+- `needle_ab.log` / `.jsonl`, `code_needle_ab.log` / `.jsonl`: retrieval at 160k with sparse host reads by budget.
+- `sparse_speed.log`, `sparse_prefill.log`, `sparse_whole.log`: sparse decode speed and quality by page size,
+  tile map and region.
+- `vskip_ab.log`, `ubatch_depth.log`: V skip and prefill micro-batch at depth (no gain).
+- `gdn_prefill_ab.log`: chunked gated-delta-net prefill, +3-6 % prefill.
+
 ## Raw data
 
 - `artifacts/receipt_stock_prism_build.json` (4070, official Prism CUDA release binaries)

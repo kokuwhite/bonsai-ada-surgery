@@ -554,6 +554,7 @@ python bench\mtp_identity.py                   # greedy draft-on vs draft-off
 | `docs/Q8_FULL_CONTEXT.md` | q8_0 at 262k on 12 GB: mechanisms, receipts, identity matrix, rejected ideas |
 | `docs/QUALITY.md` | KV precision, reasoning effort, tool-call syntax, harness-proofing |
 | `docs/RECEIPTS.md` | speed receipts, this card and others |
+| `docs/DEPTH.md` | decode and prefill past the VRAM line: tier graphs, sparse host-tail reads, chunked delta-net prefill, what did not help |
 | `bench/` | receipts, KL sweeps, tool-call stress, HumanEval runner and Killy replays |
 | `surgery/` | the kernel investigation: write-up, CUPTI injection profiler, clock sweeps, dead ends |
 
