@@ -1,0 +1,15 @@
+18:50 === terse: template sharp-v22.4-terse.jinja, health=1
+           ^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+pass@1 0.0%  (0/164)  arm=medium effort=- temp=0.0 max_tokens=24576  11.8s
+wrote artifacts/humaneval-terse-off\summary.json
+terse off: mean tokens 0 median 0
+18:55 === terse done
+20:23 === terse: template sharp-v22.4-terse.jinja, health=1
+pass@1 97.56%  (160/164)  arm=medium effort=- temp=0.0 max_tokens=24576  3466.6s
+wrote artifacts/humaneval-terse-on\summary.json
+terse on: mean tokens 2454 median 594
+pass@1 96.95%  (159/164)  arm=medium effort=- temp=0.0 max_tokens=24576  1305.9s
+wrote artifacts/humaneval-terse-off\summary.json
+terse off: mean tokens 932 median 710
+21:43 === terse done
