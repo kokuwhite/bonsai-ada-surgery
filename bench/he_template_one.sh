@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # HumanEval 164 at medium, raw server (layer off), greedy, with one chat template file; also saves the server's own
 # render of a HumanEval-style request (/apply-template) next to the results.
-#   bash bench/he_template_one.sh <template file> <name> [kwargs json]  -> artifacts/humaneval-<name>/, receipts/he_template_ab.log
+#   bash bench/he_template_one.sh <template file | -> <name> [kwargs json]  -> artifacts/humaneval-<name>/, receipts/he_template_ab.log
+# template "-": the model's own template. HE_ROOT=<dir>: start that root's launcher and bin (default: this repo).
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; TPLW="$(cygpath -w "$(realpath "${1:?template}")")"; NAME=${2:?name}; KW=${3:-}
+REPO="$(pwd -W)"; TPL=${1:?template}; NAME=${2:?name}; KW=${3:-}
+TPLW=""; [ "$TPL" != "-" ] && TPLW="$(cygpath -w "$(realpath "$TPL")")"
+ROOTW="$REPO"; [ -n "$HE_ROOT" ] && ROOTW="$(cygpath -w "$HE_ROOT")"
 LOG=receipts/he_template_ab.log; OUT=artifacts/humaneval-$NAME
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
@@ -11,9 +14,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names ll
 GUARD=$!
 trap 'touch logs/ramguard.stop; wait $GUARD 2>/dev/null; powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1' EXIT
 powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; sleep 4
-env BONSAI_LAYER=0 LLAMA_ARG_CHAT_TEMPLATE_FILE="$TPLW" powershell -NoProfile -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','$REPO\\start-server.ps1' -RedirectStandardOutput '$REPO\\logs\\heone_$NAME.launcher.log' -RedirectStandardError '$REPO\\logs\\heone_$NAME.server.log'"
+env BONSAI_LAYER=0 ${TPLW:+LLAMA_ARG_CHAT_TEMPLATE_FILE="$TPLW"} powershell -NoProfile -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','$ROOTW\\start-server.ps1' -RedirectStandardOutput '$REPO\\logs\\heone_$NAME.launcher.log' -RedirectStandardError '$REPO\\logs\\heone_$NAME.server.log'"
 ok=0; for k in $(seq 1 120); do sleep 2; curl -s -m 2 http://127.0.0.1:8080/health | grep -q ok && { ok=1; break; }; done
-say "=== $NAME: template $(basename "$TPLW"), kwargs ${KW:-none}, health=$ok"
+say "=== $NAME: template ${TPLW:+$(basename "$TPLW")}${TPLW:-model}, root $ROOTW, kwargs ${KW:-none}, health=$ok"
 [ $ok = 1 ] || exit 1
 mkdir -p "$OUT"
 PYTHONUTF8=1 python - "$OUT" "$KW" <<'PY'

@@ -1,0 +1,3 @@
+# patch 0053 candidate (tier-graphs 4715804d6, sm_89 build in root-graphs) vs the shipped engine, launcher defaults
+shipped|-|
+tiergraphs|/tmp/root-graphs|

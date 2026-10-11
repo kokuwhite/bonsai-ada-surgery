@@ -1,0 +1,3 @@
+# same, lookup off
+shipped-lkoff|-|BONSAI_LOOKUP=0
+tiergraphs-lkoff|/tmp/root-graphs|BONSAI_LOOKUP=0
