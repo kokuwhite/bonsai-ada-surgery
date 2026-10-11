@@ -1,0 +1,17 @@
+FLASH_ATTN_EXT with GGML_CUDA_FA_V_SKIP=1 (f6f2d146c): ok 3007 fail 0
+08:48 === V skip A/B: quality depth 160000, speed depth 192000, root C:\Users\pwall\AppData\Local\Temp\root-sparse8
+08:48 arm vskip-off (): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+vskip-off code   depth 192000 (evaluated 191010): prefill   530.3 tok/s  ttft 360.21s  decode   22.3 tok/s (400 tok)
+vskip-off prose  depth 192000 (evaluated 512): prefill   282.3 tok/s  ttft   1.81s  decode   16.3 tok/s (400 tok)
+vskip-off bash   depth 192000 (evaluated 516): prefill   289.3 tok/s  ttft   1.78s  decode   20.5 tok/s (400 tok)
+vskip-off mean decode 19.7 tok/s
+{"tag": "vskip-off", "depth": 160000, "correct": 10, "of": 10}
+{"tag": "vskip-off", "depth": 160000, "correct": 12, "of": 12}
+09:06 arm vskip-on (GGML_CUDA_FA_V_SKIP=1): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+vskip-on code   depth 192000 (evaluated 191010): prefill   529.9 tok/s  ttft 360.44s  decode   22.3 tok/s (400 tok)
+vskip-on prose  depth 192000 (evaluated 512): prefill   285.8 tok/s  ttft   1.79s  decode   16.3 tok/s (400 tok)
+vskip-on bash   depth 192000 (evaluated 516): prefill   291.0 tok/s  ttft   1.77s  decode   20.6 tok/s (400 tok)
+vskip-on mean decode 19.7 tok/s
+{"tag": "vskip-on", "depth": 160000, "correct": 10, "of": 10}
+{"tag": "vskip-on", "depth": 160000, "correct": 12, "of": 12}
+09:23 === done
