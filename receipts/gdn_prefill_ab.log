@@ -65,3 +65,7 @@ mma mean decode 74.1 tok/s
 03:00 === done
 recurrent: 
 mma: 0.06.732.452 W ggml_cuda_op_gated_delta_net_impl: chunked GDN prefill (MMA) engaged: 121 tokens (116 by MMA), K 5, H 48, H_k 16, raw 1, gather 1, seqs 1
+0.05.162.639 W ggml_cuda_op_gated_delta_net_impl: chunked GDN prefill (MMA) engaged: 121 tokens (116 by MMA), K 5, H 48, H_k 16, raw 1, gather 1, seqs 1
+09:24 === gdnmma: template model, root C:\Users\pwall\AppData\Local\Temp\root-gdn2, kwargs none, health=1
+gdnmma: mean tokens 2313 median 576, over 4k: 19
+10:20 === gdnmma done

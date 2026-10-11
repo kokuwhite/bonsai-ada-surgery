@@ -55,3 +55,6 @@ wrote artifacts/humaneval-budget2048\summary.json
 budget2048: mean tokens 913 median 606, over 4k: 0
 07:55 === budget2048 done
 09:24 === gdnmma: template model, root C:\Users\pwall\AppData\Local\Temp\root-gdn2, kwargs none, health=1
+gdnmma: mean tokens 2313 median 576, over 4k: 19
+10:20 === gdnmma done
+10:21 === clientsys_product: template model, root C:/Users/pwall/Projects/bonsai-2-27b-serve, kwargs none, --system-file bench/prompts/agent_system.txt, health=1
