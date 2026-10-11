@@ -1,6 +1,6 @@
 // Kernel timeline of single-token decode steps (CUDA graphs on, as in the serve), from CUPTI activity records.
 // CUPTI activity tracing needs no GPU performance-counter permission.
-//   decode_trace.exe <model.gguf> <out.csv> [n_skip=64] [n_trace=64] [ctx=8192] [cupti dll] [tokens per step=1]
+//   decode_trace.exe <model.gguf> <out.csv> [n_skip=64] [n_trace=64] [ctx=8192] [cupti dll] [tokens per step=1] [sequences=1]
 // out.csv: one line per kernel: step, start_ns, end_ns, grid x/y, threads per block, name. Steps are separated by host markers.
 #include "llama.h"
 
@@ -51,6 +51,7 @@ int main(int argc, char ** argv) {
     const int n_ctx   = argc > 5 ? atoi(argv[5]) : 8192;
     const char * dll  = argc > 6 ? argv[6] : "cupti64_2026.3.1.dll";
     const int n_step  = argc > 7 ? atoi(argv[7]) : 1;  // 3 = the shape of a draft-2 verification step
+    const int n_seqs  = argc > 8 ? atoi(argv[8]) : 1;  // 2 = a server with two slots on a unified KV cache
 
     HMODULE h = LoadLibraryA(dll);
     if (!h) { fprintf(stderr, "cannot load %s\n", dll); return 1; }
@@ -68,7 +69,7 @@ int main(int argc, char ** argv) {
     llama_model * model = llama_model_load_from_file(argv[1], mp);
     if (!model) { fprintf(stderr, "model load failed\n"); return 1; }
     auto cp = llama_context_default_params();
-    cp.n_ctx = n_ctx; cp.n_batch = cp.n_ubatch = n_step > 512 ? n_step : 512; cp.n_seq_max = 1;  // n_step 1024 = one prefill micro-batch of the serve
+    cp.n_ctx = n_ctx; cp.n_batch = cp.n_ubatch = n_step > 512 ? n_step : 512; cp.n_seq_max = n_seqs; cp.kv_unified = n_seqs > 1;  // n_step 1024 = one prefill micro-batch of the serve
     cp.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_ENABLED;
     cp.type_k = GGML_TYPE_Q8_0; cp.type_v = GGML_TYPE_Q8_0;
     llama_context * ctx = llama_init_from_model(model, cp);
