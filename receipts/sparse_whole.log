@@ -1,0 +1,26 @@
+06:03 === sparse whole: quality depth 160000, speed depth 192000, sparse 8192,256,1024, sinks 1024, root C:\Users\pwall\AppData\Local\Temp\root-sparse7
+06:03 arm dense (): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margin 1000 MiB
+dense code   depth 192000 (evaluated 191010): prefill   527.6 tok/s  ttft 362.06s  decode   25.8 tok/s (400 tok)
+dense prose  depth 192000 (evaluated 512): prefill   281.8 tok/s  ttft   1.82s  decode   18.8 tok/s (400 tok)
+dense bash   depth 192000 (evaluated 516): prefill   284.5 tok/s  ttft   1.81s  decode   23.8 tok/s (400 tok)
+dense mean decode 22.8 tok/s
+{"tag": "dense", "depth": 160000, "correct": 10, "of": 10}
+{"tag": "dense", "depth": 160000, "correct": 12, "of": 12}
+06:20 dense: 0 engaged lines; last: 
+06:21 arm sparse-tail (GGML_CUDA_FA_SPARSE=8192,256,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9 GGML_CUDA_FA_TILE_SKIP=1): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margin 1000 MiB
+sparse-tail code   depth 192000 (evaluated 191010): prefill   518.8 tok/s  ttft 368.17s  decode   30.1 tok/s (400 tok)
+sparse-tail prose  depth 192000 (evaluated 512): prefill   279.8 tok/s  ttft   1.83s  decode   19.8 tok/s (400 tok)
+sparse-tail bash   depth 192000 (evaluated 516): prefill   284.7 tok/s  ttft   1.81s  decode   25.8 tok/s (400 tok)
+sparse-tail mean decode 25.2 tok/s
+{"tag": "sparse-tail", "depth": 160000, "correct": 10, "of": 10}
+{"tag": "sparse-tail", "depth": 160000, "correct": 12, "of": 12}
+06:38 sparse-tail: 12 engaged lines; last: 17.19.154.073 W ggml_cuda_fa_sparse_mask: GGML_CUDA_FA_SPARSE B=8192 P=256 R=1024 fast: 11265 ops; this op 5 queries, host tail 38054 cells, keeps 32 of 149 pag
+06:38 arm sparse-whole (GGML_CUDA_FA_SPARSE=8192,256,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9 GGML_CUDA_FA_TILE_SKIP=1 GGML_CUDA_FA_SPARSE_SINKS=1024): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margin 1000 MiB
+sparse-whole code   depth 192000 (evaluated 191010): prefill   518.5 tok/s  ttft 368.38s  decode   42.0 tok/s (400 tok)
+sparse-whole prose  depth 192000 (evaluated 512): prefill   284.1 tok/s  ttft   1.80s  decode   28.7 tok/s (400 tok)
+sparse-whole bash   depth 192000 (evaluated 516): prefill   288.3 tok/s  ttft   1.79s  decode   38.3 tok/s (400 tok)
+sparse-whole mean decode 36.3 tok/s
+{"tag": "sparse-whole", "depth": 160000, "correct": 8, "of": 10}
+{"tag": "sparse-whole", "depth": 160000, "correct": 7, "of": 12}
+06:56 sparse-whole: 12 engaged lines; last: 16.59.076.950 W ggml_cuda_fa_sparse_mask: GGML_CUDA_FA_SPARSE B=8192 P=256 R=1024 fast: 11265 ops; this op 5 queries, host tail 158464 cells, keeps 32 of 619 pa
+06:56 === done
