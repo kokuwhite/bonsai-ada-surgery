@@ -1,0 +1,42 @@
+13:50 === tool template A/B: gguf template vs bonsai-sharp.jinja
+13:50 arm gguf: health=1
+{"family": "coding", "name": "suite-tar-01", "seed": 1, "arm": "gguf", "ok": false, "tokens": 27138, "wall_s": 288.5, "detail": ["hidden1:result_schema", "hidden2:result_schema"]}
+{"family": "coding", "name": "suite-tar-01", "seed": 2, "arm": "gguf", "ok": false, "tokens": 24290, "wall_s": 290.6, "detail": ["hidden1:result_schema", "hidden2:result_schema"]}
+{"family": "coding", "name": "suite-tar-01", "seed": 3, "arm": "gguf", "ok": false, "tokens": 97226, "wall_s": 814.6, "detail": ["hidden1:result_schema", "hidden2:invalid_gzip"]}
+14:16 PAUSED for PrismML #346 repro (resume: bash bench/tool_template_ab.sh; run_suite resumes from results.jsonl)
+14:25 === tool template A/B: gguf template vs bonsai-sharp.jinja
+14:25 arm gguf: health=1
+| --- | --- | ---: |
+| coding | suite-tar-01 | 0/4 |
+| coding | xfer-mime-01 | 0/4 |
+| coding | xfer-zip-01 | 0/4 |
+| workspace | chain | 2/2 |
+| workspace | copy | 1/2 |
+| workspace | dedupeH | 2/2 |
+| workspace | invoiceH | 2/2 |
+| workspace | ledgerH | 2/2 |
+| **total** | | **9/22** |
+
+completion tokens: gguf 653,178
+
+== summary ==
+A_native_grammar   n=18 parsed=17 payload_ok=13 cut_by_max_tokens=1 median_payload_chars=17516 mean_tps=89.4
+B_json_in_content  n=18 parsed=4 payload_ok=2 cut_by_max_tokens=8 median_payload_chars=3189 mean_tps=127.4
+16:24 arm tpl: health=1
+| --- | --- | ---: |
+| coding | suite-tar-01 | 0/4 |
+| coding | xfer-mime-01 | 0/4 |
+| coding | xfer-zip-01 | 0/4 |
+| workspace | chain | 2/2 |
+| workspace | copy | 1/2 |
+| workspace | dedupeH | 0/2 |
+| workspace | invoiceH | 1/2 |
+| workspace | ledgerH | 2/2 |
+| **total** | | **6/22** |
+
+completion tokens: tpl 562,661
+
+== summary ==
+A_native_grammar   n=18 parsed=18 payload_ok=14 cut_by_max_tokens=0 median_payload_chars=17511 mean_tps=93.5
+B_json_in_content  n=18 parsed=6 payload_ok=3 cut_by_max_tokens=5 median_payload_chars=3448 mean_tps=118.0
+18:27 === done

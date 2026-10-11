@@ -80,3 +80,17 @@
 {"tag": "pr19-chunk", "depth": 40000, "prompt_n": 39745, "completion": 40, "finish": "stop", "head": "The records above are a list of report entries that each specify a rep", "seconds": 40.8}
 {"tag": "pr19-chunk", "depth": 60000, "prompt_n": 59722, "completion": 44, "finish": "stop", "head": "The records above are a list of report entries that each specify a rep", "seconds": 65.9}
 09:02 === done
+09:07 arm b1010-12gb (BONSAI_TIER=1,BONSAI_CTX=262144): health=1; window 262144 / q8_0  (trained max 262144) kv     tiered: cells 0..128000 in VRAM, 128000..262144 in system RAM (VRAM margin 1000 MiB); shared CUDA pool on (BON
+{"tag": "b1010-12gb", "depth": 20000, "prompt_n": 20124, "completion": 41, "finish": "stop", "head": "The records above are a sequence of numbered notes, each describing a ", "seconds": 18.7}
+{"tag": "b1010-12gb", "depth": 30000, "prompt_n": 29732, "completion": 52, "finish": "stop", "head": "The records above are a sequence of report entries that list specific ", "seconds": 29.2}
+{"tag": "b1010-12gb", "depth": 33000, "prompt_n": 32743, "completion": 49, "finish": "stop", "head": "The records above are a sequence of report entries that list specific ", "seconds": 32.8}
+{"tag": "b1010-12gb", "depth": 40000, "prompt_n": 39742, "completion": 50, "finish": "stop", "head": "The records above are a sequence of report entries that list specific ", "seconds": 41.4}
+{"tag": "b1010-12gb", "depth": 60000, "prompt_n": 59721, "completion": 41, "finish": "stop", "head": "The records above are a sequence of numbered notes, each describing a ", "seconds": 68.6}
+09:10 === done
+09:10 arm b1010-8gb (BONSAI_8GB=1,BONSAI_CTX=262144): health=1; window 262144 / q4_0  (trained max 262144) 
+{"tag": "b1010-8gb", "depth": 20000, "prompt_n": 20123, "completion": 40, "finish": "stop", "head": "The records above are a list of report entries that each specify a rep", "seconds": 18.3}
+{"tag": "b1010-8gb", "depth": 30000, "prompt_n": 29734, "completion": 52, "finish": "stop", "head": "The records above are a sequence of report entries that list specific ", "seconds": 28.7}
+{"tag": "b1010-8gb", "depth": 33000, "prompt_n": 32738, "completion": 40, "finish": "stop", "head": "The records above are a list of report entries that each specify a rep", "seconds": 32.0}
+{"tag": "b1010-8gb", "depth": 40000, "prompt_n": 39747, "completion": 50, "finish": "stop", "head": "The records above are a sequence of report entries that list specific ", "seconds": 40.0}
+{"tag": "b1010-8gb", "depth": 60000, "prompt_n": 59722, "completion": 36, "finish": "stop", "head": "The records are a sequence of report entries that each list a specific", "seconds": 64.8}
+09:14 === done

@@ -1,0 +1,954 @@
+decode 31.9 tok/s with op timing on
+0.16.873.761 I op timing over 100 graphs: 29.047 ms per graph
+0.16.873.766 I      5.464 ms/graph   18.8%  x88    MUL_MAT ptq1_0 5120x17408 cols=1
+0.16.873.768 I      2.532 ms/graph    8.7%  x64    MUL_MAT ptq1_0 17408x5120 cols=1
+0.16.873.769 I      2.020 ms/graph    7.0%  x258   MUL f32 cols=1
+0.16.873.770 I      1.274 ms/graph    4.4%  x96    SCALE f32 cols=1
+0.16.873.770 I      1.230 ms/graph    4.2%  x48    MUL_MAT ptq1_0 5120x10240 cols=1
+0.16.873.771 I      1.176 ms/graph    4.0%  x64    MUL_MAT ptq1_0 6144x5120 cols=1
+0.16.873.771 I      1.172 ms/graph    4.0%  x48    CONT f32 cols=3
+0.16.873.772 I      1.150 ms/graph    4.0%  x626   RESHAPE f32 cols=1
+0.16.873.772 I      1.143 ms/graph    3.9%  x48    RESHAPE f32 cols=10240
+0.16.873.773 I      1.136 ms/graph    3.9%  x48    MUL_MAT ptq1_0 5120x6144 cols=1
+0.16.873.773 I      0.918 ms/graph    3.2%  x96    VIEW f32 cols=48
+0.16.873.774 I      0.712 ms/graph    2.5%  x48    GATED_DELTA_NET f32 cols=129
+0.16.873.774 I      0.637 ms/graph    2.2%  x96    MUL_MAT bf16 5120x48 cols=1
+0.16.873.775 I      0.549 ms/graph    1.9%  x32    MUL_MAT ptq1_0 5120x1024 cols=1
+0.16.873.776 I      0.516 ms/graph    1.8%  x1     MUL_MAT ptq1_0 5120x248320 cols=1
+0.16.873.776 I      0.487 ms/graph    1.7%  x81    RMS_NORM f32 cols=1
+0.16.873.777 I      0.482 ms/graph    1.7%  x16    MUL_MAT ptq1_0 5120x12288 cols=1
+0.16.873.777 I      0.482 ms/graph    1.7%  x96    VIEW f32 cols=16
+0.16.873.778 I      0.348 ms/graph    1.2%  x16    FLASH_ATTN_EXT f32 cols=24
+0.16.873.778 I      0.341 ms/graph    1.2%  x32    SET_ROWS f32 cols=8192
+0.16.873.779 I      0.336 ms/graph    1.2%  x16    SIGMOID f32 cols=1
+0.16.873.779 I      0.313 ms/graph    1.1%  x97    GET_ROWS f32 cols=1
+0.16.873.780 I      0.282 ms/graph    1.0%  x48    ADD f32 cols=1
+0.16.873.781 I      0.269 ms/graph    0.9%  x176   VIEW f32 cols=1
+0.16.873.781 I      0.261 ms/graph    0.9%  x48    SSM_CONV f32 cols=1
+0.16.873.782 I      0.259 ms/graph    0.9%  x16    ROPE f32 cols=4
+0.16.873.782 I      0.232 ms/graph    0.8%  x48    SWIGLU f32 cols=48
+0.16.873.783 I      0.219 ms/graph    0.8%  x48    L2_NORM f32 cols=32
+0.16.873.783 I      0.215 ms/graph    0.7%  x144   RESHAPE f32 cols=48
+0.16.873.784 I      0.212 ms/graph    0.7%  x48    CONCAT f32 cols=10240
+0.16.873.898 D que  yield_to_que: done yielding to queue
+0.16.874.234 D slot process_toke: id  0 | task 0 | n_gen = 397, n_remaining = 53, next token:  1801 ' made'
+0.16.874.237 D que    start_loop: waiting for new tasks
+0.16.874.238 D que    start_loop: processing new tasks
+0.16.874.239 D que  process_new_: processing task, id = 398
+0.16.874.240 D que    start_loop: update slots
+0.16.874.241 D srv  update_slots: posting NEXT_RESPONSE
+0.16.874.243 D que          post: new task, id = 399, front = 0
+0.16.874.246 D slot handle_last_: id  0 | task 0 | slot decode token, id=1801, n_ctx = 8192, n_tokens = 409, truncated = 0
+0.16.874.248 D set_adapters_lora: adapters = 0000000000000000
+0.16.874.249 D adapters_lora_are_same: adapters = 0000000000000000
+0.16.874.249 D set_embeddings: value = 0
+0.16.874.250 D srv        decode: n_batch (effective) = 2048, off = 0
+0.16.874.250 D que  yield_to_que: yielding to queue
+0.16.874.257 D que  process_new_: processing task, id = 399
+0.16.874.258 D srv  process_sing: decoding, decline task, id_task = 399
+0.16.874.258 D que  process_new_: task declined, id = 399
+0.16.904.398 D que  yield_to_que: done yielding to queue
+0.16.904.737 D slot process_toke: id  0 | task 0 | n_gen = 398, n_remaining = 52, next token:  3102 ' possible'
+0.16.904.740 D que    start_loop: waiting for new tasks
+0.16.904.741 D que    start_loop: processing new tasks
+0.16.904.742 D que  process_new_: processing task, id = 399
+0.16.904.744 D que    start_loop: update slots
+0.16.904.744 D srv  update_slots: posting NEXT_RESPONSE
+0.16.904.747 D que          post: new task, id = 400, front = 0
+0.16.904.749 D slot handle_last_: id  0 | task 0 | slot decode token, id=3102, n_ctx = 8192, n_tokens = 410, truncated = 0
+0.16.904.753 D set_adapters_lora: adapters = 0000000000000000
+0.16.904.753 D adapters_lora_are_same: adapters = 0000000000000000
+0.16.904.753 D set_embeddings: value = 0
+0.16.904.754 D srv        decode: n_batch (effective) = 2048, off = 0
+0.16.904.754 D que  yield_to_que: yielding to queue
+0.16.904.762 D que  process_new_: processing task, id = 400
+0.16.904.762 D srv  process_sing: decoding, decline task, id_task = 400
+0.16.904.763 D que  process_new_: task declined, id = 400
+0.16.935.288 D que  yield_to_que: done yielding to queue
+0.16.935.598 D slot process_toke: id  0 | task 0 | n_gen = 399, n_remaining = 51, next token:   279 ' the'
+0.16.935.601 D que    start_loop: waiting for new tasks
+0.16.935.601 D que    start_loop: processing new tasks
+0.16.935.603 D que  process_new_: processing task, id = 400
+0.16.935.604 D que    start_loop: update slots
+0.16.935.605 D srv  update_slots: posting NEXT_RESPONSE
+0.16.935.606 D que          post: new task, id = 401, front = 0
+0.16.935.609 D slot handle_last_: id  0 | task 0 | slot decode token, id=279, n_ctx = 8192, n_tokens = 411, truncated = 0
+0.16.935.612 D set_adapters_lora: adapters = 0000000000000000
+0.16.935.612 D adapters_lora_are_same: adapters = 0000000000000000
+0.16.935.613 D set_embeddings: value = 0
+0.16.935.613 D srv        decode: n_batch (effective) = 2048, off = 0
+0.16.935.614 D que  yield_to_que: yielding to queue
+0.16.935.621 D que  process_new_: processing task, id = 401
+0.16.935.621 D srv  process_sing: decoding, decline task, id_task = 401
+0.16.935.622 D que  process_new_: task declined, id = 401
+0.16.966.190 D que  yield_to_que: done yielding to queue
+0.16.966.515 D slot process_toke: id  0 | task 0 | n_gen = 400, n_remaining = 50, next token:  8619 ' radio'
+0.16.966.518 D que    start_loop: waiting for new tasks
+0.16.966.518 D que    start_loop: processing new tasks
+0.16.966.520 D que  process_new_: processing task, id = 401
+0.16.966.521 D que    start_loop: update slots
+0.16.966.522 D srv  update_slots: posting NEXT_RESPONSE
+0.16.966.524 D que          post: new task, id = 402, front = 0
+0.16.966.527 D slot handle_last_: id  0 | task 0 | slot decode token, id=8619, n_ctx = 8192, n_tokens = 412, truncated = 0
+0.16.966.529 D set_adapters_lora: adapters = 0000000000000000
+0.16.966.530 D adapters_lora_are_same: adapters = 0000000000000000
+0.16.966.530 D set_embeddings: value = 0
+0.16.966.531 D srv        decode: n_batch (effective) = 2048, off = 0
+0.16.966.531 D que  yield_to_que: yielding to queue
+0.16.966.538 D que  process_new_: processing task, id = 402
+0.16.966.539 D srv  process_sing: decoding, decline task, id_task = 402
+0.16.966.539 D que  process_new_: task declined, id = 402
+0.16.996.857 D que  yield_to_que: done yielding to queue
+0.16.997.199 D slot process_toke: id  0 | task 0 | n_gen = 401, n_remaining = 49, next token:    11 ','
+0.16.997.201 D que    start_loop: waiting for new tasks
+0.16.997.201 D que    start_loop: processing new tasks
+0.16.997.203 D que  process_new_: processing task, id = 402
+0.16.997.205 D que    start_loop: update slots
+0.16.997.206 D srv  update_slots: posting NEXT_RESPONSE
+0.16.997.207 D que          post: new task, id = 403, front = 0
+0.16.997.210 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 413, truncated = 0
+0.16.997.213 D set_adapters_lora: adapters = 0000000000000000
+0.16.997.214 D adapters_lora_are_same: adapters = 0000000000000000
+0.16.997.214 D set_embeddings: value = 0
+0.16.997.215 D srv        decode: n_batch (effective) = 2048, off = 0
+0.16.997.215 D que  yield_to_que: yielding to queue
+0.16.997.224 D que  process_new_: processing task, id = 403
+0.16.997.225 D srv  process_sing: decoding, decline task, id_task = 403
+0.16.997.225 D que  process_new_: task declined, id = 403
+0.17.028.328 D que  yield_to_que: done yielding to queue
+0.17.028.682 D slot process_toke: id  0 | task 0 | n_gen = 402, n_remaining = 48, next token: 12069 ' television'
+0.17.028.685 D que    start_loop: waiting for new tasks
+0.17.028.685 D que    start_loop: processing new tasks
+0.17.028.687 D que  process_new_: processing task, id = 403
+0.17.028.689 D que    start_loop: update slots
+0.17.028.689 D srv  update_slots: posting NEXT_RESPONSE
+0.17.028.691 D que          post: new task, id = 404, front = 0
+0.17.028.694 D slot handle_last_: id  0 | task 0 | slot decode token, id=12069, n_ctx = 8192, n_tokens = 414, truncated = 0
+0.17.028.697 D set_adapters_lora: adapters = 0000000000000000
+0.17.028.697 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.028.698 D set_embeddings: value = 0
+0.17.028.698 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.028.698 D que  yield_to_que: yielding to queue
+0.17.028.707 D que  process_new_: processing task, id = 404
+0.17.028.708 D srv  process_sing: decoding, decline task, id_task = 404
+0.17.028.708 D que  process_new_: task declined, id = 404
+0.17.059.571 D que  yield_to_que: done yielding to queue
+0.17.059.932 D slot process_toke: id  0 | task 0 | n_gen = 403, n_remaining = 47, next token:    11 ','
+0.17.059.936 D que    start_loop: waiting for new tasks
+0.17.059.936 D que    start_loop: processing new tasks
+0.17.059.938 D que  process_new_: processing task, id = 404
+0.17.059.939 D que    start_loop: update slots
+0.17.059.939 D srv  update_slots: posting NEXT_RESPONSE
+0.17.059.941 D que          post: new task, id = 405, front = 0
+0.17.059.944 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 415, truncated = 0
+0.17.059.948 D set_adapters_lora: adapters = 0000000000000000
+0.17.059.949 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.059.949 D set_embeddings: value = 0
+0.17.059.950 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.059.950 D que  yield_to_que: yielding to queue
+0.17.059.959 D que  process_new_: processing task, id = 405
+0.17.059.960 D srv  process_sing: decoding, decline task, id_task = 405
+0.17.059.960 D que  process_new_: task declined, id = 405
+0.17.094.166 D que  yield_to_que: done yielding to queue
+0.17.094.511 D slot process_toke: id  0 | task 0 | n_gen = 404, n_remaining = 46, next token:  3988 ' early'
+0.17.094.515 D que    start_loop: waiting for new tasks
+0.17.094.515 D que    start_loop: processing new tasks
+0.17.094.518 D que  process_new_: processing task, id = 405
+0.17.094.520 D que    start_loop: update slots
+0.17.094.520 D srv  update_slots: posting NEXT_RESPONSE
+0.17.094.522 D que          post: new task, id = 406, front = 0
+0.17.094.525 D slot handle_last_: id  0 | task 0 | slot decode token, id=3988, n_ctx = 8192, n_tokens = 416, truncated = 0
+0.17.094.529 D set_adapters_lora: adapters = 0000000000000000
+0.17.094.529 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.094.529 D set_embeddings: value = 0
+0.17.094.530 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.094.530 D que  yield_to_que: yielding to queue
+0.17.094.539 D que  process_new_: processing task, id = 406
+0.17.094.540 D srv  process_sing: decoding, decline task, id_task = 406
+0.17.094.540 D que  process_new_: task declined, id = 406
+0.17.124.362 D que  yield_to_que: done yielding to queue
+0.17.124.666 D slot process_toke: id  0 | task 0 | n_gen = 405, n_remaining = 45, next token: 17943 ' computers'
+0.17.124.668 D que    start_loop: waiting for new tasks
+0.17.124.669 D que    start_loop: processing new tasks
+0.17.124.670 D que  process_new_: processing task, id = 406
+0.17.124.672 D que    start_loop: update slots
+0.17.124.672 D srv  update_slots: posting NEXT_RESPONSE
+0.17.124.674 D que          post: new task, id = 407, front = 0
+0.17.124.677 D slot handle_last_: id  0 | task 0 | slot decode token, id=17943, n_ctx = 8192, n_tokens = 417, truncated = 0
+0.17.124.679 D set_adapters_lora: adapters = 0000000000000000
+0.17.124.679 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.124.680 D set_embeddings: value = 0
+0.17.124.680 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.124.680 D que  yield_to_que: yielding to queue
+0.17.124.689 D que  process_new_: processing task, id = 407
+0.17.124.690 D srv  process_sing: decoding, decline task, id_task = 407
+0.17.124.691 D que  process_new_: task declined, id = 407
+0.17.154.463 D que  yield_to_que: done yielding to queue
+0.17.154.785 D slot process_toke: id  0 | task 0 | n_gen = 406, n_remaining = 44, next token:    11 ','
+0.17.154.788 D que    start_loop: waiting for new tasks
+0.17.154.788 D que    start_loop: processing new tasks
+0.17.154.791 D que  process_new_: processing task, id = 407
+0.17.154.793 D que    start_loop: update slots
+0.17.154.793 D srv  update_slots: posting NEXT_RESPONSE
+0.17.154.795 D que          post: new task, id = 408, front = 0
+0.17.154.798 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 418, truncated = 0
+0.17.154.801 D set_adapters_lora: adapters = 0000000000000000
+0.17.154.802 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.154.802 D set_embeddings: value = 0
+0.17.154.803 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.154.803 D que  yield_to_que: yielding to queue
+0.17.154.810 D que  process_new_: processing task, id = 408
+0.17.154.810 D srv  process_sing: decoding, decline task, id_task = 408
+0.17.154.811 D que  process_new_: task declined, id = 408
+0.17.185.074 D que  yield_to_que: done yielding to queue
+0.17.185.382 D slot process_toke: id  0 | task 0 | n_gen = 407, n_remaining = 43, next token: 26616 ' radar'
+0.17.185.385 D que    start_loop: waiting for new tasks
+0.17.185.386 D que    start_loop: processing new tasks
+0.17.185.387 D que  process_new_: processing task, id = 408
+0.17.185.389 D que    start_loop: update slots
+0.17.185.389 D srv  update_slots: posting NEXT_RESPONSE
+0.17.185.391 D que          post: new task, id = 409, front = 0
+0.17.185.394 D slot handle_last_: id  0 | task 0 | slot decode token, id=26616, n_ctx = 8192, n_tokens = 419, truncated = 0
+0.17.185.397 D set_adapters_lora: adapters = 0000000000000000
+0.17.185.397 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.185.397 D set_embeddings: value = 0
+0.17.185.398 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.185.398 D que  yield_to_que: yielding to queue
+0.17.185.407 D que  process_new_: processing task, id = 409
+0.17.185.408 D srv  process_sing: decoding, decline task, id_task = 409
+0.17.185.408 D que  process_new_: task declined, id = 409
+0.17.215.085 D que  yield_to_que: done yielding to queue
+0.17.215.399 D slot process_toke: id  0 | task 0 | n_gen = 408, n_remaining = 42, next token:  5757 ' systems'
+0.17.215.402 D que    start_loop: waiting for new tasks
+0.17.215.402 D que    start_loop: processing new tasks
+0.17.215.404 D que  process_new_: processing task, id = 409
+0.17.215.406 D que    start_loop: update slots
+0.17.215.406 D srv  update_slots: posting NEXT_RESPONSE
+0.17.215.408 D que          post: new task, id = 410, front = 0
+0.17.215.411 D slot handle_last_: id  0 | task 0 | slot decode token, id=5757, n_ctx = 8192, n_tokens = 420, truncated = 0
+0.17.215.414 D set_adapters_lora: adapters = 0000000000000000
+0.17.215.414 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.215.415 D set_embeddings: value = 0
+0.17.215.415 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.215.415 D que  yield_to_que: yielding to queue
+0.17.215.422 D que  process_new_: processing task, id = 410
+0.17.215.423 D srv  process_sing: decoding, decline task, id_task = 410
+0.17.215.423 D que  process_new_: task declined, id = 410
+0.17.246.070 D que  yield_to_que: done yielding to queue
+0.17.246.377 D slot process_toke: id  0 | task 0 | n_gen = 409, n_remaining = 41, next token:    11 ','
+0.17.246.379 D que    start_loop: waiting for new tasks
+0.17.246.380 D que    start_loop: processing new tasks
+0.17.246.381 D que  process_new_: processing task, id = 410
+0.17.246.383 D que    start_loop: update slots
+0.17.246.383 D srv  update_slots: posting NEXT_RESPONSE
+0.17.246.385 D que          post: new task, id = 411, front = 0
+0.17.246.388 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 421, truncated = 0
+0.17.246.391 D set_adapters_lora: adapters = 0000000000000000
+0.17.246.391 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.246.391 D set_embeddings: value = 0
+0.17.246.392 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.246.392 D que  yield_to_que: yielding to queue
+0.17.246.400 D que  process_new_: processing task, id = 411
+0.17.246.400 D srv  process_sing: decoding, decline task, id_task = 411
+0.17.246.401 D que  process_new_: task declined, id = 411
+0.17.277.328 D que  yield_to_que: done yielding to queue
+0.17.277.681 D slot process_toke: id  0 | task 0 | n_gen = 410, n_remaining = 40, next token:   321 ' and'
+0.17.277.685 D que    start_loop: waiting for new tasks
+0.17.277.686 D que    start_loop: processing new tasks
+0.17.277.690 D que  process_new_: processing task, id = 411
+0.17.277.692 D que    start_loop: update slots
+0.17.277.692 D srv  update_slots: posting NEXT_RESPONSE
+0.17.277.695 D que          post: new task, id = 412, front = 0
+0.17.277.697 D slot handle_last_: id  0 | task 0 | slot decode token, id=321, n_ctx = 8192, n_tokens = 422, truncated = 0
+0.17.277.700 D set_adapters_lora: adapters = 0000000000000000
+0.17.277.701 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.277.701 D set_embeddings: value = 0
+0.17.277.702 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.277.702 D que  yield_to_que: yielding to queue
+0.17.277.711 D que  process_new_: processing task, id = 412
+0.17.277.711 D srv  process_sing: decoding, decline task, id_task = 412
+0.17.277.712 D que  process_new_: task declined, id = 412
+0.17.307.444 D que  yield_to_que: done yielding to queue
+0.17.307.773 D slot process_toke: id  0 | task 0 | n_gen = 411, n_remaining = 39, next token: 26706 ' countless'
+0.17.307.776 D que    start_loop: waiting for new tasks
+0.17.307.776 D que    start_loop: processing new tasks
+0.17.307.778 D que  process_new_: processing task, id = 412
+0.17.307.779 D que    start_loop: update slots
+0.17.307.779 D srv  update_slots: posting NEXT_RESPONSE
+0.17.307.781 D que          post: new task, id = 413, front = 0
+0.17.307.784 D slot handle_last_: id  0 | task 0 | slot decode token, id=26706, n_ctx = 8192, n_tokens = 423, truncated = 0
+0.17.307.787 D set_adapters_lora: adapters = 0000000000000000
+0.17.307.787 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.307.788 D set_embeddings: value = 0
+0.17.307.788 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.307.788 D que  yield_to_que: yielding to queue
+0.17.307.797 D que  process_new_: processing task, id = 413
+0.17.307.798 D srv  process_sing: decoding, decline task, id_task = 413
+0.17.307.798 D que  process_new_: task declined, id = 413
+0.17.338.193 D que  yield_to_que: done yielding to queue
+0.17.338.563 D slot process_toke: id  0 | task 0 | n_gen = 412, n_remaining = 38, next token:   975 ' other'
+0.17.338.567 D que    start_loop: waiting for new tasks
+0.17.338.567 D que    start_loop: processing new tasks
+0.17.338.569 D que  process_new_: processing task, id = 413
+0.17.338.571 D que    start_loop: update slots
+0.17.338.571 D srv  update_slots: posting NEXT_RESPONSE
+0.17.338.574 D que          post: new task, id = 414, front = 0
+0.17.338.577 D slot handle_last_: id  0 | task 0 | slot decode token, id=975, n_ctx = 8192, n_tokens = 424, truncated = 0
+0.17.338.580 D set_adapters_lora: adapters = 0000000000000000
+0.17.338.580 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.338.580 D set_embeddings: value = 0
+0.17.338.581 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.338.581 D que  yield_to_que: yielding to queue
+0.17.338.591 D que  process_new_: processing task, id = 414
+0.17.338.592 D srv  process_sing: decoding, decline task, id_task = 414
+0.17.338.592 D que  process_new_: task declined, id = 414
+0.17.368.897 D que  yield_to_que: done yielding to queue
+0.17.369.265 D slot process_toke: id  0 | task 0 | n_gen = 413, n_remaining = 37, next token: 13900 ' technologies'
+0.17.369.268 D que    start_loop: waiting for new tasks
+0.17.369.268 D que    start_loop: processing new tasks
+0.17.369.270 D que  process_new_: processing task, id = 414
+0.17.369.271 D que    start_loop: update slots
+0.17.369.272 D srv  update_slots: posting NEXT_RESPONSE
+0.17.369.274 D que          post: new task, id = 415, front = 0
+0.17.369.277 D slot handle_last_: id  0 | task 0 | slot decode token, id=13900, n_ctx = 8192, n_tokens = 425, truncated = 0
+0.17.369.280 D set_adapters_lora: adapters = 0000000000000000
+0.17.369.280 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.369.280 D set_embeddings: value = 0
+0.17.369.281 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.369.281 D que  yield_to_que: yielding to queue
+0.17.369.290 D que  process_new_: processing task, id = 415
+0.17.369.291 D srv  process_sing: decoding, decline task, id_task = 415
+0.17.369.291 D que  process_new_: task declined, id = 415
+0.17.399.937 D que  yield_to_que: done yielding to queue
+0.17.400.242 D slot process_toke: id  0 | task 0 | n_gen = 414, n_remaining = 36, next token:   421 ' that'
+0.17.400.245 D que    start_loop: waiting for new tasks
+0.17.400.245 D que    start_loop: processing new tasks
+0.17.400.247 D que  process_new_: processing task, id = 415
+0.17.400.248 D que    start_loop: update slots
+0.17.400.249 D srv  update_slots: posting NEXT_RESPONSE
+0.17.400.251 D que          post: new task, id = 416, front = 0
+0.17.400.254 D slot handle_last_: id  0 | task 0 | slot decode token, id=421, n_ctx = 8192, n_tokens = 426, truncated = 0
+0.17.400.257 D set_adapters_lora: adapters = 0000000000000000
+0.17.400.257 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.400.257 D set_embeddings: value = 0
+0.17.400.258 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.400.258 D que  yield_to_que: yielding to queue
+0.17.400.302 D que  process_new_: processing task, id = 416
+0.17.400.303 D srv  process_sing: decoding, decline task, id_task = 416
+0.17.400.303 D que  process_new_: task declined, id = 416
+0.17.431.732 D que  yield_to_que: done yielding to queue
+0.17.432.069 D slot process_toke: id  0 | task 0 | n_gen = 415, n_remaining = 35, next token:  4364 ' defined'
+0.17.432.072 D que    start_loop: waiting for new tasks
+0.17.432.072 D que    start_loop: processing new tasks
+0.17.432.074 D que  process_new_: processing task, id = 416
+0.17.432.076 D que    start_loop: update slots
+0.17.432.076 D srv  update_slots: posting NEXT_RESPONSE
+0.17.432.078 D que          post: new task, id = 417, front = 0
+0.17.432.081 D slot handle_last_: id  0 | task 0 | slot decode token, id=4364, n_ctx = 8192, n_tokens = 427, truncated = 0
+0.17.432.084 D set_adapters_lora: adapters = 0000000000000000
+0.17.432.085 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.432.085 D set_embeddings: value = 0
+0.17.432.085 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.432.086 D que  yield_to_que: yielding to queue
+0.17.432.095 D que  process_new_: processing task, id = 417
+0.17.432.095 D srv  process_sing: decoding, decline task, id_task = 417
+0.17.432.096 D que  process_new_: task declined, id = 417
+0.17.468.392 D que  yield_to_que: done yielding to queue
+0.17.468.697 D slot process_toke: id  0 | task 0 | n_gen = 416, n_remaining = 34, next token:   279 ' the'
+0.17.468.700 D que    start_loop: waiting for new tasks
+0.17.468.700 D que    start_loop: processing new tasks
+0.17.468.702 D que  process_new_: processing task, id = 417
+0.17.468.703 D que    start_loop: update slots
+0.17.468.704 D srv  update_slots: posting NEXT_RESPONSE
+0.17.468.706 D que          post: new task, id = 418, front = 0
+0.17.468.708 D slot handle_last_: id  0 | task 0 | slot decode token, id=279, n_ctx = 8192, n_tokens = 428, truncated = 0
+0.17.468.711 D set_adapters_lora: adapters = 0000000000000000
+0.17.468.711 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.468.711 D set_embeddings: value = 0
+0.17.468.712 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.468.712 D que  yield_to_que: yielding to queue
+0.17.468.721 D que  process_new_: processing task, id = 418
+0.17.468.722 D srv  process_sing: decoding, decline task, id_task = 418
+0.17.468.722 D que  process_new_: task declined, id = 418
+0.17.504.613 D que  yield_to_que: done yielding to queue
+0.17.504.921 D slot process_toke: id  0 | task 0 | n_gen = 417, n_remaining = 33, next token: 59347 ' twentieth'
+0.17.504.925 D que    start_loop: waiting for new tasks
+0.17.504.925 D que    start_loop: processing new tasks
+0.17.504.927 D que  process_new_: processing task, id = 418
+0.17.504.928 D que    start_loop: update slots
+0.17.504.929 D srv  update_slots: posting NEXT_RESPONSE
+0.17.504.930 D que          post: new task, id = 419, front = 0
+0.17.504.933 D slot handle_last_: id  0 | task 0 | slot decode token, id=59347, n_ctx = 8192, n_tokens = 429, truncated = 0
+0.17.504.936 D set_adapters_lora: adapters = 0000000000000000
+0.17.504.936 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.504.937 D set_embeddings: value = 0
+0.17.504.937 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.504.937 D que  yield_to_que: yielding to queue
+0.17.504.946 D que  process_new_: processing task, id = 419
+0.17.504.947 D srv  process_sing: decoding, decline task, id_task = 419
+0.17.504.947 D que  process_new_: task declined, id = 419
+0.17.535.741 D que  yield_to_que: done yielding to queue
+0.17.536.054 D slot process_toke: id  0 | task 0 | n_gen = 418, n_remaining = 32, next token:  9018 ' century'
+0.17.536.057 D que    start_loop: waiting for new tasks
+0.17.536.057 D que    start_loop: processing new tasks
+0.17.536.059 D que  process_new_: processing task, id = 419
+0.17.536.060 D que    start_loop: update slots
+0.17.536.061 D srv  update_slots: posting NEXT_RESPONSE
+0.17.536.063 D que          post: new task, id = 420, front = 0
+0.17.536.066 D slot handle_last_: id  0 | task 0 | slot decode token, id=9018, n_ctx = 8192, n_tokens = 430, truncated = 0
+0.17.536.069 D set_adapters_lora: adapters = 0000000000000000
+0.17.536.069 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.536.070 D set_embeddings: value = 0
+0.17.536.070 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.536.070 D que  yield_to_que: yielding to queue
+0.17.536.079 D que  process_new_: processing task, id = 420
+0.17.536.080 D srv  process_sing: decoding, decline task, id_task = 420
+0.17.536.080 D que  process_new_: task declined, id = 420
+0.17.566.006 D que  yield_to_que: done yielding to queue
+0.17.566.318 D slot process_toke: id  0 | task 0 | n_gen = 419, n_remaining = 31, next token:    13 '.'
+0.17.566.320 D que    start_loop: waiting for new tasks
+0.17.566.321 D que    start_loop: processing new tasks
+0.17.566.322 D que  process_new_: processing task, id = 420
+0.17.566.324 D que    start_loop: update slots
+0.17.566.324 D srv  update_slots: posting NEXT_RESPONSE
+0.17.566.326 D que          post: new task, id = 421, front = 0
+0.17.566.329 D slot handle_last_: id  0 | task 0 | slot decode token, id=13, n_ctx = 8192, n_tokens = 431, truncated = 0
+0.17.566.332 D set_adapters_lora: adapters = 0000000000000000
+0.17.566.332 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.566.332 D set_embeddings: value = 0
+0.17.566.333 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.566.333 D que  yield_to_que: yielding to queue
+0.17.566.342 D que  process_new_: processing task, id = 421
+0.17.566.343 D srv  process_sing: decoding, decline task, id_task = 421
+0.17.566.343 D que  process_new_: task declined, id = 421
+0.17.596.388 D que  yield_to_que: done yielding to queue
+0.17.596.789 D slot process_toke: id  0 | task 0 | n_gen = 420, n_remaining = 30, next token: 14205 ' Yet'
+0.17.596.793 D que    start_loop: waiting for new tasks
+0.17.596.793 D que    start_loop: processing new tasks
+0.17.596.794 D que  process_new_: processing task, id = 421
+0.17.596.796 D que    start_loop: update slots
+0.17.596.796 D srv  update_slots: posting NEXT_RESPONSE
+0.17.596.798 D que          post: new task, id = 422, front = 0
+0.17.596.801 D slot handle_last_: id  0 | task 0 | slot decode token, id=14205, n_ctx = 8192, n_tokens = 432, truncated = 0
+0.17.596.805 D set_adapters_lora: adapters = 0000000000000000
+0.17.596.805 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.596.805 D set_embeddings: value = 0
+0.17.596.806 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.596.806 D que  yield_to_que: yielding to queue
+0.17.596.816 D que  process_new_: processing task, id = 422
+0.17.596.817 D srv  process_sing: decoding, decline task, id_task = 422
+0.17.596.818 D que  process_new_: task declined, id = 422
+0.17.626.698 D que  yield_to_que: done yielding to queue
+0.17.627.113 D slot process_toke: id  0 | task 0 | n_gen = 421, n_remaining = 29, next token:   424 ' it'
+0.17.627.116 D que    start_loop: waiting for new tasks
+0.17.627.116 D que    start_loop: processing new tasks
+0.17.627.118 D que  process_new_: processing task, id = 422
+0.17.627.119 D que    start_loop: update slots
+0.17.627.119 D srv  update_slots: posting NEXT_RESPONSE
+0.17.627.121 D que          post: new task, id = 423, front = 0
+0.17.627.124 D slot handle_last_: id  0 | task 0 | slot decode token, id=424, n_ctx = 8192, n_tokens = 433, truncated = 0
+0.17.627.127 D set_adapters_lora: adapters = 0000000000000000
+0.17.627.128 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.627.128 D set_embeddings: value = 0
+0.17.627.129 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.627.129 D que  yield_to_que: yielding to queue
+0.17.627.138 D que  process_new_: processing task, id = 423
+0.17.627.139 D srv  process_sing: decoding, decline task, id_task = 423
+0.17.627.139 D que  process_new_: task declined, id = 423
+0.17.656.997 D que  yield_to_que: done yielding to queue
+0.17.657.322 D slot process_toke: id  0 | task 0 | n_gen = 422, n_remaining = 28, next token:   557 ' was'
+0.17.657.325 D que    start_loop: waiting for new tasks
+0.17.657.325 D que    start_loop: processing new tasks
+0.17.657.327 D que  process_new_: processing task, id = 423
+0.17.657.328 D que    start_loop: update slots
+0.17.657.329 D srv  update_slots: posting NEXT_RESPONSE
+0.17.657.331 D que          post: new task, id = 424, front = 0
+0.17.657.334 D slot handle_last_: id  0 | task 0 | slot decode token, id=557, n_ctx = 8192, n_tokens = 434, truncated = 0
+0.17.657.336 D set_adapters_lora: adapters = 0000000000000000
+0.17.657.337 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.657.337 D set_embeddings: value = 0
+0.17.657.337 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.657.338 D que  yield_to_que: yielding to queue
+0.17.657.345 D que  process_new_: processing task, id = 424
+0.17.657.346 D srv  process_sing: decoding, decline task, id_task = 424
+0.17.657.346 D que  process_new_: task declined, id = 424
+0.17.688.185 D que  yield_to_que: done yielding to queue
+0.17.688.498 D slot process_toke: id  0 | task 0 | n_gen = 423, n_remaining = 27, next token:  1048 ' also'
+0.17.688.501 D que    start_loop: waiting for new tasks
+0.17.688.501 D que    start_loop: processing new tasks
+0.17.688.503 D que  process_new_: processing task, id = 424
+0.17.688.505 D que    start_loop: update slots
+0.17.688.505 D srv  update_slots: posting NEXT_RESPONSE
+0.17.688.507 D que          post: new task, id = 425, front = 0
+0.17.688.509 D slot handle_last_: id  0 | task 0 | slot decode token, id=1048, n_ctx = 8192, n_tokens = 435, truncated = 0
+0.17.688.512 D set_adapters_lora: adapters = 0000000000000000
+0.17.688.512 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.688.513 D set_embeddings: value = 0
+0.17.688.513 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.688.514 D que  yield_to_que: yielding to queue
+0.17.688.522 D que  process_new_: processing task, id = 425
+0.17.688.523 D srv  process_sing: decoding, decline task, id_task = 425
+0.17.688.523 D que  process_new_: task declined, id = 425
+0.17.724.709 D que  yield_to_que: done yielding to queue
+0.17.725.016 D slot process_toke: id  0 | task 0 | n_gen = 424, n_remaining = 26, next token:    11 ','
+0.17.725.021 D que    start_loop: waiting for new tasks
+0.17.725.021 D que    start_loop: processing new tasks
+0.17.725.024 D que  process_new_: processing task, id = 425
+0.17.725.025 D que    start_loop: update slots
+0.17.725.025 D srv  update_slots: posting NEXT_RESPONSE
+0.17.725.027 D que          post: new task, id = 426, front = 0
+0.17.725.030 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 436, truncated = 0
+0.17.725.033 D set_adapters_lora: adapters = 0000000000000000
+0.17.725.033 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.725.034 D set_embeddings: value = 0
+0.17.725.034 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.725.035 D que  yield_to_que: yielding to queue
+0.17.725.044 D que  process_new_: processing task, id = 426
+0.17.725.044 D srv  process_sing: decoding, decline task, id_task = 426
+0.17.725.045 D que  process_new_: task declined, id = 426
+0.17.754.940 D que  yield_to_que: done yielding to queue
+0.17.755.249 D slot process_toke: id  0 | task 0 | n_gen = 425, n_remaining = 25, next token:   539 ' by'
+0.17.755.252 D que    start_loop: waiting for new tasks
+0.17.755.253 D que    start_loop: processing new tasks
+0.17.755.255 D que  process_new_: processing task, id = 426
+0.17.755.257 D que    start_loop: update slots
+0.17.755.257 D srv  update_slots: posting NEXT_RESPONSE
+0.17.755.259 D que          post: new task, id = 427, front = 0
+0.17.755.262 D slot handle_last_: id  0 | task 0 | slot decode token, id=539, n_ctx = 8192, n_tokens = 437, truncated = 0
+0.17.755.265 D set_adapters_lora: adapters = 0000000000000000
+0.17.755.265 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.755.266 D set_embeddings: value = 0
+0.17.755.266 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.755.266 D que  yield_to_que: yielding to queue
+0.17.755.274 D que  process_new_: processing task, id = 427
+0.17.755.275 D srv  process_sing: decoding, decline task, id_task = 427
+0.17.755.275 D que  process_new_: task declined, id = 427
+0.17.784.869 D que  yield_to_que: done yielding to queue
+0.17.785.196 D slot process_toke: id  0 | task 0 | n_gen = 426, n_remaining = 24, next token:   279 ' the'
+0.17.785.198 D que    start_loop: waiting for new tasks
+0.17.785.199 D que    start_loop: processing new tasks
+0.17.785.200 D que  process_new_: processing task, id = 427
+0.17.785.202 D que    start_loop: update slots
+0.17.785.202 D srv  update_slots: posting NEXT_RESPONSE
+0.17.785.205 D que          post: new task, id = 428, front = 0
+0.17.785.208 D slot handle_last_: id  0 | task 0 | slot decode token, id=279, n_ctx = 8192, n_tokens = 438, truncated = 0
+0.17.785.210 D set_adapters_lora: adapters = 0000000000000000
+0.17.785.210 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.785.211 D set_embeddings: value = 0
+0.17.785.212 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.785.212 D que  yield_to_que: yielding to queue
+0.17.785.221 D que  process_new_: processing task, id = 428
+0.17.785.221 D srv  process_sing: decoding, decline task, id_task = 428
+0.17.785.222 D que  process_new_: task declined, id = 428
+0.17.819.420 D que  yield_to_que: done yielding to queue
+0.17.819.717 D slot process_toke: id  0 | task 0 | n_gen = 427, n_remaining = 23, next token: 10344 ' standards'
+0.17.819.719 D que    start_loop: waiting for new tasks
+0.17.819.719 D que    start_loop: processing new tasks
+0.17.819.721 D que  process_new_: processing task, id = 428
+0.17.819.722 D que    start_loop: update slots
+0.17.819.723 D srv  update_slots: posting NEXT_RESPONSE
+0.17.819.725 D que          post: new task, id = 429, front = 0
+0.17.819.727 D slot handle_last_: id  0 | task 0 | slot decode token, id=10344, n_ctx = 8192, n_tokens = 439, truncated = 0
+0.17.819.730 D set_adapters_lora: adapters = 0000000000000000
+0.17.819.730 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.819.731 D set_embeddings: value = 0
+0.17.819.731 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.819.732 D que  yield_to_que: yielding to queue
+0.17.819.740 D que  process_new_: processing task, id = 429
+0.17.819.740 D srv  process_sing: decoding, decline task, id_task = 429
+0.17.819.741 D que  process_new_: task declined, id = 429
+0.17.851.075 D que  yield_to_que: done yielding to queue
+0.17.851.407 D slot process_toke: id  0 | task 0 | n_gen = 428, n_remaining = 22, next token:   314 ' of'
+0.17.851.409 D que    start_loop: waiting for new tasks
+0.17.851.410 D que    start_loop: processing new tasks
+0.17.851.411 D que  process_new_: processing task, id = 429
+0.17.851.412 D que    start_loop: update slots
+0.17.851.413 D srv  update_slots: posting NEXT_RESPONSE
+0.17.851.415 D que          post: new task, id = 430, front = 0
+0.17.851.417 D slot handle_last_: id  0 | task 0 | slot decode token, id=314, n_ctx = 8192, n_tokens = 440, truncated = 0
+0.17.851.420 D set_adapters_lora: adapters = 0000000000000000
+0.17.851.420 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.851.421 D set_embeddings: value = 0
+0.17.851.421 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.851.421 D que  yield_to_que: yielding to queue
+0.17.851.430 D que  process_new_: processing task, id = 430
+0.17.851.431 D srv  process_sing: decoding, decline task, id_task = 430
+0.17.851.431 D que  process_new_: task declined, id = 430
+0.17.887.697 D que  yield_to_que: done yielding to queue
+0.17.888.045 D slot process_toke: id  0 | task 0 | n_gen = 429, n_remaining = 21, next token:  1141 ' its'
+0.17.888.048 D que    start_loop: waiting for new tasks
+0.17.888.049 D que    start_loop: processing new tasks
+0.17.888.050 D que  process_new_: processing task, id = 430
+0.17.888.052 D que    start_loop: update slots
+0.17.888.052 D srv  update_slots: posting NEXT_RESPONSE
+0.17.888.054 D que          post: new task, id = 431, front = 0
+0.17.888.057 D slot handle_last_: id  0 | task 0 | slot decode token, id=1141, n_ctx = 8192, n_tokens = 441, truncated = 0
+0.17.888.060 D set_adapters_lora: adapters = 0000000000000000
+0.17.888.060 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.888.061 D set_embeddings: value = 0
+0.17.888.061 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.888.061 D que  yield_to_que: yielding to queue
+0.17.888.070 D que  process_new_: processing task, id = 431
+0.17.888.070 D srv  process_sing: decoding, decline task, id_task = 431
+0.17.888.071 D que  process_new_: task declined, id = 431
+0.17.918.285 D que  yield_to_que: done yielding to queue
+0.17.918.624 D slot process_toke: id  0 | task 0 | n_gen = 430, n_remaining = 20, next token:  1765 ' own'
+0.17.918.627 D que    start_loop: waiting for new tasks
+0.17.918.627 D que    start_loop: processing new tasks
+0.17.918.629 D que  process_new_: processing task, id = 431
+0.17.918.631 D que    start_loop: update slots
+0.17.918.631 D srv  update_slots: posting NEXT_RESPONSE
+0.17.918.633 D que          post: new task, id = 432, front = 0
+0.17.918.636 D slot handle_last_: id  0 | task 0 | slot decode token, id=1765, n_ctx = 8192, n_tokens = 442, truncated = 0
+0.17.918.639 D set_adapters_lora: adapters = 0000000000000000
+0.17.918.639 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.918.640 D set_embeddings: value = 0
+0.17.918.640 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.918.640 D que  yield_to_que: yielding to queue
+0.17.918.650 D que  process_new_: processing task, id = 432
+0.17.918.651 D srv  process_sing: decoding, decline task, id_task = 432
+0.17.918.651 D que  process_new_: task declined, id = 432
+0.17.950.386 D que  yield_to_que: done yielding to queue
+0.17.950.723 D slot process_toke: id  0 | task 0 | n_gen = 431, n_remaining = 19, next token: 11057 ' era'
+0.17.950.726 D que    start_loop: waiting for new tasks
+0.17.950.727 D que    start_loop: processing new tasks
+0.17.950.728 D que  process_new_: processing task, id = 432
+0.17.950.730 D que    start_loop: update slots
+0.17.950.730 D srv  update_slots: posting NEXT_RESPONSE
+0.17.950.732 D que          post: new task, id = 433, front = 0
+0.17.950.735 D slot handle_last_: id  0 | task 0 | slot decode token, id=11057, n_ctx = 8192, n_tokens = 443, truncated = 0
+0.17.950.738 D set_adapters_lora: adapters = 0000000000000000
+0.17.950.738 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.950.738 D set_embeddings: value = 0
+0.17.950.739 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.950.739 D que  yield_to_que: yielding to queue
+0.17.950.748 D que  process_new_: processing task, id = 433
+0.17.950.749 D srv  process_sing: decoding, decline task, id_task = 433
+0.17.950.749 D que  process_new_: task declined, id = 433
+0.17.983.148 D que  yield_to_que: done yielding to queue
+0.17.983.477 D slot process_toke: id  0 | task 0 | n_gen = 432, n_remaining = 18, next token:    11 ','
+0.17.983.480 D que    start_loop: waiting for new tasks
+0.17.983.480 D que    start_loop: processing new tasks
+0.17.983.482 D que  process_new_: processing task, id = 433
+0.17.983.483 D que    start_loop: update slots
+0.17.983.484 D srv  update_slots: posting NEXT_RESPONSE
+0.17.983.486 D que          post: new task, id = 434, front = 0
+0.17.983.488 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 444, truncated = 0
+0.17.983.491 D set_adapters_lora: adapters = 0000000000000000
+0.17.983.491 D adapters_lora_are_same: adapters = 0000000000000000
+0.17.983.492 D set_embeddings: value = 0
+0.17.983.492 D srv        decode: n_batch (effective) = 2048, off = 0
+0.17.983.493 D que  yield_to_que: yielding to queue
+0.17.983.546 D que  process_new_: processing task, id = 434
+0.17.983.547 D srv  process_sing: decoding, decline task, id_task = 434
+0.17.983.547 D que  process_new_: task declined, id = 434
+0.18.013.528 D que  yield_to_que: done yielding to queue
+0.18.013.835 D slot process_toke: id  0 | task 0 | n_gen = 433, n_remaining = 17, next token: 16739 ' deeply'
+0.18.013.838 D que    start_loop: waiting for new tasks
+0.18.013.838 D que    start_loop: processing new tasks
+0.18.013.840 D que  process_new_: processing task, id = 434
+0.18.013.841 D que    start_loop: update slots
+0.18.013.842 D srv  update_slots: posting NEXT_RESPONSE
+0.18.013.844 D que          post: new task, id = 435, front = 0
+0.18.013.847 D slot handle_last_: id  0 | task 0 | slot decode token, id=16739, n_ctx = 8192, n_tokens = 445, truncated = 0
+0.18.013.849 D set_adapters_lora: adapters = 0000000000000000
+0.18.013.850 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.013.850 D set_embeddings: value = 0
+0.18.013.851 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.013.851 D que  yield_to_que: yielding to queue
+0.18.013.858 D que  process_new_: processing task, id = 435
+0.18.013.859 D srv  process_sing: decoding, decline task, id_task = 435
+0.18.013.859 D que  process_new_: task declined, id = 435
+0.18.043.828 D que  yield_to_que: done yielding to queue
+0.18.044.188 D slot process_toke: id  0 | task 0 | n_gen = 434, n_remaining = 16, next token: 45341 ' flawed'
+0.18.044.191 D que    start_loop: waiting for new tasks
+0.18.044.191 D que    start_loop: processing new tasks
+0.18.044.193 D que  process_new_: processing task, id = 435
+0.18.044.194 D que    start_loop: update slots
+0.18.044.195 D srv  update_slots: posting NEXT_RESPONSE
+0.18.044.198 D que          post: new task, id = 436, front = 0
+0.18.044.200 D slot handle_last_: id  0 | task 0 | slot decode token, id=45341, n_ctx = 8192, n_tokens = 446, truncated = 0
+0.18.044.203 D set_adapters_lora: adapters = 0000000000000000
+0.18.044.204 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.044.204 D set_embeddings: value = 0
+0.18.044.205 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.044.205 D que  yield_to_que: yielding to queue
+0.18.044.213 D que  process_new_: processing task, id = 436
+0.18.044.214 D srv  process_sing: decoding, decline task, id_task = 436
+0.18.044.214 D que  process_new_: task declined, id = 436
+0.18.073.691 D que  yield_to_que: done yielding to queue
+0.18.074.001 D slot process_toke: id  0 | task 0 | n_gen = 435, n_remaining = 15, next token:    13 '.'
+0.18.074.004 D que    start_loop: waiting for new tasks
+0.18.074.004 D que    start_loop: processing new tasks
+0.18.074.006 D que  process_new_: processing task, id = 436
+0.18.074.007 D que    start_loop: update slots
+0.18.074.008 D srv  update_slots: posting NEXT_RESPONSE
+0.18.074.010 D que          post: new task, id = 437, front = 0
+0.18.074.013 D slot handle_last_: id  0 | task 0 | slot decode token, id=13, n_ctx = 8192, n_tokens = 447, truncated = 0
+0.18.074.015 D set_adapters_lora: adapters = 0000000000000000
+0.18.074.016 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.074.016 D set_embeddings: value = 0
+0.18.074.016 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.074.017 D que  yield_to_que: yielding to queue
+0.18.074.024 D que  process_new_: processing task, id = 437
+0.18.074.025 D srv  process_sing: decoding, decline task, id_task = 437
+0.18.074.025 D que  process_new_: task declined, id = 437
+0.18.104.452 D que  yield_to_que: done yielding to queue
+0.18.104.780 D slot process_toke: id  0 | task 0 | n_gen = 436, n_remaining = 14, next token: 91111 ' Tubes'
+0.18.104.783 D que    start_loop: waiting for new tasks
+0.18.104.783 D que    start_loop: processing new tasks
+0.18.104.785 D que  process_new_: processing task, id = 437
+0.18.104.787 D que    start_loop: update slots
+0.18.104.788 D srv  update_slots: posting NEXT_RESPONSE
+0.18.104.790 D que          post: new task, id = 438, front = 0
+0.18.104.793 D slot handle_last_: id  0 | task 0 | slot decode token, id=91111, n_ctx = 8192, n_tokens = 448, truncated = 0
+0.18.104.796 D set_adapters_lora: adapters = 0000000000000000
+0.18.104.796 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.104.797 D set_embeddings: value = 0
+0.18.104.797 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.104.798 D que  yield_to_que: yielding to queue
+0.18.104.806 D que  process_new_: processing task, id = 438
+0.18.104.807 D srv  process_sing: decoding, decline task, id_task = 438
+0.18.104.807 D que  process_new_: task declined, id = 438
+0.18.139.761 D que  yield_to_que: done yielding to queue
+0.18.140.106 D slot process_toke: id  0 | task 0 | n_gen = 437, n_remaining = 13, next token:   998 ' were'
+0.18.140.109 D que    start_loop: waiting for new tasks
+0.18.140.109 D que    start_loop: processing new tasks
+0.18.140.111 D que  process_new_: processing task, id = 438
+0.18.140.113 D que    start_loop: update slots
+0.18.140.113 D srv  update_slots: posting NEXT_RESPONSE
+0.18.140.115 D que          post: new task, id = 439, front = 0
+0.18.140.118 D slot handle_last_: id  0 | task 0 | slot decode token, id=998, n_ctx = 8192, n_tokens = 449, truncated = 0
+0.18.140.122 D set_adapters_lora: adapters = 0000000000000000
+0.18.140.122 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.140.123 D set_embeddings: value = 0
+0.18.140.123 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.140.123 D que  yield_to_que: yielding to queue
+0.18.140.131 D que  process_new_: processing task, id = 439
+0.18.140.132 D srv  process_sing: decoding, decline task, id_task = 439
+0.18.140.132 D que  process_new_: task declined, id = 439
+0.18.169.915 D que  yield_to_que: done yielding to queue
+0.18.170.231 D slot process_toke: id  0 | task 0 | n_gen = 438, n_remaining = 12, next token:  3349 ' large'
+0.18.170.234 D que    start_loop: waiting for new tasks
+0.18.170.234 D que    start_loop: processing new tasks
+0.18.170.236 D que  process_new_: processing task, id = 439
+0.18.170.238 D que    start_loop: update slots
+0.18.170.238 D srv  update_slots: posting NEXT_RESPONSE
+0.18.170.240 D que          post: new task, id = 440, front = 0
+0.18.170.243 D slot handle_last_: id  0 | task 0 | slot decode token, id=3349, n_ctx = 8192, n_tokens = 450, truncated = 0
+0.18.170.246 D set_adapters_lora: adapters = 0000000000000000
+0.18.170.246 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.170.247 D set_embeddings: value = 0
+0.18.170.247 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.170.247 D que  yield_to_que: yielding to queue
+0.18.170.257 D que  process_new_: processing task, id = 440
+0.18.170.258 D srv  process_sing: decoding, decline task, id_task = 440
+0.18.170.258 D que  process_new_: task declined, id = 440
+0.18.200.128 D que  yield_to_que: done yielding to queue
+0.18.200.438 D slot process_toke: id  0 | task 0 | n_gen = 439, n_remaining = 11, next token:    11 ','
+0.18.200.441 D que    start_loop: waiting for new tasks
+0.18.200.441 D que    start_loop: processing new tasks
+0.18.200.443 D que  process_new_: processing task, id = 440
+0.18.200.444 D que    start_loop: update slots
+0.18.200.445 D srv  update_slots: posting NEXT_RESPONSE
+0.18.200.446 D que          post: new task, id = 441, front = 0
+0.18.200.449 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 451, truncated = 0
+0.18.200.452 D set_adapters_lora: adapters = 0000000000000000
+0.18.200.452 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.200.453 D set_embeddings: value = 0
+0.18.200.453 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.200.453 D que  yield_to_que: yielding to queue
+0.18.200.462 D que  process_new_: processing task, id = 441
+0.18.200.463 D srv  process_sing: decoding, decline task, id_task = 441
+0.18.200.463 D que  process_new_: task declined, id = 441
+0.18.230.408 D que  yield_to_que: done yielding to queue
+0.18.230.750 D slot process_toke: id  0 | task 0 | n_gen = 440, n_remaining = 10, next token: 42780 ' fragile'
+0.18.230.754 D que    start_loop: waiting for new tasks
+0.18.230.754 D que    start_loop: processing new tasks
+0.18.230.756 D que  process_new_: processing task, id = 441
+0.18.230.758 D que    start_loop: update slots
+0.18.230.759 D srv  update_slots: posting NEXT_RESPONSE
+0.18.230.761 D que          post: new task, id = 442, front = 0
+0.18.230.764 D slot handle_last_: id  0 | task 0 | slot decode token, id=42780, n_ctx = 8192, n_tokens = 452, truncated = 0
+0.18.230.767 D set_adapters_lora: adapters = 0000000000000000
+0.18.230.767 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.230.768 D set_embeddings: value = 0
+0.18.230.768 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.230.769 D que  yield_to_que: yielding to queue
+0.18.230.779 D que  process_new_: processing task, id = 442
+0.18.230.779 D srv  process_sing: decoding, decline task, id_task = 442
+0.18.230.780 D que  process_new_: task declined, id = 442
+0.18.260.640 D que  yield_to_que: done yielding to queue
+0.18.260.997 D slot process_toke: id  0 | task 0 | n_gen = 441, n_remaining = 9, next token:    11 ','
+0.18.261.001 D que    start_loop: waiting for new tasks
+0.18.261.001 D que    start_loop: processing new tasks
+0.18.261.003 D que  process_new_: processing task, id = 442
+0.18.261.004 D que    start_loop: update slots
+0.18.261.004 D srv  update_slots: posting NEXT_RESPONSE
+0.18.261.006 D que          post: new task, id = 443, front = 0
+0.18.261.009 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 453, truncated = 0
+0.18.261.013 D set_adapters_lora: adapters = 0000000000000000
+0.18.261.013 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.261.014 D set_embeddings: value = 0
+0.18.261.014 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.261.014 D que  yield_to_que: yielding to queue
+0.18.261.023 D que  process_new_: processing task, id = 443
+0.18.261.024 D srv  process_sing: decoding, decline task, id_task = 443
+0.18.261.024 D que  process_new_: task declined, id = 443
+0.18.290.877 D que  yield_to_que: done yielding to queue
+0.18.291.181 D slot process_toke: id  0 | task 0 | n_gen = 442, n_remaining = 8, next token:  2279 ' power'
+0.18.291.184 D que    start_loop: waiting for new tasks
+0.18.291.185 D que    start_loop: processing new tasks
+0.18.291.187 D que  process_new_: processing task, id = 443
+0.18.291.188 D que    start_loop: update slots
+0.18.291.189 D srv  update_slots: posting NEXT_RESPONSE
+0.18.291.190 D que          post: new task, id = 444, front = 0
+0.18.291.193 D slot handle_last_: id  0 | task 0 | slot decode token, id=2279, n_ctx = 8192, n_tokens = 454, truncated = 0
+0.18.291.195 D set_adapters_lora: adapters = 0000000000000000
+0.18.291.196 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.291.196 D set_embeddings: value = 0
+0.18.291.196 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.291.197 D que  yield_to_que: yielding to queue
+0.18.291.205 D que  process_new_: processing task, id = 444
+0.18.291.206 D srv  process_sing: decoding, decline task, id_task = 444
+0.18.291.206 D que  process_new_: task declined, id = 444
+0.18.320.745 D que  yield_to_que: done yielding to queue
+0.18.321.068 D slot process_toke: id  0 | task 0 | n_gen = 443, n_remaining = 7, next token:  2741 '-h'
+0.18.321.071 D que    start_loop: waiting for new tasks
+0.18.321.071 D que    start_loop: processing new tasks
+0.18.321.073 D que  process_new_: processing task, id = 444
+0.18.321.075 D que    start_loop: update slots
+0.18.321.076 D srv  update_slots: posting NEXT_RESPONSE
+0.18.321.078 D que          post: new task, id = 445, front = 0
+0.18.321.081 D slot handle_last_: id  0 | task 0 | slot decode token, id=2741, n_ctx = 8192, n_tokens = 455, truncated = 0
+0.18.321.083 D set_adapters_lora: adapters = 0000000000000000
+0.18.321.084 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.321.084 D set_embeddings: value = 0
+0.18.321.085 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.321.085 D que  yield_to_que: yielding to queue
+0.18.321.092 D que  process_new_: processing task, id = 445
+0.18.321.093 D srv  process_sing: decoding, decline task, id_task = 445
+0.18.321.093 D que  process_new_: task declined, id = 445
+0.18.351.462 D que  yield_to_que: done yielding to queue
+0.18.351.775 D slot process_toke: id  0 | task 0 | n_gen = 444, n_remaining = 6, next token:  2116 'ung'
+0.18.351.778 D que    start_loop: waiting for new tasks
+0.18.351.778 D que    start_loop: processing new tasks
+0.18.351.780 D que  process_new_: processing task, id = 445
+0.18.351.782 D que    start_loop: update slots
+0.18.351.782 D srv  update_slots: posting NEXT_RESPONSE
+0.18.351.784 D que          post: new task, id = 446, front = 0
+0.18.351.787 D slot handle_last_: id  0 | task 0 | slot decode token, id=2116, n_ctx = 8192, n_tokens = 456, truncated = 0
+0.18.351.790 D set_adapters_lora: adapters = 0000000000000000
+0.18.351.790 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.351.791 D set_embeddings: value = 0
+0.18.351.791 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.351.792 D que  yield_to_que: yielding to queue
+0.18.351.799 D que  process_new_: processing task, id = 446
+0.18.351.800 D srv  process_sing: decoding, decline task, id_task = 446
+0.18.351.800 D que  process_new_: task declined, id = 446
+0.18.381.566 D que  yield_to_que: done yielding to queue
+0.18.381.900 D slot process_toke: id  0 | task 0 | n_gen = 445, n_remaining = 5, next token:   856 'ry'
+0.18.381.903 D que    start_loop: waiting for new tasks
+0.18.381.903 D que    start_loop: processing new tasks
+0.18.381.905 D que  process_new_: processing task, id = 446
+0.18.381.906 D que    start_loop: update slots
+0.18.381.907 D srv  update_slots: posting NEXT_RESPONSE
+0.18.381.909 D que          post: new task, id = 447, front = 0
+0.18.381.912 D slot handle_last_: id  0 | task 0 | slot decode token, id=856, n_ctx = 8192, n_tokens = 457, truncated = 0
+0.18.381.915 D set_adapters_lora: adapters = 0000000000000000
+0.18.381.915 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.381.916 D set_embeddings: value = 0
+0.18.381.916 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.381.916 D que  yield_to_que: yielding to queue
+0.18.381.925 D que  process_new_: processing task, id = 447
+0.18.381.926 D srv  process_sing: decoding, decline task, id_task = 447
+0.18.381.926 D que  process_new_: task declined, id = 447
+0.18.412.044 D que  yield_to_que: done yielding to queue
+0.18.412.419 D slot process_toke: id  0 | task 0 | n_gen = 446, n_remaining = 4, next token:    11 ','
+0.18.412.423 D que    start_loop: waiting for new tasks
+0.18.412.423 D que    start_loop: processing new tasks
+0.18.412.425 D que  process_new_: processing task, id = 447
+0.18.412.427 D que    start_loop: update slots
+0.18.412.427 D srv  update_slots: posting NEXT_RESPONSE
+0.18.412.430 D que          post: new task, id = 448, front = 0
+0.18.412.432 D slot handle_last_: id  0 | task 0 | slot decode token, id=11, n_ctx = 8192, n_tokens = 458, truncated = 0
+0.18.412.436 D set_adapters_lora: adapters = 0000000000000000
+0.18.412.436 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.412.436 D set_embeddings: value = 0
+0.18.412.437 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.412.437 D que  yield_to_que: yielding to queue
+0.18.412.448 D que  process_new_: processing task, id = 448
+0.18.412.449 D srv  process_sing: decoding, decline task, id_task = 448
+0.18.412.449 D que  process_new_: task declined, id = 448
+0.18.442.035 D que  yield_to_que: done yielding to queue
+0.18.442.405 D slot process_toke: id  0 | task 0 | n_gen = 447, n_remaining = 3, next token:   321 ' and'
+0.18.442.434 D que    start_loop: waiting for new tasks
+0.18.442.435 D que    start_loop: processing new tasks
+0.18.442.438 D que  process_new_: processing task, id = 448
+0.18.442.439 D que    start_loop: update slots
+0.18.442.439 D srv  update_slots: posting NEXT_RESPONSE
+0.18.442.442 D que          post: new task, id = 449, front = 0
+0.18.442.444 D slot handle_last_: id  0 | task 0 | slot decode token, id=321, n_ctx = 8192, n_tokens = 459, truncated = 0
+0.18.442.447 D set_adapters_lora: adapters = 0000000000000000
+0.18.442.447 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.442.448 D set_embeddings: value = 0
+0.18.442.448 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.442.449 D que  yield_to_que: yielding to queue
+0.18.442.513 D que  process_new_: processing task, id = 449
+0.18.442.515 D srv  process_sing: decoding, decline task, id_task = 449
+0.18.442.516 D que  process_new_: task declined, id = 449
+0.18.472.575 D que  yield_to_que: done yielding to queue
+0.18.472.916 D slot process_toke: id  0 | task 0 | n_gen = 448, n_remaining = 2, next token:  6103 ' slow'
+0.18.472.919 D que    start_loop: waiting for new tasks
+0.18.472.919 D que    start_loop: processing new tasks
+0.18.472.921 D que  process_new_: processing task, id = 449
+0.18.472.922 D que    start_loop: update slots
+0.18.472.923 D srv  update_slots: posting NEXT_RESPONSE
+0.18.472.924 D que          post: new task, id = 450, front = 0
+0.18.472.927 D slot handle_last_: id  0 | task 0 | slot decode token, id=6103, n_ctx = 8192, n_tokens = 460, truncated = 0
+0.18.472.930 D set_adapters_lora: adapters = 0000000000000000
+0.18.472.931 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.472.931 D set_embeddings: value = 0
+0.18.472.932 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.472.932 D que  yield_to_que: yielding to queue
+0.18.472.940 D que  process_new_: processing task, id = 450
+0.18.472.941 D srv  process_sing: decoding, decline task, id_task = 450
+0.18.472.941 D que  process_new_: task declined, id = 450
+0.18.502.938 D que  yield_to_que: done yielding to queue
+0.18.503.255 D slot process_toke: id  0 | task 0 | n_gen = 449, n_remaining = 1, next token:   310 ' to'
+0.18.503.258 D que    start_loop: waiting for new tasks
+0.18.503.258 D que    start_loop: processing new tasks
+0.18.503.260 D que  process_new_: processing task, id = 450
+0.18.503.262 D que    start_loop: update slots
+0.18.503.262 D srv  update_slots: posting NEXT_RESPONSE
+0.18.503.264 D que          post: new task, id = 451, front = 0
+0.18.503.267 D slot handle_last_: id  0 | task 0 | slot decode token, id=310, n_ctx = 8192, n_tokens = 461, truncated = 0
+0.18.503.270 D set_adapters_lora: adapters = 0000000000000000
+0.18.503.270 D adapters_lora_are_same: adapters = 0000000000000000
+0.18.503.270 D set_embeddings: value = 0
+0.18.503.271 D srv        decode: n_batch (effective) = 2048, off = 0
+0.18.503.271 D que  yield_to_que: yielding to queue
+0.18.503.279 D que  process_new_: processing task, id = 451
+0.18.503.280 D srv  process_sing: decoding, decline task, id_task = 451
+0.18.503.280 D que  process_new_: task declined, id = 451
+0.18.533.140 D que  yield_to_que: done yielding to queue
+0.18.533.455 D slot process_toke: id  0 | task 0 | stopped by limit, n_gen = 450, n_predict = 450
+0.18.533.458 D slot process_toke: id  0 | task 0 | n_gen = 450, n_remaining = 0, next token:  7948 ' warm'
+0.18.533.461 I slot print_timing: id  0 | task 0 | prompt eval time =     277.11 ms /    13 tokens (   21.32 ms per token,    46.91 tokens per second)
+0.18.533.462 I slot print_timing: id  0 | task 0 |        eval time =   14088.19 ms /   450 tokens (   31.38 ms per token,    31.87 tokens per second)
+0.18.533.463 I slot print_timing: id  0 | task 0 |       total time =   14365.31 ms /   463 tokens
+0.18.533.463 I slot print_timing: id  0 | task 0 |    graphs reused =        448
+0.18.533.481 D res          send: sending result for task id = 0
+0.18.533.482 D res          send: task id = 0 pushed to result queue
+0.18.533.485 I slot      release: id  0 | task 0 | stop processing: n_tokens = 462, truncated = 0
+0.18.533.486 D slot        reset: id  0 | task 0 | 
+0.18.533.490 D que    start_loop: waiting for new tasks
+0.18.533.490 D que    start_loop: processing new tasks
+0.18.533.491 D que  process_new_: processing task, id = 451
+0.18.533.492 D que    start_loop: update slots
+0.18.533.493 I srv  update_slots: all slots are idle
+0.18.533.493 D que    start_loop: waiting for new tasks
+0.18.533.505 D No parser definition detected, assuming pure content parser.0.18.534.770 D Parsed message: {"role":"assistant","content":"\n\n<think>\nThe user wants a long, detailed essay about the history of the transistor. Let me organize my thoughts on what to cover:\n\n1. Pre-history: The vacuum tube era, problems with tubes, early semiconductor research\n2. The Bell Labs team: Shockley, Bardeen, Brattain\n3. The discovery: December 1947, point-contact transistor\n4. The planar transistor: Kilby and Noyce\n5. The integrated circuit: How transistors led to ICs\n6. The evolution: From discrete to integrated, scaling (Moore's Law)\n7. The broader impact: Computing, communications, consumer electronics\n8. The Nobel Prize (1956)\n9. Modern era: CMOS, nanoscale transistors, post-silicon challenges\n10. Cultural and economic impact\n\nLet me write a thorough, well-structured essay that covers all these aspects in detail. I'll aim for something substantial - maybe 3000-4000 words to be truly \"long and detailed.\"\n</think>\n\n# The Transistor: A History of the Device That Reshaped the World\n\n## I. The Vacuum Tube Era and the Search for a Better Switch\n\nTo understand the transistor, one must first understand what it replaced. For nearly four decades, the vacuum tube—also called the thermionic valve or triode—was the fundamental building block of electronic amplification and switching. Invented by Lee De Forest in 1906 and refined through the 1920s and 1930s, the vacuum tube worked by heating a filament to emit electrons, which were then directed by a control grid toward a collector plate. By varying the voltage on the grid, an engineer could control the flow of electrons and thereby amplify a signal or switch a circuit on and off.\n\nThe vacuum tube was revolutionary. It made possible the radio, television, early computers, radar systems, and countless other technologies that defined the twentieth century. Yet it was also, by the standards of its own era, deeply flawed. Tubes were large, fragile, power-hungry, and slow to warm"}
+0.18.535.840 D srv          stop: all tasks already finished, no need to cancel
+0.18.535.845 D res  remove_waiti: remove task 0 from waiting list. current waiting = 1 (before remove)
+0.18.535.845 D srv          stop: all tasks already finished, no need to cancel

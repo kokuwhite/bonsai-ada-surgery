@@ -1,0 +1,54 @@
+FLASH_ATTN_EXT with the tile skip: ok 3007 fail 0
+18:28 === sparse speed: depths 192000 250000, sparse 8192,256,1024
+18:28 arm dense-shipped (): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+dense-shipped code   depth 192000 (evaluated 191010): prefill   521.7 tok/s  ttft 366.11s  decode   22.3 tok/s (400 tok)
+dense-shipped prose  depth 192000 (evaluated 512): prefill   283.5 tok/s  ttft   1.81s  decode   16.2 tok/s (400 tok)
+dense-shipped bash   depth 192000 (evaluated 516): prefill   286.6 tok/s  ttft   1.80s  decode   20.5 tok/s (400 tok)
+dense-shipped mean decode 19.7 tok/s
+dense-shipped code   depth 250000 (evaluated 248886): prefill   441.6 tok/s  ttft 563.64s  decode   15.4 tok/s (400 tok)
+dense-shipped prose  depth 250000 (evaluated 512): prefill   226.5 tok/s  ttft   2.26s  decode    9.0 tok/s (400 tok)
+dense-shipped bash   depth 250000 (evaluated 516): prefill   229.9 tok/s  ttft   2.24s  decode   13.6 tok/s (400 tok)
+dense-shipped mean decode 12.7 tok/s
+18:47 arm dense-fair (GGML_CUDA_DISABLE_GRAPHS=1 LLAMA_ARG_KQ_MASK_PACKED=0): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margin 1000 MiB
+18:55 === sparse speed: depths 192000 250000, sparse 8192,256,1024, all arms: BONSAI_LOOKUP=0
+18:56 arm dense-shipped (): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+19:08 === sparse speed: depths 192000 250000, sparse 8192,256,1024, all arms: BONSAI_LOOKUP=0
+19:08 arm dense-shipped (): health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB
+dense-shipped code   depth 192000 (evaluated 191010): prefill   522.2 tok/s  ttft 365.79s  decode   22.4 tok/s (400 tok)
+dense-shipped prose  depth 192000 (evaluated 512): prefill   283.8 tok/s  ttft   1.80s  decode   16.4 tok/s (400 tok)
+dense-shipped bash   depth 192000 (evaluated 516): prefill   288.5 tok/s  ttft   1.79s  decode   20.6 tok/s (400 tok)
+dense-shipped mean decode 19.8 tok/s
+dense-shipped code   depth 250000 (evaluated 248886): prefill   441.8 tok/s  ttft 563.40s  decode   14.1 tok/s (400 tok)
+dense-shipped prose  depth 250000 (evaluated 512): prefill   226.1 tok/s  ttft   2.26s  decode    9.1 tok/s (400 tok)
+dense-shipped bash   depth 250000 (evaluated 516): prefill   231.2 tok/s  ttft   2.23s  decode   13.6 tok/s (400 tok)
+dense-shipped mean decode 12.3 tok/s
+19:27 arm dense-fair (GGML_CUDA_DISABLE_GRAPHS=1 LLAMA_ARG_KQ_MASK_PACKED=0): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margin 1000 MiB
+dense-fair code   depth 192000 (evaluated 191010): prefill   525.3 tok/s  ttft 363.64s  decode   25.8 tok/s (400 tok)
+dense-fair prose  depth 192000 (evaluated 512): prefill   281.0 tok/s  ttft   1.82s  decode   18.8 tok/s (400 tok)
+dense-fair bash   depth 192000 (evaluated 516): prefill   284.2 tok/s  ttft   1.82s  decode   23.9 tok/s (400 tok)
+dense-fair mean decode 22.8 tok/s
+dense-fair code   depth 250000 (evaluated 248886): prefill   444.0 tok/s  ttft 560.53s  decode   15.3 tok/s (400 tok)
+dense-fair prose  depth 250000 (evaluated 512): prefill   223.5 tok/s  ttft   2.29s  decode    9.9 tok/s (400 tok)
+dense-fair bash   depth 250000 (evaluated 516): prefill   226.6 tok/s  ttft   2.28s  decode   14.9 tok/s (400 tok)
+dense-fair mean decode 13.4 tok/s
+19:45 arm sparse (GGML_CUDA_DISABLE_GRAPHS=1 LLAMA_ARG_KQ_MASK_PACKED=0 GGML_CUDA_FA_SPARSE=8192,256,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margin 1000 MiB
+sparse code   depth 192000 (evaluated 191010): prefill   525.8 tok/s  ttft 363.26s  decode   25.2 tok/s (400 tok)
+sparse prose  depth 192000 (evaluated 512): prefill   282.2 tok/s  ttft   1.81s  decode   16.8 tok/s (400 tok)
+sparse bash   depth 192000 (evaluated 516): prefill   285.0 tok/s  ttft   1.81s  decode   22.6 tok/s (400 tok)
+sparse mean decode 21.5 tok/s
+sparse code   depth 250000 (evaluated 248886): prefill   444.2 tok/s  ttft 560.27s  decode   15.1 tok/s (400 tok)
+sparse prose  depth 250000 (evaluated 512): prefill   225.2 tok/s  ttft   2.27s  decode   10.2 tok/s (400 tok)
+sparse bash   depth 250000 (evaluated 516): prefill   228.5 tok/s  ttft   2.26s  decode   15.3 tok/s (400 tok)
+sparse mean decode 13.5 tok/s
+20:03 === done
+20:04 === sparse speed: depths 192000 250000, sparse 8192,256,1024, all arms: 
+20:04 arm sparse (GGML_CUDA_DISABLE_GRAPHS=1 LLAMA_ARG_KQ_MASK_PACKED=0 GGML_CUDA_FA_SPARSE=8192,256,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margin 1000 MiB
+sparse code   depth 192000 (evaluated 191010): prefill   525.7 tok/s  ttft 363.33s  decode   17.2 tok/s (400 tok)
+sparse prose  depth 192000 (evaluated 512): prefill   272.4 tok/s  ttft   1.88s  decode   11.3 tok/s (400 tok)
+sparse bash   depth 192000 (evaluated 516): prefill   275.6 tok/s  ttft   1.87s  decode   14.6 tok/s (400 tok)
+sparse mean decode 14.4 tok/s
+sparse code   depth 250000 (evaluated 248886): prefill   444.2 tok/s  ttft 560.28s  decode   11.1 tok/s (400 tok)
+sparse prose  depth 250000 (evaluated 512): prefill   214.4 tok/s  ttft   2.39s  decode    6.6 tok/s (400 tok)
+sparse bash   depth 250000 (evaluated 516): prefill   217.4 tok/s  ttft   2.37s  decode    9.8 tok/s (400 tok)
+sparse mean decode 9.2 tok/s
+20:23 === done

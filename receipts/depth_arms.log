@@ -110,3 +110,81 @@ tiergraphs-lkoff bash   depth 192000 (evaluated 516): prefill   288.3 tok/s  ttf
 tiergraphs-lkoff mean decode 25.0 tok/s
 00:07 tiergraphs-lkoff: 'one sync per K write' warnings: 0
 00:07 === tgateoff done
+03:18 === depth arms optime6: depths 192000 (bench/arms/sparse_optiming6.txt)
+03:18 arm op-dense-lkon (C:\Users\pwall\AppData\Local\Temp\root-sparse6; GGML_CUDA_DISABLE_GRAPHS=1 LLAMA_ARG_KQ_MASK_PACKED=0 GGML_CUDA_OP_TIMING=1): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margi
+op-dense-lkon code   depth 192000 (evaluated 191010): prefill   511.4 tok/s  ttft 373.51s  decode   24.6 tok/s (400 tok)
+op-dense-lkon prose  depth 192000 (evaluated 512): prefill   275.6 tok/s  ttft   1.86s  decode   18.0 tok/s (400 tok)
+op-dense-lkon bash   depth 192000 (evaluated 516): prefill   278.9 tok/s  ttft   1.85s  decode   22.6 tok/s (400 tok)
+op-dense-lkon mean decode 21.7 tok/s
+op-dense-lkon timing: 7.18.984.410 W op timing over 100 graphs: 25.114 ms per graph
+op-dense-lkon timing: 7.18.984.414 W      5.598 ms/graph   22.3%  x4     ROPE f32 cols=4
+op-dense-lkon timing: 7.18.984.414 W      3.261 ms/graph   13.0%  x4     FLASH_ATTN_EXT f32 cols=24
+op-dense-lkon timing: 7.18.984.417 W      2.718 ms/graph   10.8%  x25    MUL_MAT ptq1_0 5120x17408 cols=5
+op-dense-lkon timing: 7.18.984.417 W      1.783 ms/graph    7.1%  x12    MUL_MAT ptq1_0 17408x5120 cols=5
+op-dense-lkon timing: 7.18.984.418 W      1.226 ms/graph    4.9%  x48    CPY f32 cols=1
+op-dense-lkon timing: 7.18.984.419 W      0.713 ms/graph    2.8%  x125   RESHAPE f32 cols=5
+op-dense-lkon timing: 7.18.984.419 W      0.650 ms/graph    2.6%  x9     MUL_MAT ptq1_0 5120x10240 cols=5
+op-dense-lkon timing: 7.18.984.420 W      0.530 ms/graph    2.1%  x51    MUL f32 cols=5
+op-dense-lkon timing: 7.18.984.420 W      0.528 ms/graph    2.1%  x12    MUL_MAT ptq1_0 6144x5120 cols=5
+op-dense-lkon timing: 7.18.984.421 W      0.459 ms/graph    1.8%  x9     CONT f32 cols=3
+op-dense-lkon timing: 7.18.984.421 W      0.442 ms/graph    1.8%  x9     MUL_MAT ptq1_0 5120x6144 cols=5
+op-dense-lkon timing: 7.18.984.422 W      0.423 ms/graph    1.7%  x9     RESHAPE f32 cols=10240
+03:25 op-dense-lkon: 'one sync per K write' warnings: 0
+03:26 arm op-sparse-lkon (C:\Users\pwall\AppData\Local\Temp\root-sparse6; GGML_CUDA_DISABLE_GRAPHS=1 LLAMA_ARG_KQ_MASK_PACKED=0 GGML_CUDA_OP_TIMING=1 GGML_CUDA_FA_SPARSE=8192,256,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margi
+op-sparse-lkon code   depth 192000 (evaluated 191010): prefill   510.7 tok/s  ttft 373.98s  decode   15.8 tok/s (400 tok)
+op-sparse-lkon prose  depth 192000 (evaluated 512): prefill   264.9 tok/s  ttft   1.93s  decode   10.1 tok/s (400 tok)
+op-sparse-lkon bash   depth 192000 (evaluated 516): prefill   266.7 tok/s  ttft   1.94s  decode   13.4 tok/s (400 tok)
+op-sparse-lkon mean decode 13.1 tok/s
+op-sparse-lkon timing: 7.58.089.156 W op timing over 100 graphs: 43.132 ms per graph
+op-sparse-lkon timing: 7.58.089.161 W     30.814 ms/graph   71.4%  x4     FLASH_ATTN_EXT f32 cols=24
+op-sparse-lkon timing: 7.58.089.162 W      2.545 ms/graph    5.9%  x25    MUL_MAT ptq1_0 5120x17408 cols=5
+op-sparse-lkon timing: 7.58.089.162 W      1.694 ms/graph    3.9%  x12    MUL_MAT ptq1_0 17408x5120 cols=5
+op-sparse-lkon timing: 7.58.089.163 W      0.747 ms/graph    1.7%  x48    CPY f32 cols=1
+op-sparse-lkon timing: 7.58.089.164 W      0.588 ms/graph    1.4%  x9     MUL_MAT ptq1_0 5120x10240 cols=5
+op-sparse-lkon timing: 7.58.089.164 W      0.491 ms/graph    1.1%  x12    MUL_MAT ptq1_0 6144x5120 cols=5
+op-sparse-lkon timing: 7.58.089.165 W      0.413 ms/graph    1.0%  x0     MUL_MAT ptq1_0 5120x248320 cols=1
+op-sparse-lkon timing: 7.58.089.165 W      0.372 ms/graph    0.9%  x9     MUL_MAT ptq1_0 5120x6144 cols=5
+op-sparse-lkon timing: 7.58.089.166 W      0.299 ms/graph    0.7%  x51    MUL f32 cols=5
+op-sparse-lkon timing: 7.58.089.167 W      0.296 ms/graph    0.7%  x9     CONT f32 cols=3
+op-sparse-lkon timing: 7.58.089.167 W      0.279 ms/graph    0.6%  x9     RESHAPE f32 cols=10240
+op-sparse-lkon timing: 7.58.089.168 W      0.279 ms/graph    0.6%  x19    MUL_MAT bf16 5120x48 cols=5
+03:34 op-sparse-lkon: 'one sync per K write' warnings: 0
+03:34 arm op-dense-lkoff (C:\Users\pwall\AppData\Local\Temp\root-sparse6; BONSAI_LOOKUP=0 GGML_CUDA_DISABLE_GRAPHS=1 LLAMA_ARG_KQ_MASK_PACKED=0 GGML_CUDA_OP_TIMING=1): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margi
+op-dense-lkoff code   depth 192000 (evaluated 191010): prefill   511.1 tok/s  ttft 373.75s  decode   24.6 tok/s (400 tok)
+op-dense-lkoff prose  depth 192000 (evaluated 512): prefill   273.6 tok/s  ttft   1.87s  decode   18.0 tok/s (400 tok)
+op-dense-lkoff bash   depth 192000 (evaluated 516): prefill   279.6 tok/s  ttft   1.85s  decode   22.7 tok/s (400 tok)
+op-dense-lkoff mean decode 21.8 tok/s
+op-dense-lkoff timing: 7.19.383.312 W op timing over 100 graphs: 25.242 ms per graph
+op-dense-lkoff timing: 7.19.383.318 W      5.336 ms/graph   21.1%  x4     ROPE f32 cols=4
+op-dense-lkoff timing: 7.19.383.318 W      3.262 ms/graph   12.9%  x4     FLASH_ATTN_EXT f32 cols=24
+op-dense-lkoff timing: 7.19.383.320 W      2.725 ms/graph   10.8%  x25    MUL_MAT ptq1_0 5120x17408 cols=5
+op-dense-lkoff timing: 7.19.383.321 W      1.753 ms/graph    6.9%  x12    MUL_MAT ptq1_0 17408x5120 cols=5
+op-dense-lkoff timing: 7.19.383.322 W      1.253 ms/graph    5.0%  x48    CPY f32 cols=1
+op-dense-lkoff timing: 7.19.383.323 W      0.864 ms/graph    3.4%  x125   RESHAPE f32 cols=5
+op-dense-lkoff timing: 7.19.383.323 W      0.693 ms/graph    2.7%  x9     MUL_MAT ptq1_0 5120x10240 cols=5
+op-dense-lkoff timing: 7.19.383.324 W      0.555 ms/graph    2.2%  x51    MUL f32 cols=5
+op-dense-lkoff timing: 7.19.383.324 W      0.548 ms/graph    2.2%  x12    MUL_MAT ptq1_0 6144x5120 cols=5
+op-dense-lkoff timing: 7.19.383.325 W      0.446 ms/graph    1.8%  x9     MUL_MAT ptq1_0 5120x6144 cols=5
+op-dense-lkoff timing: 7.19.383.325 W      0.437 ms/graph    1.7%  x9     CONT f32 cols=3
+op-dense-lkoff timing: 7.19.383.326 W      0.413 ms/graph    1.6%  x0     MUL_MAT ptq1_0 5120x248320 cols=1
+03:41 op-dense-lkoff: 'one sync per K write' warnings: 0
+03:42 arm op-sparse-lkoff (C:\Users\pwall\AppData\Local\Temp\root-sparse6; BONSAI_LOOKUP=0 GGML_CUDA_DISABLE_GRAPHS=1 LLAMA_ARG_KQ_MASK_PACKED=0 GGML_CUDA_OP_TIMING=1 GGML_CUDA_FA_SPARSE=8192,256,1024 GGML_CUDA_FA_SPARSE_FAST=1 GGML_CUDA_KV_TIER_STAGE_MIN_Q=9): health=1; kv     tiered: cells 0..121344 in VRAM, 121344..262144 in system RAM (VRAM margi
+op-sparse-lkoff code   depth 192000 (evaluated 191010): prefill   511.0 tok/s  ttft 373.79s  decode   15.8 tok/s (400 tok)
+op-sparse-lkoff prose  depth 192000 (evaluated 512): prefill   264.7 tok/s  ttft   1.93s  decode   10.3 tok/s (400 tok)
+op-sparse-lkoff bash   depth 192000 (evaluated 516): prefill   268.8 tok/s  ttft   1.92s  decode   13.1 tok/s (400 tok)
+op-sparse-lkoff mean decode 13.1 tok/s
+op-sparse-lkoff timing: 7.57.968.041 W op timing over 100 graphs: 43.106 ms per graph
+op-sparse-lkoff timing: 7.57.968.045 W     30.822 ms/graph   71.5%  x4     FLASH_ATTN_EXT f32 cols=24
+op-sparse-lkoff timing: 7.57.968.046 W      2.547 ms/graph    5.9%  x25    MUL_MAT ptq1_0 5120x17408 cols=5
+op-sparse-lkoff timing: 7.57.968.047 W      1.667 ms/graph    3.9%  x12    MUL_MAT ptq1_0 17408x5120 cols=5
+op-sparse-lkoff timing: 7.57.968.049 W      0.742 ms/graph    1.7%  x48    CPY f32 cols=1
+op-sparse-lkoff timing: 7.57.968.049 W      0.589 ms/graph    1.4%  x9     MUL_MAT ptq1_0 5120x10240 cols=5
+op-sparse-lkoff timing: 7.57.968.050 W      0.488 ms/graph    1.1%  x12    MUL_MAT ptq1_0 6144x5120 cols=5
+op-sparse-lkoff timing: 7.57.968.050 W      0.413 ms/graph    1.0%  x0     MUL_MAT ptq1_0 5120x248320 cols=1
+op-sparse-lkoff timing: 7.57.968.051 W      0.371 ms/graph    0.9%  x9     MUL_MAT ptq1_0 5120x6144 cols=5
+op-sparse-lkoff timing: 7.57.968.051 W      0.304 ms/graph    0.7%  x51    MUL f32 cols=5
+op-sparse-lkoff timing: 7.57.968.052 W      0.296 ms/graph    0.7%  x9     CONT f32 cols=3
+op-sparse-lkoff timing: 7.57.968.053 W      0.281 ms/graph    0.7%  x9     RESHAPE f32 cols=10240
+op-sparse-lkoff timing: 7.57.968.053 W      0.274 ms/graph    0.6%  x19    MUL_MAT bf16 5120x48 cols=5
+03:49 op-sparse-lkoff: 'one sync per K write' warnings: 0
+03:49 === optime6 done

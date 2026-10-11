@@ -1,0 +1,25 @@
+07:56 === ubatch at depth: ubs 512 1024 2048, depths 128000 192000, root .
+07:56 ub 512: health=1; kv     tiered: cells 0..129024 in VRAM, 129024..262144 in system RAM (VRAM margin 1000 MiB); shared 
+ub512 code   depth 128000 (evaluated 127340): prefill   654.0 tok/s  ttft 194.71s  decode   74.9 tok/s (400 tok)
+ub512 prose  depth 128000 (evaluated 512): prefill   381.7 tok/s  ttft   1.34s  decode   59.1 tok/s (400 tok)
+ub512 bash   depth 128000 (evaluated 516): prefill   384.0 tok/s  ttft   1.34s  decode   74.8 tok/s (400 tok)
+ub512 mean decode 69.6 tok/s
+ub512 code   depth 192000 (evaluated 191010): prefill   523.9 tok/s  ttft 364.60s  decode   33.4 tok/s (400 tok)
+ub512 prose  depth 192000 (evaluated 512): prefill   280.6 tok/s  ttft   1.82s  decode   16.3 tok/s (400 tok)
+ub512 bash   depth 192000 (evaluated 516): prefill   287.6 tok/s  ttft   1.79s  decode   22.4 tok/s (400 tok)
+ub512 mean decode 24.1 tok/s
+08:07 ub 1024: health=1; kv     tiered: cells 0..136704 in VRAM, 136704..262144 in system RAM (VRAM margin 1000 MiB); shared 
+ub1024 code   depth 128000 (evaluated 127340): prefill   417.7 tok/s  ttft 304.89s  decode   73.2 tok/s (400 tok)
+ub1024 prose  depth 128000 (evaluated 1024): prefill   302.2 tok/s  ttft   3.39s  decode   60.7 tok/s (400 tok)
+ub1024 bash   depth 128000 (evaluated 1028): prefill   304.2 tok/s  ttft   3.38s  decode   68.4 tok/s (400 tok)
+ub1024 mean decode 67.4 tok/s
+ub1024 code   depth 192000 (evaluated 191010): prefill   361.4 tok/s  ttft 528.53s  decode   28.8 tok/s (400 tok)
+ub1024 prose  depth 192000 (evaluated 1024): prefill   242.7 tok/s  ttft   4.22s  decode   17.3 tok/s (400 tok)
+ub1024 bash   depth 192000 (evaluated 1028): prefill   244.2 tok/s  ttft   4.21s  decode   22.0 tok/s (400 tok)
+ub1024 mean decode 22.7 tok/s
+08:22 ub 2048: health=1; kv     tiered: cells 0..152064 in VRAM, 152064..262144 in system RAM (VRAM margin 1000 MiB); shared 
+ub2048 code   depth 128000 (evaluated 127340): prefill   100.2 tok/s  ttft 1270.34s  decode   16.9 tok/s (400 tok)
+ub2048 prose  depth 128000 (evaluated 2044): prefill    91.3 tok/s  ttft  22.38s  decode   13.6 tok/s (400 tok)
+ub2048 bash   depth 128000 (evaluated 2048): prefill    91.3 tok/s  ttft  22.43s  decode   15.3 tok/s (400 tok)
+ub2048 mean decode 15.3 tok/s
+08:47 stopped by hand during ub2048 at 192k (ub2048 128k already 100 tok/s prefill; 512 is best)

@@ -1,0 +1,16 @@
+09:14 run 1 chunk=0 health=1
+{"tag": "r1-off", "depth": 0, "kind": "edit", "item": "csv.py", "tps": 150.6, "n": 237, "draft_n": 282, "draft_acc": 197, "sha": "34626552c9d9", "wall": 3.1}
+09:15 run 1 chunk-path lines in the server log: 0
+09:15 run 2 chunk=32768 health=1
+{"tag": "r2-on", "depth": 0, "kind": "edit", "item": "csv.py", "tps": 150.6, "n": 237, "draft_n": 282, "draft_acc": 197, "sha": "34626552c9d9", "wall": 3.1}
+09:16 run 2 chunk-path lines in the server log: 0
+09:16 run 3 chunk=0 health=1
+{"tag": "r3-off", "depth": 0, "kind": "edit", "item": "csv.py", "tps": 152.8, "n": 237, "draft_n": 282, "draft_acc": 197, "sha": "34626552c9d9", "wall": 3.1}
+09:17 run 3 chunk-path lines in the server log: 0
+09:17 run 4 chunk=32768 health=1
+{"tag": "r4-on", "depth": 0, "kind": "edit", "item": "csv.py", "tps": 151.3, "n": 237, "draft_n": 282, "draft_acc": 197, "sha": "34626552c9d9", "wall": 3.1}
+09:18 run 4 chunk-path lines in the server log: 0
+r1-off vs r3-off: 11/11 identical; differ: 
+r2-on vs r4-on: 11/11 identical; differ: 
+r1-off vs r2-on: 11/11 identical; differ: 
+09:18 === done

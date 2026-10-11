@@ -1,0 +1,6 @@
+=== 15:00 arm mtp cells 95000 depth 138000 health=1
+spec   draft 2 (4 past the VRAM line), draft window 16384
+code   think=0 tools=0: decode   25.2 tok/s (400 tok, evaluated 137341, finish length, tool_calls 0)
+code   think=0 tools=1: decode   27.3 tok/s (50 tok, evaluated 137648, finish tool_calls, tool_calls 1)
+prose  think=0 tools=0: decode   19.4 tok/s (400 tok, evaluated 137337, finish length, tool_calls 0)
+prose  think=0 tools=1: decode   19.5 tok/s (400 tok, evaluated 137644, finish length, tool_calls 0)
