@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # 12 GB recipe with the PR #13 engine: the current launcher (f16 mask) against the launcher that turns the packed KQ
 # mask on and adds the 240 MiB it saves to the VRAM line. Decode and prefill at 131k and 180k (quick_tps).
-#   bash bench/mask12_ab.sh <root f16-mask launcher> <root packed-mask launcher>   -> receipts/mask12_ab.log
+#   bash bench/mask12_ab.sh <root f16-mask launcher> <root packed-mask launcher>   -> docs/receipts/mask12_ab.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; LOG=receipts/mask12_ab.log
+REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; LOG=docs/receipts/mask12_ab.log
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; powershell -NoProfile -Command "Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force" >/dev/null 2>&1; sleep 4; }
 for D in 131000 180000; do for arm in "f16|$1" "packed|$2"; do NAME=${arm%%|*}; ROOT="$(cygpath -w "${arm#*|}")"

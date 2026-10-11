@@ -6,9 +6,9 @@
 #   t107: 107 varied tools of the same total size (106.7k chars), Pi's fields, about 64k tokens in all,
 #         server-default sampling and greedy;
 #   t2:   2 tools, Pi's fields, about 64k tokens, server-default sampling (same depth without the tool list).
-#   bash bench/issue7_tools_ab.sh   -> receipts/issue7_tools_ab.log, receipts/agent_depth.jsonl (tags i7b-*)
+#   bash bench/issue7_tools_ab.sh   -> docs/receipts/issue7_tools_ab.log, docs/receipts/agent_depth.jsonl (tags i7b-*)
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/issue7_tools_ab.log
+REPO="$(pwd -W)"; LOG=docs/receipts/issue7_tools_ab.log
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }

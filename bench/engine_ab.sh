@@ -2,9 +2,9 @@
 # Engine A/B on the served recipe: the product bin (A) against a candidate root (B: its own bin\, same launcher,
 # same model). Alternated A B A B, MTP on and off, quick_tps at the given depths; then greedy identity
 # (release_smoke.sh). Layer off.
-#   bash bench/engine_ab.sh <candidate-root> <tag> [depths]   -> receipts/engine_ab_<tag>.log
+#   bash bench/engine_ab.sh <candidate-root> <tag> [depths]   -> docs/receipts/engine_ab_<tag>.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; CAND="$1"; TAG="$2"; DEPTHS="${3:-4000 32000}"; LOG="receipts/engine_ab_$TAG.log"
+REPO="$(pwd -W)"; CAND="$1"; TAG="$2"; DEPTHS="${3:-4000 32000}"; LOG="docs/receipts/engine_ab_$TAG.log"
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }

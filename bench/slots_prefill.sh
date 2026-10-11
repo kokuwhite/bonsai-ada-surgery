@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Prefill cost of extra slots / a unified KV cache: fresh 32k prompt (quick_tps first line), 12 GB recipe, layer off.
-#   bash bench/slots_prefill.sh <root with BONSAI_SLOTS support>   -> receipts/slots_prefill.log
+#   bash bench/slots_prefill.sh <root with BONSAI_SLOTS support>   -> docs/receipts/slots_prefill.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"; LOG=receipts/slots_prefill.log
+REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"; LOG=docs/receipts/slots_prefill.log
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 for A in "np1|BONSAI_VRAM_MARGIN=1300" "np1kvu|BONSAI_VRAM_MARGIN=1300 LLAMA_ARG_KV_UNIFIED=1" "np2|BONSAI_VRAM_MARGIN=1300 BONSAI_SLOTS=2" "np2kvu|BONSAI_VRAM_MARGIN=1300 BONSAI_SLOTS=2 LLAMA_ARG_KV_UNIFIED=1" "np1-again|BONSAI_VRAM_MARGIN=1300"; do
   NAME=${A%%|*}; ENVS=${A#*|}

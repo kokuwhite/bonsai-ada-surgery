@@ -28,7 +28,7 @@ Question: below the VRAM line, how close is one decode step to the time the card
 3 tokens: the PTQ1_0 3-column kernel takes 12.1 ms (74 %). One avoidable item was the gated-delta-net conv-state
 concat: 48 calls of 14 us in the generic non-contiguous kernel (0.68 ms per step). The engine already had a
 transpose kernel for this exact layout, enabled only on GB10. Patch 0050 enables it on every NVIDIA card:
-`bench/concat_ab.sh`, `receipts/concat_ab.log`: decode +1.4 % (91.8 vs 90.0 / 91.0 tok/s at depth 0, 97.4 vs
+`bench/concat_ab.sh`, `docs/receipts/concat_ab.log`: decode +1.4 % (91.8 vs 90.0 / 91.0 tok/s at depth 0, 97.4 vs
 96.1 / 95.8 at 16k), the same text in 6/6 greedy answers.
 
 ## Prefill, for comparison

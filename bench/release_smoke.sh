@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Release smoke test: greedy outputs of the current product bin vs a clean unzip of a new bundle, same model, the
 # launcher's served recipe (262k, tiered q8_0 KV, MTP), layer off. Then the budget report probe on the new bundle.
-#   bash bench/release_smoke.sh <unzipped-bundle-dir> [tag]   -> receipts/release_smoke_<tag>.log
+#   bash bench/release_smoke.sh <unzipped-bundle-dir> [tag]   -> docs/receipts/release_smoke_<tag>.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; NEW="$1"; TAG="${2:-new}"; LOG="receipts/release_smoke_$TAG.log"
+REPO="$(pwd -W)"; NEW="$1"; TAG="${2:-new}"; LOG="docs/receipts/release_smoke_$TAG.log"
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 KEY="$REPO\\artifacts\\api_key.txt"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }

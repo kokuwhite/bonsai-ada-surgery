@@ -3,9 +3,9 @@
 # acceptance 0.378 (lookup on); yesterday, before lookup was the default: 45 tok/s at 0.49. Served recipe with the layer
 # on (as Milor runs it), one arm with lookup (default) and one with BONSAI_LOOKUP=0; agent_depth_probe at 60k with 30
 # MCP-like tools, thinking on, greedy and sampled.
-#   bash bench/issue7_lookup_ab.sh   -> receipts/issue7_lookup_ab.log, receipts/agent_depth.jsonl (tags i7-lookup, i7-nolookup)
+#   bash bench/issue7_lookup_ab.sh   -> docs/receipts/issue7_lookup_ab.log, docs/receipts/agent_depth.jsonl (tags i7-lookup, i7-nolookup)
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/issue7_lookup_ab.log
+REPO="$(pwd -W)"; LOG=docs/receipts/issue7_lookup_ab.log
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }

@@ -2,7 +2,7 @@
 
 A small, self-contained benchmark for the capability that single-turn reasoning benchmarks miss and that aggressive
 weight compression loses first: long, exact work. It was built while diagnosing Bonsai 2 27B (1.58-bit) against its
-teacher; see `research/quality-20260929/REPORT.md` for what it found. It runs against any OpenAI-compatible chat
+teacher; see `docs/research/quality-20260929/REPORT.md` for what it found. It runs against any OpenAI-compatible chat
 endpoint and can pair two endpoints request by request (for example a raw server and the same server behind the
 Bonsai layer, or two quantizations of one model).
 

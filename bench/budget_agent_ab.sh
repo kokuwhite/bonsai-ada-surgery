@@ -3,9 +3,9 @@
 # template and rules unchanged. Raw server (layer off), product launcher otherwise. Per arm: the suite's workspace
 # tasks (bench/plans/tools_workspace.json, 5 tasks x 3 seeds), then the tool-call syntax stress test. HumanEval with
 # the same budgets: 2048 -> 160/164 at 913 mean tokens, 4096 -> 160/164 at 1178 (default 160/164 at 2312).
-#   bash bench/budget_agent_ab.sh   -> receipts/budget_agent_ab.log, artifacts/eval/budget_<arm>/   (BUDGETS="default 4096 2048")
+#   bash bench/budget_agent_ab.sh   -> docs/receipts/budget_agent_ab.log, artifacts/eval/budget_<arm>/   (BUDGETS="default 4096 2048")
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/budget_agent_ab.log; PLAN=${PLAN:-bench/plans/tools_workspace.json}
+REPO="$(pwd -W)"; LOG=docs/receipts/budget_agent_ab.log; PLAN=${PLAN:-bench/plans/tools_workspace.json}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &

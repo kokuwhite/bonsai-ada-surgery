@@ -2,9 +2,9 @@
 # PrismML #346 on an RTX 4070: illegal memory access after a long prefill with q4_0 K/V + FA on prism-b10770.
 # The reporter's command (no drafter, default -b/-ub, 65k slot), a needle prompt of ~30k and ~45k tokens
 # (code word at the start, a repeated filler sentence, the question at the end), max_tokens 3000.
-# Arms: b10770 as is, b10770 with bf197c43d (#312) reverted. BALLAST_MIB=N holds N MiB of VRAM first.   -> receipts/prism346.log
+# Arms: b10770 as is, b10770 with bf197c43d (#312) reverted. BALLAST_MIB=N holds N MiB of VRAM first.   -> docs/receipts/prism346.log
 cd "$(dirname "$0")/.." || exit 1
-MODEL="$(pwd -W)/models/Ternary-Bonsai-2-27B-PTQ1_0.gguf"; LOG=receipts/prism346.log; RT=$(pwd)/bin
+MODEL="$(pwd -W)/models/Ternary-Bonsai-2-27B-PTQ1_0.gguf"; LOG=docs/receipts/prism346.log; RT=$(pwd)/bin
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 # BALLAST_MIB=N: hold N MiB of VRAM in a second process (tools/vram-ballast), so the server sees a smaller card
 if [ -n "$BALLAST_MIB" ]; then

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # int8 score step evaluation: operator tests, kernel timing on the served prefill shape, KL against today's kernel.
-#   bash bench/int8_eval.sh <int8-build-bin> [after-pattern-file]   -> receipts/int8_eval.log
+#   bash bench/int8_eval.sh <int8-build-bin> [after-pattern-file]   -> docs/receipts/int8_eval.log
 cd "$(dirname "$0")/.." || exit 1
-BIN="$1"; LOG=receipts/int8_eval.log
+BIN="$1"; LOG=docs/receipts/int8_eval.log
 WBIN=$(cygpath -w "$BIN")
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 say "=== int8 eval, build $WBIN"

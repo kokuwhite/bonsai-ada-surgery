@@ -10,7 +10,7 @@ measurable quality change (KL by position against today's kernel, HumanEval and 
 
 ## Why the gain is there
 
-1. **Attention is most of the prefill cost at depth.** One 159k prefill (`receipts/prefill_depth_fit.txt`) fits
+1. **Attention is most of the prefill cost at depth.** One 159k prefill (`docs/receipts/prefill_depth_fit.txt`) fits
    0.509 ms + 0.0181 ms per 1k of depth for each prefill token. The depth term is 53% of the cost at 32k, 82% at
    130k and 85% at 158k.
 2. **The score step is the slow half of attention.** In `fattn-mma-f16.cuh`, the score step (K times Q) uses fp16
@@ -67,7 +67,7 @@ What we found on the way, and what we do next: below the tiered-KV line, the att
 the depth cost (0.012 ms per token for each 1k of depth; the kernel alone is about 0.011). When prefill crosses the
 line (119,040 cells on the 12 GB recipe), the cost per token jumps by about 0.67 ms at once and then grows twice as
 fast. At 130k that step is about 30% of the prefill time. `bench/tier_step_probe.sh` moves the line to 16k and
-changes one thing for each arm, to find the cause (`receipts/tier_step.log`):
+changes one thing for each arm, to find the cause (`docs/receipts/tier_step.log`):
 
 | Line at 16k, prefill to 40k | Cost per token just past the line | Prefill, tok/s |
 | --- | ---: | ---: |
@@ -85,7 +85,7 @@ are in system RAM. The quantizing `set_rows` kernel writes each row in small pie
 Patch 0041 makes those writes go to VRAM first: `set_rows` writes through the all-VRAM alias (the new host-part
 rows land in the staging buffer), and a write-back kernel copies them to their RAM pages as whole 16-byte stores.
 It also copies the host rows of the next attention layer into staging on a second stream while the layers before it
-compute. Result with the line at 16k, prefill to 40k (`receipts/tier_ab.log`): 717 -> 983 tok/s, the same as the
+compute. Result with the line at 16k, prefill to 40k (`docs/receipts/tier_ab.log`): 717 -> 983 tok/s, the same as the
 all-VRAM cache (990); without the write redirect 721, without the prefetch 967; greedy text identical to 0040.
 
 ## Route (as planned)

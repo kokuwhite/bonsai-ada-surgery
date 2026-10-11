@@ -2,10 +2,10 @@
 # V skip in the vec decode kernel (GGML_CUDA_FA_V_SKIP=1: a warp skips the V rows of its 32 cells when every weight is
 # below exp(-20) of the running maximum): product settings (12 GB recipe, graphs as shipped, lookup on), layer off,
 # off vs on. Per arm: quick_tps at SPEED_DEPTH, code_needle (exact copies) and needle_depth (12 facts) at DEPTH.
-#   bash bench/vskip_ab.sh <root with the engine>   -> receipts/vskip_ab.{log,jsonl}
+#   bash bench/vskip_ab.sh <root with the engine>   -> docs/receipts/vskip_ab.{log,jsonl}
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"
-LOG=receipts/vskip_ab.log; OUT=receipts/vskip_ab.jsonl; DEPTH=${DEPTH:-160000}; SPEED_DEPTH=${SPEED_DEPTH:-192000}; SP=${SPARSE:-8192,256,1024}; SINKS=${SINKS:-1024}
+LOG=docs/receipts/vskip_ab.log; OUT=docs/receipts/vskip_ab.jsonl; DEPTH=${DEPTH:-160000}; SPEED_DEPTH=${SPEED_DEPTH:-192000}; SP=${SPARSE:-8192,256,1024}; SINKS=${SINKS:-1024}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 rm -f logs/ramguard.stop
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ramguard.ps1 -Names llama-server -StopFile logs/ramguard.stop &

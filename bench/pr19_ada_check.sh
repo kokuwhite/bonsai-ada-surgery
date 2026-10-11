@@ -3,10 +3,10 @@
 # one binary. (1) test-backend-ops FLASH_ATTN_EXT off / 256 / 768; (2) one server session per arm through
 # 4k -> 64k -> 128k -> 192k -> 250k (quick_tps: first line = prefill of the new depth, then 2 follow-ups), lowest free
 # VRAM; (3) texts with drafting + lookup at 64k and 160k; (4) fresh long prompts with the chunk on.
-#   bash bench/pr19_ada_check.sh <root>   -> receipts/pr19_ada.log, receipts/pr19_ada.jsonl
+#   bash bench/pr19_ada_check.sh <root>   -> docs/receipts/pr19_ada.log, docs/receipts/pr19_ada.jsonl
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"
-LOG=receipts/pr19_ada.log; OUT=receipts/pr19_ada.jsonl; CHUNK=${PR19_CHUNK:-32768}
+LOG=docs/receipts/pr19_ada.log; OUT=docs/receipts/pr19_ada.jsonl; CHUNK=${PR19_CHUNK:-32768}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; powershell -NoProfile -Command "Get-Process llama-server -ErrorAction SilentlyContinue | Where-Object { \$_.Path -like '$ROOT\bin\*' } | Stop-Process -Force" >/dev/null 2>&1; sleep 4; }
 start_srv() { # NAME "ENVS"
@@ -59,6 +59,6 @@ for d in sorted({k[0] for k in by}):
 EOF
 # (4) fresh long prompts with the chunk on
 bash bench/one_token_ab.sh "pr19-chunk|$ROOT|BONSAI_TIER=1,BONSAI_CTX=262144,GGML_CUDA_FA_CHUNK=$CHUNK" > logs/pr19_onetoken.run.log 2>&1
-grep -A6 "arm pr19-chunk" receipts/one_token_ab.log | tail -6 | tee -a "$LOG"
+grep -A6 "arm pr19-chunk" docs/receipts/one_token_ab.log | tail -6 | tee -a "$LOG"
 stop_srv
 say "=== done"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Issue #7: bench/cache_reuse_repro.py on the product server (12 GB recipe, layer off).
-#   bash bench/cache_reuse_repro.sh [tag]   -> receipts/cache_reuse_repro.jsonl, logs/cache_reuse.*.log
+#   bash bench/cache_reuse_repro.sh [tag]   -> docs/receipts/cache_reuse_repro.jsonl, logs/cache_reuse.*.log
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; TAG=${1:-product}
 powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1

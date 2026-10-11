@@ -2,9 +2,9 @@
 # Patch 0050: the transpose concat path for the gated-delta-net conv state on every NVIDIA card (was GB10 only) vs
 # the product engine. Product launcher (12 GB recipe), drafting on, layer off. Arms: product root, candidate, product.
 # Per arm: decode at depth 0 and 16k (bench/quick_tps.py) and 6 greedy answers for identity.
-#   bash bench/concat_ab.sh <candidate root>   -> receipts/concat_ab.log, logs/catab_<arm>.answers.jsonl
+#   bash bench/concat_ab.sh <candidate root>   -> docs/receipts/concat_ab.log, logs/catab_<arm>.answers.jsonl
 cd "$(dirname "$0")/.." || exit 1
-ROOT="$(pwd -W)"; CAND="$1"; LOG=receipts/concat_ab.log; QT=bench/quick_tps.py
+ROOT="$(pwd -W)"; CAND="$1"; LOG=docs/receipts/concat_ab.log; QT=bench/quick_tps.py
 MODEL="$ROOT\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() {

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # PR #13 on Ada (RTX 4070, 12 GB recipe): the packed KQ mask with MTP drafting + lookup at 32k and 64k (texts against
 # the f16 mask), the VRAM it saves at a pinned line, fresh long prompts with it on, and the release smoke of the new
-# engine with its default switches.   bash bench/pr13_ada_check.sh <root>   -> receipts/pr13_ada.log, receipts/pr13_ada.jsonl
+# engine with its default switches.   bash bench/pr13_ada_check.sh <root>   -> docs/receipts/pr13_ada.log, docs/receipts/pr13_ada.jsonl
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"; LOG=receipts/pr13_ada.log; OUT=receipts/pr13_ada.jsonl
+REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"; LOG=docs/receipts/pr13_ada.log; OUT=docs/receipts/pr13_ada.jsonl
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; powershell -NoProfile -ExecutionPolicy Bypass -File ../mirai-s-serve/tooling/stop.ps1 >/dev/null 2>&1; powershell -NoProfile -Command "Get-Process llama-server -ErrorAction SilentlyContinue | Where-Object { \$_.Path -like '$ROOT\bin\*' } | Stop-Process -Force" >/dev/null 2>&1; sleep 4; }
 start_srv() { # NAME "ENVS"
@@ -25,9 +25,9 @@ done; done
 stop_srv
 # (c) fresh long prompts, packed mask on, 12 GB recipe
 bash bench/one_token_ab.sh "pr13-mask1|$ROOT|BONSAI_TIER=1,BONSAI_CTX=262144,LLAMA_ARG_KQ_MASK_PACKED=1" > logs/pr13_onetoken.run.log 2>&1
-grep -A6 "arm pr13-mask1" receipts/one_token_ab.log | tail -6 | tee -a "$LOG"
+grep -A6 "arm pr13-mask1" docs/receipts/one_token_ab.log | tail -6 | tee -a "$LOG"
 stop_srv
 # (d) release smoke: new engine, default switches, against the product bin
-bash bench/release_smoke.sh "$(cygpath -m "$ROOT")" pr13 > logs/pr13_smoke.run.log 2>&1; say "release smoke exit $?: $(tail -2 receipts/release_smoke_pr13.log | head -1)"
+bash bench/release_smoke.sh "$(cygpath -m "$ROOT")" pr13 > logs/pr13_smoke.run.log 2>&1; say "release smoke exit $?: $(tail -2 docs/receipts/release_smoke_pr13.log | head -1)"
 stop_srv
 say "=== done"

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Draft size past the VRAM line (--spec-draft-n-max-tail, BONSAI_SPEC_DEEP): one arm per size, same server recipe,
 # layer off, lookup_ab.py at DEPTH (default 160000). Mid-message checkpoints on (8192) so each arm reads the long
-# prompt once.   bash bench/tail_draft_ab.sh 4 6 8   -> receipts/tail_draft_ab.jsonl, receipts/tail_draft_ab.log
+# prompt once.   bash bench/tail_draft_ab.sh 4 6 8   -> docs/receipts/tail_draft_ab.jsonl, docs/receipts/tail_draft_ab.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; OUT=receipts/tail_draft_ab.jsonl; LOG=receipts/tail_draft_ab.log; DEPTH=${DEPTH:-160000}
+REPO="$(pwd -W)"; OUT=docs/receipts/tail_draft_ab.jsonl; LOG=docs/receipts/tail_draft_ab.log; DEPTH=${DEPTH:-160000}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }
 for N in "$@"; do

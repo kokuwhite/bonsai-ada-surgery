@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Side request at depth: one slot (the bundle's launcher) vs two slots on a unified KV cache with idle-slot caching
 # off. 12 GB recipe, layer off, bench/side_request.py at DEPTH (default 120000).
-#   [SIDE_ARMS='name|VAR=v VAR=v;...'] bash bench/side_ab.sh <root with BONSAI_SLOTS support>   -> receipts/side_ab.{log,jsonl}
+#   [SIDE_ARMS='name|VAR=v VAR=v;...'] bash bench/side_ab.sh <root with BONSAI_SLOTS support>   -> docs/receipts/side_ab.{log,jsonl}
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; MODEL="$REPO\models\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"; ROOT="$(cygpath -w "${1:?root}")"
-LOG=receipts/side_ab.log; OUT=receipts/side_ab.jsonl; DEPTH=${DEPTH:-120000}
+LOG=docs/receipts/side_ab.log; OUT=docs/receipts/side_ab.jsonl; DEPTH=${DEPTH:-120000}
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; sleep 4; }
 IFS=";" read -ra ARMS <<< "${SIDE_ARMS:-np1|;np2|BONSAI_SLOTS=2 LLAMA_ARG_KV_UNIFIED=1 LLAMA_ARG_CACHE_IDLE_SLOTS=0 BONSAI_VRAM_MARGIN=1300}"

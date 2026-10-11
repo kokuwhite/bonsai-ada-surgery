@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Issue #16: server private bytes and working set right after load (no request), per launcher setting.
-#   bash bench/ram_load.sh "name|VAR=v,VAR=v" ...   -> receipts/ram_load.log
+#   bash bench/ram_load.sh "name|VAR=v,VAR=v" ...   -> docs/receipts/ram_load.log
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/ram_load.log
+REPO="$(pwd -W)"; LOG=docs/receipts/ram_load.log
 for A in "$@"; do
   IFS='|' read -r NAME VARS <<< "$A"
   powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; sleep 3

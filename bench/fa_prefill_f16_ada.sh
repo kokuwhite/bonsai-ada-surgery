@@ -3,10 +3,10 @@
 # x 6, 512 queries, KV 4k-128k, q8_0 against f16; test-backend-ops perf cases from the 0040 build), then a serving A/B
 # with the switch off and on: all-VRAM cache (64k window, so the pool has room for the f16 copy), one 60k prompt.
 # (With the 12 GB tiered recipe the cache fills VRAM to the launcher's margin, and the enabled switch stopped the server
-# when its pool grew at 8k: cuMemSetAccess failed. receipts/fa_prefill_f16_ada.log, 10:21.)
-#   bash bench/fa_prefill_f16_ada.sh   -> receipts/fa_prefill_f16_ada.log
+# when its pool grew at 8k: cuMemSetAccess failed. docs/receipts/fa_prefill_f16_ada.log, 10:21.)
+#   bash bench/fa_prefill_f16_ada.sh   -> docs/receipts/fa_prefill_f16_ada.log
 cd "$(dirname "$0")/.." || exit 1
-LOG=receipts/fa_prefill_f16_ada.log
+LOG=docs/receipts/fa_prefill_f16_ada.log
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 CU=/c/Users/pwall/AppData/Local/Programs/Python/Python312/Lib/site-packages/nvidia/cu13
 BIN="$TEMP/build-0040/bin"

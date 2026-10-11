@@ -16,10 +16,10 @@ P40 and on an RTX 4070, up to rare numeric ties. Speed does depend on it, and sp
 | HumanEval 164, thinking off | `bench/humaneval_run.py --arm off` | yes | run it on both models, we will pair it |
 | Long exact-work suite, 37 tasks, frozen seeds, raw vs layer | `suite/run_suite.py` | yes (needs the sandbox runtime) | 17 / 28 (S1); 17 / 29 on the second seed set (S2) |
 | Tool-call format: native XML + server grammar vs JSON in content | `bench/toolcall_stress.py` | yes (needs a Qwen3-Coder-style template) | 9 of 9 vs 1 of 9 parsed |
-| AIME 2025, MMLU-Pro sample, AppWorld | `research/quality-20260929/bench/` | **not yet**: the runners hard-code this machine's ports and paths; the plans and logs are there to read | 52/56 of 60, 71/76 of 100, 70.8% of 168 |
+| AIME 2025, MMLU-Pro sample, AppWorld | `docs/research/quality-20260929/bench/` | **not yet**: the runners hard-code this machine's ports and paths; the plans and logs are there to read | 52/56 of 60, 71/76 of 100, 70.8% of 168 |
 
 Every number in the right column has a plan written before the result and a receipt: `README.md` (the layer table),
-`suite/README.md` (both scoreboards) and `research/quality-20260929/REPORT.md` (rounds HE1, S1, S2).
+`suite/README.md` (both scoreboards) and `docs/research/quality-20260929/REPORT.md` (rounds HE1, S1, S2).
 
 ## 1. Setup (once)
 

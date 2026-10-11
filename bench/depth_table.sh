@@ -3,11 +3,11 @@
 # depth (cumulative prefill at each depth from the server's progress lines), then quick_tps at each lower depth in
 # descending order (each prompt shares the deeper prompt's filler prefix, so the server reuses the cache and only the
 # question is new). Decode = the quick_tps "code" prompt (400 tokens, greedy, thinking off) and the mean of its three.
-#   bash bench/depth_table.sh <root> <tag> [depths, deepest first]   -> receipts/depth_table_<tag>.log
+#   bash bench/depth_table.sh <root> <tag> [depths, deepest first]   -> docs/receipts/depth_table_<tag>.log
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd -W)"; ROOT="$1"; TAG="$2"; DEPTHS="${3:-258000 180000 131000 112000 64000 32000 16000 4000}"
 [ "$ROOT" = repo ] && ROOT="$REPO"
-LOG=receipts/depth_table_$TAG.log
+LOG=docs/receipts/depth_table_$TAG.log
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }

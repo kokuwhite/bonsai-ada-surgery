@@ -3,9 +3,9 @@
 # characters, as Pi sends), Pi's fields, about 64k tokens, server-default sampling and greedy. Arms are
 # "name|root|VAR=v,VAR=v" (root "repo" = this repo; another root must have its own bin, layer and start-server.ps1).
 #   bash bench/issue7_fix_ab.sh "base|repo|" "fix|C:/.../root-fix|" "fix-gate|C:/.../root-fix|LLAMA_SPEC_LOOKUP_GATE=1"
-#   -> receipts/issue7_fix_ab.log, receipts/agent_depth.jsonl (tags i7f-<name>)
+#   -> docs/receipts/issue7_fix_ab.log, docs/receipts/agent_depth.jsonl (tags i7f-<name>)
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/issue7_fix_ab.log
+REPO="$(pwd -W)"; LOG=docs/receipts/issue7_fix_ab.log
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }

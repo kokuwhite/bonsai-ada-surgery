@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Issue #7 (2026-10-09): long session vs fresh server at the same context, past a pinned VRAM line (no difference:
-# receipts/frag_ab.log). Served recipe
+# docs/receipts/frag_ab.log). Served recipe
 # (MTP + lookup, q8_0 tiered), layer off, VRAM line pinned at 16k so the session passes it quickly.
-#   bash bench/frag_ab.sh [target]   -> receipts/frag_ab.log, receipts/frag_session.jsonl
+#   bash bench/frag_ab.sh [target]   -> docs/receipts/frag_ab.log, docs/receipts/frag_session.jsonl
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/frag_ab.log; TARGET=${1:-45000}
+REPO="$(pwd -W)"; LOG=docs/receipts/frag_ab.log; TARGET=${1:-45000}
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }

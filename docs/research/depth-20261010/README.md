@@ -13,13 +13,13 @@ result, verdict, receipts) and one line in `runs.jsonl` (machine-readable, for c
 | `runs.jsonl` | One JSON line per experiment: id, date, engine commit, script, env, metrics, verdict, receipts |
 | `OUTSIDE.md` | Techniques from papers and other projects that were considered, and why each was tried or not |
 | `../../receipts/` | The raw run logs named in each entry (one line per request or per arm) |
-| `../../bench/` | The scripts named in each entry |
-| `../../docs/DEPTH.md` | The user-facing summary of the same work |
+| `../../../bench/` | The scripts named in each entry |
+| `../../DEPTH.md` | The user-facing summary of the same work |
 
 ## About the gates
 
 Gates were declared before results, in chat, in the issue threads or in the scripts' header comments, but not frozen
-in a plan file as in `research/quality-20260929/`. Each entry says where its gate was declared, or that a run was a
+in a plan file as in `docs/research/quality-20260929/`. Each entry says where its gate was declared, or that a run was a
 measurement without a gate. That is weaker than a frozen plan; future rounds should write `<ID>-plan.json` first.
 
 ## Engines

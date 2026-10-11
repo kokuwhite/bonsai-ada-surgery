@@ -2,9 +2,9 @@
 # The 1-token answer bug from the 8 GB card (PR #9), on the RTX 4070: all-VRAM cache (64k window, layer off), fresh
 # prompts at 20k-60k, arms "name|root|VAR=v,..." (root "repo" = this repo).
 #   bash bench/one_token_ab.sh "q4-f16cap|repo|BONSAI_CTK=q4_0,GGML_CUDA_FA_PREFILL_F16=32768" ...
-#   -> receipts/one_token_ab.log, receipts/one_token_repro.jsonl
+#   -> docs/receipts/one_token_ab.log, docs/receipts/one_token_repro.jsonl
 cd "$(dirname "$0")/.." || exit 1
-REPO="$(pwd -W)"; LOG=receipts/one_token_ab.log
+REPO="$(pwd -W)"; LOG=docs/receipts/one_token_ab.log
 MODEL="$REPO\\models\\Ternary-Bonsai-2-27B-PTQ1_0-mtp-procreations.gguf"
 say() { echo "$(date '+%H:%M') $*" | tee -a "$LOG"; }
 stop_srv() { powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; }

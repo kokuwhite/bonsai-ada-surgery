@@ -10,7 +10,7 @@ Experiment entries: `EXPERIMENTS.md`; machine-readable: `runs.jsonl`.
    attention op's host rows while the current op computes) only ran without a CUDA graph, and the launcher keeps CUDA
    graphs on. Found from D07 (graphs off beat the shipped setup by 15 % at 192k), isolated and gated as patch 0053 (release candidate):
    +25 % decode at 192k on 12 GB, +8 to +16 % past the line on 8 GB, nothing lost below the line. Isolation, gates and
-   release: `research/release-20261011/`.
+   release: `docs/research/release-20261011/`.
 2. **Sparse reads of the host tail keep retrieval at 4-6 % of the tail, and give 2x decode on an 8 GB-like layout**
    (D10: 13.6 -> 27.6 tok/s at 160k, copies 10/10, needles 12/12, page 64 with a 64-cell MMA tile map). The page size
    matters for exact copies (256 misses one function twice). It is not faster yet on the real 8 GB card (D16); two

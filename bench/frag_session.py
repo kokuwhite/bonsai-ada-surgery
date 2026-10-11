@@ -1,12 +1,12 @@
 """Issue #7 (2026-10-09): is a long session past the VRAM line slower than a fresh server at the same context? Here it
-was not (46.5k, line pinned at 16k: 30.4 against 31.3 ms per step, receipts/frag_ab.log). The slowdown in the issue
+was not (46.5k, line pinned at 16k: 30.4 against 31.3 ms per step, docs/receipts/frag_ab.log). The slowdown in the issue
 came from a lower VRAM line at that start (105k against 243k after the restart: other programs held 2.3 GB).
 Simulates one growing chat against a running server: each turn appends a ~TURN-token user message and the model's
 answer, so the server reuses the prefix; at --change-at the tool list changes (the prompt diverges near the start and
 the server reads it again, as when a client enables MCP tools). Prints the context, decode tok/s, draft acceptance and
 ms per draft step for each turn. With --replay-last it sends only the last request again (use it on a fresh server for
 the comparison).
-    python bench/frag_session.py --base http://127.0.0.1:8080 --key-file artifacts/api_key.txt --target 45000 --out receipts/frag_session.jsonl --tag long
+    python bench/frag_session.py --base http://127.0.0.1:8080 --key-file artifacts/api_key.txt --target 45000 --out docs/receipts/frag_session.jsonl --tag long
     python bench/frag_session.py ... --replay-last --tag fresh
 """
 import argparse, json, os, sys, time, urllib.request
@@ -24,7 +24,7 @@ ap.add_argument("--change-at", type=int, default=12000, help="change the tool li
 ap.add_argument("--state", default="logs/frag_session_state.json", help="where the last request is kept for --replay-last")
 ap.add_argument("--replay-last", action="store_true")
 ap.add_argument("--tag", default="")
-ap.add_argument("--out", default="receipts/frag_session.jsonl")
+ap.add_argument("--out", default="docs/receipts/frag_session.jsonl")
 a = ap.parse_args()
 key = open(a.key_file).read().strip()
 

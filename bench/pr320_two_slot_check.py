@@ -2,7 +2,7 @@
 runs alone deep past the window (A); slot 1 then continues its own conversation (B2), so its draft rows must still
 be there. Compared with a one-slot run of B1 and B2 only: B2 greedy text and draft acceptance should match. The
 script starts and stops its own llama-server on port 8899 (it kills only that process).
-    python bench/pr320_two_slot_check.py --bin <dir with llama-server.exe> --model <MTP gguf> --out receipts/pr320_two_slot.log
+    python bench/pr320_two_slot_check.py --bin <dir with llama-server.exe> --model <MTP gguf> --out docs/receipts/pr320_two_slot.log
 """
 import argparse, hashlib, json, os, subprocess, sys, time, urllib.request
 
@@ -11,7 +11,7 @@ ap.add_argument("--bin", required=True)
 ap.add_argument("--model", required=True)
 ap.add_argument("--window", type=int, default=1024)
 ap.add_argument("--deep", type=int, default=8000, help="approximate prompt tokens of the deep request A")
-ap.add_argument("--out", default="receipts/pr320_two_slot.log")
+ap.add_argument("--out", default="docs/receipts/pr320_two_slot.log")
 a = ap.parse_args()
 PORT = 8899
 log = open(a.out, "a", encoding="utf-8")
