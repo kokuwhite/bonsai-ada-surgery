@@ -15,6 +15,21 @@ for tool in git cmake nvcc c++ sha256sum; do
 done
 [[ $JOBS =~ ^[1-9][0-9]*$ ]] || { echo 'BONSAI_BUILD_JOBS must be a positive integer.' >&2; exit 1; }
 [[ $ARCH =~ ^(native|[0-9]+(-real|-virtual)?)(\;[0-9]+(-real|-virtual)?)*$ ]] || { echo 'BONSAI_CUDA_ARCH must be native or CUDA architectures such as 89 or 86;89.' >&2; exit 1; }
+# `native` is resolved by nvcc at configure time. With no CUDA-capable device visible to
+# nvidia-smi -- typically because the NVIDIA driver is not loaded yet, so nouveau still owns the
+# card and there is no /dev/nvidia* -- nvcc resolves it to its OLDEST supported architecture
+# (observed: sm_52 on an sm_86 card). The build succeeds silently and the resulting binary is
+# markedly slower on the real card. Ask for the architecture explicitly in that situation.
+if [[ $ARCH == native ]] && ! nvidia-smi -L >/dev/null 2>&1; then
+    cat >&2 <<'MSG'
+WARNING: BONSAI_CUDA_ARCH=native, but no CUDA-capable device is visible to nvidia-smi.
+         nvcc resolves `native` to its oldest supported architecture in that case
+         (observed: sm_52 on an sm_86 card) and the build succeeds silently, so the
+         binary ends up running another architecture's machine code.
+         Load the NVIDIA driver first, or pass the architecture yourself,
+         e.g. BONSAI_CUDA_ARCH=86 for Ampere, BONSAI_CUDA_ARCH=89 for Ada.
+MSG
+fi
 version=$(cmake --version | head -n 1)
 if [[ ! $version =~ ([0-9]+)\.([0-9]+) ]] || (( BASH_REMATCH[1] < 3 || (BASH_REMATCH[1] == 3 && BASH_REMATCH[2] < 24) )); then
     echo "CMake >=3.24 required; found $version" >&2
