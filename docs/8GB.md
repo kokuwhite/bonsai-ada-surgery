@@ -64,8 +64,8 @@ prefill = a 512-token follow-up request at that depth):
 | 131k preset before: prefill | 350 | 257 | 152 | 118 | 96 | - |
 | 262k now: prefill | 359 | 262 | 156 | 121 | 99 | 59 |
 
-Fresh 60k prompts: 37.3 / 37.2 tok/s (before: 28.2 / 28.2, from the rig's run of the previous preset; that receipt is not
-in this repo). Lowest free VRAM in the run: 116 MiB. 0 one-token answers.
+Fresh 60k prompts: 37.3 / 37.2 tok/s (before: 28.2 / 28.2, P79 on the previous preset: `research/depth-8gb-20261006/results-raw.zip`,
+`receipts/p79/fresh60k_r1.txt` and `_r2.txt`). Lowest free VRAM in the run: 116 MiB. 0 one-token answers.
 With MTP drafting and lookup, the packed mask gave the same text as the f16 mask in 22 of 22 requests at 32k and 64k.
 Past the staged depth (the VRAM line + 81,920, about 140k here) the host rows are read in place, so a follow-up
 prefill there is slower (59 tok/s at 160k against 99 at 128k).
@@ -107,7 +107,8 @@ What does not help, measured on this card:
 
 - **Attention for the host rows on the CPU.** The generic CPU kernel needs 278 ms per layer for 196,608 rows and 2
   queries (P95, `receipts/depth_8gb/p95_cpu_fa_perf.txt`); a dedicated AVX2 kernel (int8 K dots, each row loaded once
-  for the 6 heads of a group) measured ~110 ms on the rig (that output is not in this repo); PCIe needs ~19 ms. The arithmetic (~24k multiply-adds
+  for the 6 heads of a group) measured ~110 ms per layer (P97: 9.5 ms at 16,384 rows, scaled; a hand run, recorded in
+  `research/depth-8gb-20261006/experiments/P097.md`, source `scripts/cpuattn/cpuattn_bench.cpp` there); PCIe needs ~19 ms. The arithmetic (~24k multiply-adds
   per row) is more than a 6-core CPU does in that time.
 
 In progress (issue #21): **sparse reads of the host rows.** The attention mass is spread widely at depth (on 180k
