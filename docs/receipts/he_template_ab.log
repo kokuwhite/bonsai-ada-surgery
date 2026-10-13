@@ -58,3 +58,7 @@ budget2048: mean tokens 913 median 606, over 4k: 0
 gdnmma: mean tokens 2313 median 576, over 4k: 19
 10:20 === gdnmma done
 10:21 === clientsys_product: template model, root C:/Users/pwall/Projects/bonsai-2-27b-serve, kwargs none, --system-file bench/prompts/agent_system.txt, health=1
+clientsys_product: mean tokens 2209 median 557, over 4k: 20
+11:12 === clientsys_product done
+11:13 === clientsys_userprefix: template served_template_userprefix.jinja, root C:/Users/pwall/Projects/bonsai-2-27b-serve, kwargs none, --system-file bench/prompts/agent_system.txt, health=1
+11:50 clientsys_userprefix stopped at 154/164 by the 10-11 shutdown (partial; rerun pending)
