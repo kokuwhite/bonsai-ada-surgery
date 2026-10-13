@@ -74,7 +74,7 @@ How, and every receipt: [`docs/Q8_FULL_CONTEXT.md`](docs/Q8_FULL_CONTEXT.md). Sh
 | --- | --- | --- |
 | Windows, an NVIDIA card (RTX 20/30/40/50) | download the release zip, drop in the model, run `start-server.ps1` | [Quick start (Windows)](#quick-start-windows-nvidia) |
 | Hugging Face | the same bundle plus the ready-made MTP-grafted GGUF (`hf download`, no graft step) | [CaryPalmer/Ternary-Bonsai-2-27B-262k-GGUF](https://huggingface.co/CaryPalmer/Ternary-Bonsai-2-27B-262k-GGUF) |
-| Linux, NVIDIA driver + CUDA toolkit | `bash build/build_linux.sh` builds the pinned PrismML source with all 52 patches applied | [Quick start (Linux)](#quick-start-linux-nvidia) |
+| Linux, NVIDIA driver + CUDA toolkit | `bash build/build_linux.sh` builds the pinned PrismML source with all 53 patches applied | [Quick start (Linux)](#quick-start-linux-nvidia) |
 | your own llama.cpp workflow | build the fork branch `bonsai-q8-product`, or `git am` the series in `patches/` onto PrismML `adfffbe` | [The patch stack](#the-patch-stack) |
 | an older bundle of this repo | `git pull`, unzip the latest zip over it, run `layeretch_runtime.ps1` once | [Upgrading](#upgrading-from-an-older-bundle) |
 
@@ -116,6 +116,13 @@ Windows demotes a background process's memory, and puts as many positions in VRA
 the tiered-KV runtime are detected and get the previous 96k all-VRAM recipe.
 
 ### Upgrading from an older bundle
+
+`bundle-20261011` makes **decode past the VRAM line faster** (patch 0053). The tier prefetch (the copy engine moves
+the next attention op's cache rows from system RAM while the current op computes) only ran without a CUDA graph,
+and the launcher keeps CUDA graphs on. Now graphs whose attention reads system RAM run without one; graphs below
+the line keep theirs. RTX 4070, 12 GB recipe: 192k 23.6 -> 29.4, 250k 12.7 -> 14.6 tok/s (4k-128k unchanged).
+RTX 2060 SUPER, 8 GB recipe: 128k 12.8 -> 14.8, 192k 7.9 -> 8.6, 245k 6.2 -> 6.7 (4k / 32k unchanged). HumanEval
+164 outputs identical. `GGML_CUDA_KV_TIER_GRAPHS=1` keeps the old behaviour ([docs/DEPTH.md](docs/DEPTH.md)).
 
 `bundle-20261010` sizes **system RAM use from the machine** (issue #16, from howdya: "bad allocation" and a server exit
 on 16 GB of RAM) and makes **8 GB prefill at depth faster**. The prompt cache (default limit 8 GiB) and the context
@@ -402,6 +409,7 @@ Hadamard-embedding fix of sudoingX's #217 landed through #205. #285 was split at
 | 0049 | Packed KQ mask, step 2: the tensor-core flash-attention kernel reads the bits natively. With MTP drafting at 32k and 64k: 22 of 22 texts identical to the f16 mask (RTX 2060 SUPER) | this repo (Mirai engine) |
 | 0051 | Chunked flash attention for prefill at depth (`GGML_CUDA_FA_CHUNK=C`): prefill-sized ops past the f16 prefill limit split the KV dimension into chunks of C cells (copied to VRAM, converted to f16, f16 tensor-core kernel, folded with the softmax max and sum), so VRAM stays bounded and host rows cross PCIe once per op. RTX 2060 SUPER, 262k: prefill x1.4 at 128k, x2 at 192k, x3.6 at 250k; perplexity at 64k 7.2107 (whole f16) / 7.2074 (chunked) (off by default; the 8 GB preset sets 32768) | this repo |
 | 0052 | Tests: flash-attention cases for the chunked path (q4_0 K/V, head 256, GQA, f16 and packed masks) | this repo |
+| 0053 | CUDA graphs off for graphs whose attention reads the host tail of a tiered KV cache, so the tier prefetch (copy engine, overlapped with compute) runs past the VRAM line; graphs below the line keep CUDA graphs; one log line per switch (`GGML_CUDA_KV_TIER_GRAPHS=1`: old behaviour). RTX 4070: 192k 23.6 -> 29.4, 250k 12.7 -> 14.6 tok/s; RTX 2060 SUPER: 128k +16 %, 192k +9 %, 245k +8 % | this repo |
 
 How each cut was found (CUPTI traces, L1 wavefront counts, what did not work):
 [`surgery/ADA4070_PTQ1.md`](surgery/ADA4070_PTQ1.md) and [`docs/Q8_FULL_CONTEXT.md`](docs/Q8_FULL_CONTEXT.md).
@@ -546,7 +554,7 @@ python bench\mtp_identity.py                   # greedy draft-on vs draft-off
 
 | Path | What |
 | --- | --- |
-| `patches/` | the 52-commit stack on PrismML `adfffbe`, `git am`-able |
+| `patches/` | the 53-commit stack on PrismML `adfffbe`, `git am`-able |
 | `start-server.ps1`, `start-remote.ps1` | the recipe (LAN / Cloudflare tunnel) |
 | `build/build_linux.sh`, `start-linux.sh` | Linux build from the pinned base + patches, first-run launcher |
 | `tests/`, `.github/workflows/` | Linux setup tests, Linux CUDA compile and PDL code-generation CI |

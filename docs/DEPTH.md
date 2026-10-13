@@ -6,7 +6,7 @@ receipts named in each section. What shipped is marked **shipped**; the rest are
 a release. Every experiment, with its gate, setup and receipts: [`docs/research/depth-20261010/`](research/depth-20261010/).
 
 - [Where the time goes](#where-the-time-goes)
-- [CUDA graphs and the tier prefetch (patch 0053, next bundle)](#cuda-graphs-and-the-tier-prefetch-patch-0053-next-bundle)
+- [CUDA graphs and the tier prefetch (patch 0053, bundle-20261011)](#cuda-graphs-and-the-tier-prefetch-patch-0053-bundle-20261011)
 - [Sparse reads of the host tail](#sparse-reads-of-the-host-tail)
 - [Chunked gated-delta-net prefill](#chunked-gated-delta-net-prefill)
 - [What did not help](#what-did-not-help)
@@ -33,7 +33,7 @@ attention plus the wait for the staged host rows is ~35 % of a step. The wait sh
 attention (ROPE, 22 %), because that is where the stream waits for the copy. So at this depth on 12 GB, both the copy
 and the attention itself matter.
 
-## CUDA graphs and the tier prefetch (patch 0053, next bundle)
+## CUDA graphs and the tier prefetch (patch 0053, bundle-20261011)
 
 The tier prefetch pipeline (the copy engine moves the next attention op's host rows into VRAM while the current op
 computes) only ran without a CUDA graph, and the launcher keeps CUDA graphs on. Patch 0053 turns CUDA graphs off only

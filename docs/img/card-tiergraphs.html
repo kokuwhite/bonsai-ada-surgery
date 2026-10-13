@@ -1,0 +1,96 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Bonsai tier graphs card</title>
+<!-- One shareable 1200x675 card: patch 0053 (CUDA graphs off past the VRAM line, so the tier prefetch overlaps).
+     Render: msedge --headless=new --hide-scrollbars --force-device-scale-factor=2 --window-size=1200,675
+     --screenshot=card-tiergraphs.png file:///.../card-tiergraphs.html -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --ground: #F3F5F1; --surface: #FFFFFF; --ink: #17211B; --muted: #5E6D63; --line: #DCE2DA; --grid: #E6EBE4;
+  --green: #2E7A57; --amber: #A86F16; --rust: #B5473A;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+}
+html, body { margin: 0; width: 1200px; height: 675px; overflow: hidden; background: var(--ground); color: var(--ink); font-family: var(--body); }
+.card { box-sizing: border-box; width: 1200px; height: 675px; padding: 40px 56px 30px; display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-family: var(--mono); font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-family: var(--display); font-size: 42px; line-height: 1.08; font-weight: 700; }
+.main { flex: 1; min-height: 0; display: grid; grid-template-columns: 330px 1fr; gap: 22px; margin-top: 6px; }
+.tiles { display: flex; flex-direction: column; gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 20px; display: flex; flex-direction: column; gap: 4px; }
+.tile .num { font-family: var(--display); font-size: 46px; font-weight: 700; line-height: 1; }
+.tile .num small { font-size: 22px; font-weight: 600; color: var(--muted); }
+.tile .was { font-family: var(--mono); font-size: 14px; color: var(--muted); }
+.tile .was s { color: var(--amber); }
+.tile .what { font-size: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px 12px; display: flex; flex-direction: column; min-height: 0; }
+.ptitle { font-size: 16px; font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; }
+.legend { display: flex; gap: 18px; font-size: 13px; color: var(--muted); font-weight: 400; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
+.chart { flex: 1; min-height: 0; }
+.chart svg { width: 100%; height: 100%; }
+svg text { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
+svg .val { fill: var(--ink); font-size: 13px; font-weight: 500; }
+svg .old { fill: var(--amber); font-size: 12px; }
+svg .gpu { fill: var(--ink); font-size: 13px; font-weight: 500; }
+.note { font-size: 13.5px; color: var(--muted); line-height: 1.35; border-top: 1px solid var(--grid); padding-top: 8px; }
+.note b { color: var(--rust); font-weight: 600; }
+.foot { display: flex; justify-content: space-between; gap: 16px; white-space: nowrap; font-family: var(--mono); font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.foot b { color: var(--ink); font-weight: 500; }
+</style>
+<div class="card">
+  <div class="eyebrow">Bonsai 2 27B PTQ1_0 · 262k window · RTX 4070 12 GB and RTX 2060 SUPER 8 GB</div>
+  <h1>Faster decode past the VRAM line, nothing lost below it</h1>
+  <div class="main">
+    <div class="tiles">
+      <div class="tile"><div class="num">29.4 <small>tok/s</small></div><div class="was">was <s>23.6</s> at 192k on 12 GB</div><div class="what">+25 %; lookup off 19.8 → 25.0 (+26 %)</div></div>
+      <div class="tile"><div class="num">+16 <small>%</small></div><div class="was">128k on 8 GB: <s>12.8</s> → 14.8 tok/s</div><div class="what">192k +9&#160;%, 245k +8&#160;%, lookup off +12&#160;%</div></div>
+      <div class="tile"><div class="num">164/164 <small>same text</small></div><div class="was">HumanEval: all outputs identical</div><div class="what">Unchanged below the line: <span style="white-space:nowrap">12 GB 4k–128k</span>, <span style="white-space:nowrap">8 GB 4k/32k</span> · <span style="white-space:nowrap">0 one-token answers</span></div></div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">Decode past the VRAM line (tok/s)
+        <span class="legend"><span><i class="sw" style="background:var(--amber)"></i>before</span><span><i class="sw" style="background:var(--green)"></i>this bundle</span></span>
+      </div>
+      <div class="chart" id="chart"></div>
+      <div class="note">Why: the copy engine moves the next attention op's cache rows from system RAM while the current op
+        computes, but only without a CUDA graph, and graphs were always on. Now graphs switch off only where attention reads
+        system RAM. <b>Honest part:</b> the full window on 8 GB is still slow (6.7 tok/s at 245k); sparse cache reads for
+        that are in testing.</div>
+    </div>
+  </div>
+  <div class="foot"><span>quick_tps mean decode (code · prose · bash) · MTP + lookup · patch 0053 · bundle-20261011</span><span><b>github.com/professorpalmer/bonsai-ada-surgery</b></span></div>
+</div>
+<script>
+var NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, text) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (text !== undefined) e.textContent = text; return e; }
+var W = 760, H = 300, L = 40, R = 16, T = 26, B = 46;
+var s = el('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMid meet' });
+var Y = function (v) { return T + (H - T - B) * (1 - v / 32); };
+[0, 8, 16, 24, 32].forEach(function (v) {
+  s.appendChild(el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: '#E6EBE4' }));
+  s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end' }, v));
+});
+// groups: [label, before, after]; 12 GB recipe (RTX 4070) then 8 GB recipe (RTX 2060 SUPER)
+var groups = [
+  ['192k', 23.6, 29.4], ['250k', 12.7, 14.6], ['192k lkp off', 19.8, 25.0],
+  ['128k', 12.8, 14.8], ['192k', 7.9, 8.6], ['245k', 6.2, 6.7]
+];
+var gw = (W - L - R) / (groups.length + 0.6), bw = gw * 0.32;
+groups.forEach(function (g, i) {
+  var x0 = L + gw * (i + (i >= 3 ? 0.6 : 0)) + gw * 0.15;
+  [[g[1], '#A86F16', 'old'], [g[2], '#2E7A57', 'val']].forEach(function (b, k) {
+    var x = x0 + k * (bw + 4);
+    s.appendChild(el('rect', { x: x, y: Y(b[0]), width: bw, height: Y(0) - Y(b[0]), rx: 3, fill: b[1] }));
+    s.appendChild(el('text', { x: x + bw / 2, y: Y(b[0]) - 6, 'text-anchor': 'middle', class: b[2] }, b[0].toFixed(1)));
+  });
+  s.appendChild(el('text', { x: x0 + bw + 2, y: H - B + 16, 'text-anchor': 'middle' }, g[0]));
+});
+var mid = L + gw * 3.3;
+s.appendChild(el('line', { x1: mid, x2: mid, y1: T - 6, y2: H - B + 4, stroke: '#DCE2DA', 'stroke-dasharray': '3 4' }));
+s.appendChild(el('text', { x: L + gw * 1.5, y: H - 8, 'text-anchor': 'middle', class: 'gpu' }, 'RTX 4070 12 GB'));
+s.appendChild(el('text', { x: L + gw * 5.1, y: H - 8, 'text-anchor': 'middle', class: 'gpu' }, 'RTX 2060 SUPER 8 GB'));
+document.getElementById('chart').appendChild(s);
+</script>
