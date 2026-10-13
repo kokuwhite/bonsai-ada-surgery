@@ -2411,3 +2411,153 @@ c803e03ea; the build that ran was d6c6e9f01. P103's "same text" gate item was ne
   P14c: plan named 32k/64k, only 4k/32k ran. P12: the KL check of the drafted default was not measured.
 - P18 server logs are in logs/, not receipts/p18/. P11b/P24 scripts have the lost-backslash sed (readiness wait ran to
   its 300 s limit; runs completed). P19 was only named, never planned or run.
+
+## 2026-10-11 16:06Z - PR #33 merged: docs/research/depth-8gb-20261006 (the 8 GB mission record)
+Cary: match research/quality-20260929 ("every single experiment ... like a toolbox"). Folder: REPORT, TOOLBOX (agent),
+experiments/P001-P108 (4 writer agents, 107 files + events + index), runs.jsonl (145 lines, agent), NOTEBOOK (this
+file), scripts/, results-raw.zip (1,124 files, key + user name redacted, 0 matches), releases/, drafts/. Audit found ~60
+notebook/receipt differences (correction entries above). Outside the folder: 8GB.md memory-clock wording + depth table
+sources; start-server.ps1 comment 8k -> 24k; depth-20261010 D16 + P105/P106. Pointed #32 to the P79 / P97 receipts.
+From now: every new result also gets experiments/P###.md + a runs.jsonl line + TOOLBOX update (memory rule).
+
+## 2026-10-11 P107 (result): sparse attention saves 30 ms/graph at 245k; the loss is mat-vecs slowing 2.5-24x after a VRAM wrap
+Run 10:32-11:42 (queue 69e). bin-sparse6 (028f606fc), 262k test launcher, lookup off, f16 mask, graphs off, OP_TIMING=1.
+dense245: mean decode 5.5 (code 5.8 / prose 5.2 / bash 5.6), code prefill 136.4 (243,896 tok, ttft 1,788 s), follow-ups
+78.1 / 76.0; 155.464 ms/graph: FA x8 91.818 (59.1 %), ROPE x8 26.340, MUL_MAT 5120x17408 x64 5.172, 17408x5120 x32 2.625.
+sparse245: mean decode 4.7 (4.9 / 4.4 / 4.7), code prefill 136.4, follow-ups 44.2 / 44.1; 183.867 ms/graph: MUL_MAT
+17408x5120 x32 63.011 (34.3 %), FA x8 61.454 (33.4 %), 5120x17408 x64 14.669, CONCAT x24 7.243, 5120x10240 5.496,
+6144x5120 3.479, 5120x6144 3.014, GDN 2.731. Dense min free at end 128 MiB; sparse wrapped (4194282).
+VRAM trace (new, receipts/p107/vram_trace_sparse.txt, 30 s): free 120-128 MiB through the whole prefill 11:08-11:37;
+wrapped at 11:38:07 (used 17592181858141, free 4194282) = first sparse decode step; stays wrapped to the end; normal
+after the server stops. Reading: sparse FA works (-30 ms); something allocated at the first sparse decode step pushes
+the card over; WDDM most likely demotes part of the weights (mat-vecs 2.5-24x slower); the follow-up prefill drop is
+likely the same. P109 (running, margin +200) is the test. Posted on #21 (edited to mark the inferences).
+
+## 2026-10-11 11:50 - 2026-10-13 10:54: STOP for the move (Cary: Carmel, Indiana), and resume
+Stop (11:50-11:58, 10-11): pause.ps1 (queue\PAUSE kept, server stopped, slot 5); runner processes killed; app check-in
+task bonsai-8gb-checkin DISABLED; session waiters and gh watcher stopped. P109 was interrupted while its first arm
+(sparse_m425) read the 160k prompt: NO results. Only fact: loaded with free 510 MiB (P107 sparse arm: 318), so the
++200 margin took effect. Partial log: receipts/p109/sparse_m425.INTERRUPTED.txt. The runner logged "done 69e2-p109" when
+it was killed; the job was moved back to queue/pending (NOTE line in queue.log). P108 never started.
+Backups before the move (fork professorpalmer/llama.cpp-ada-ternary, branches 8gb-backup/*): kv-q3-0 6a4851286,
+kfirst-probe 0e0dc757a, kv-fakebits 4d1c8abe0, cpu-host-attn 794462074 (new WIP commit of a test-backend-ops edit),
+fa-chunked-prefill d0c1d8644. fa-sparse-proto-2060 (028f606fc) and tier-graphs-2060 (4715804d6) were already on
+origin. All other vendor worktrees clean.
+Not done before the cut-off: this entry and the P107 record PR (done now, 10-13).
+Resume check (10-13 10:54 CDT; the PC slept, last boot is still 10-07 12:31): RTX 2060 SUPER driver 591.86, 27 C, fan
+100 % (slot 5), 175 W, PCIe 3.0 x16, 220 MiB used; 31.9 GB RAM; C: 303 GB free; queue: PAUSE, pending = 69e2-p109,
+69f-p108, running empty; gh auth OK. GitHub during the gap: no new comments on #21/#22; 4070 PR #34 (build_linux.sh).
+Time zone still Central (Carmel is Eastern): left as is (system setting is Cary's; keeps log times consistent).
+Plan: P110 post-move smoke first (launcher defaults, 4k/32k/64k, vs P96 51.5 / 51.3 / 34.4, temps), then P109, P108.
+Nothing already done needs a rerun: P1-P107 complete (records in docs/research/depth-8gb-20261006).
+
+## 2026-10-13 P110 (result): post-move smoke - the card is the same; the gate as written failed on a bad reference
+Run 10:57-11:05 (queue 69e0). bundle-20261010 (release_1010/x/bin), 262k test launcher, layer off; P96's request mix.
+Tests: ADD 99/99, RMS_NORM 51/51, FLASH_ATTN_EXT 3005/3005. Loaded free 266 MiB. 0 one-token. Max temp 67 C; PCIe 3 x16
+in 37/37 samples; trace min free 100 MiB (the summary's "-4186609" is an awk string-compare bug in the script, fixed
+by hand: field read as a string after sub()).
+Decode 4k 52.9 (53.1 / 51.9 / 53.6), 32k 45.9 (43.7 / 49.1 / 45.0), 64k 37.6 (37.5 / 37.6 / 37.8).
+Gate as written (within 3 % of P96 51.5 / 51.3 / 34.4): 4k +2.7 % pass, 32k -10.5 % FAIL, 64k +9.3 %.
+Cross-check (same launcher family): P85 32k 45.8 (43.5 / 48.8 / 45.1), 64k 37.5; P88 32k 46.2 (43.8 / 49.4 / 45.5), 64k
+37.5. P110 matches both within 1 % at 32k / 64k. P96 (32k 53.5 / 52.1 / 48.4, 64k 34.4) is the outlier in both
+directions (P94: lookup drafter history moves these items). Verdict: no change from the move; the reference should
+have been the P85 / P88 / P96 range, not P96 alone (lesson: a smoke gate needs a reference range, not one run).
+P109 started 11:05:56.
+
+## 2026-10-13 #21: the 4070 found the sparse allocations; P109 stopped (superseded); P111 and P109b (plans); P108 runs
+4070 (#21, 16:02Z): only with FA_SPARSE, at the first sparse op (= first decode step): (1) page-bound tables, cudaMalloc,
+f32 max+min per page/head/dim: 227 MiB at 160k, 393 MiB at 245k (2 KiB per host cell); (2) first fill = the whole host
+tail of K as f16, pool temporary (kept by the pool's high-water mark): 219 / 385 MiB; other < 35 MiB. Up to ~780 MiB
+over the dense arm at 245k = the P107 over-commit. Fix 8d5b862fc (fa-sparse-proto): bounds in f16 (exact; 1 KiB/cell:
+114 / 196 MiB) + first fill in chunks of GGML_CUDA_FA_SPARSE_FILL_CELLS=16384 (32 MiB). Sparse fixed cost at 245k
+~230 MiB. Launcher rule proposed: + host cells x 1 KiB x (64/page) + 36 MiB when FA_SPARSE is set.
+P109 stopped 11:08 (2nd time, no result; margin +200 cannot cover it) -> .superseded. prism-sparse fa-sparse-proto-2060
+fast-forwarded to 8d5b862fc; build (tooling/build-sparse -> bin-sparse7) runs beside P108 (receipts/build-sparse7.txt).
+P111 (queue 69g, gate in its header): P107 on 8d5b862fc, margin 475 both arms, dense + sparse 160k -> 245k, OP_TIMING,
+10 s trace. Pass: sparse min free > 0 all arm AND MUL_MAT 17408x5120 sparse <= 1.1x dense AND 160k follow-up >= 100.
+P109b (queue 69h, gate in its header): old bin-sparse6, margin 1025, sparse only: min free > 0 AND the mat-vec <= 1.1x
+P107 dense (2.625 ms/graph) -> cause shown on the old build too. Posted on #21.
+
+## 2026-10-13 11:35 Check of open PRs / issues (Cary: see if the other agent needs anything; it handles shipping)
+Open: PR #37 (4070 draft, depth-20261010 D17/D18 + P107): numbers checked against the 2060 receipts, all correct;
+asked them to write P111 (not P110) for the 2060 run. #22: nothing left from 8 GB (P103b closed it); suggested closing it
+when the bundle ships. #21: plan posted. #35 (outside 3080 Ti Linux report) and #7: 4070 threads, nothing for 8 GB.
+PR #34 merged by the 4070. Shipping stays with the 4070 session.
+
+## 2026-10-13 11:40 fa-sparse-proto 3299a0b4b (4070): GGML_CUDA_FA_SPARSE_MIN_HOST; rebuild; P112 (plan)
+3299a0b4b = 8d5b862fc + GGML_CUDA_FA_SPARSE_MIN_HOST=N (dense while the host tail < N cells; default 0 = off).
+prism-sparse fast-forwarded; rebuilt tooling/build-sparse (try 1, 11:36:29; receipts/build-sparse7.txt; the 8d5b862fc
+build line kept as build-sparse7-8d5b862fc.txt). P111 runs on it with MIN_HOST unset (same path as 8d5b862fc).
+P108 so far: q3_0 op tests SET_ROWS 14/14, GET_ROWS 4/4, CPY 7/7, FLASH_ATTN_EXT 110/110; PPL 16k q4_0 7.9050.
+P112 (queue 69g2, gate in its header): margin 475, 64k -> 160k, dense vs sparse + MIN_HOST=32768. Pass: 64k within 2 %
+of dense, 160k >= 1.7x dense, 0 one-token, min free > 0. Queue: P108 -> P111 -> P112 -> P109b.
+
+## 2026-10-13 bundle-20261011 shipped by the 4070 (90ca41e40, 53 patches, patch 0053); #22 closed; P113 (plan)
+Release: bonsai-bundle-win-x64.zip 610,429,298 B, SHA-256 f8899cbfd98091b6830615dc83182626b0b551d8b833ceea58c4e2e52cda8bf8.
+P113 (queue 69g3, after P111 / P112; from the P96 script, gate in its header): sha256; ADD / RMS_NORM / FLASH_ATTN_EXT;
+sweep 4k-128k (each >= the P85/P88/P96/P110 minimum - 3 %; 128k >= 14.3 = P96, since 0053 helps past the line);
+fresh 60k x2; lookup_ab d0 / d64000 (texts vs P96 reported, not gated: P94); 0 one-token; trace min free >= 60 MiB.
+Fixed in the copy: the trace awk now converts the field to a number (the P110 string-compare bug).
+Queue: P108 (running) -> P111 -> P112 -> P113 -> P109b.
+
+## 2026-10-13 P108 (result): the real q3_0 KV type works and costs ~nothing; P114 (plan)
+Run 11:09-12:14 (queue 69f). bin-q3kv (kv-q3-0 6a4851286 on 2cadbfb64). Op tests (q3_0 cases): SET_ROWS 14/14, GET_ROWS
+4/4, CPY 7/7, FLASH_ATTN_EXT 110/110, 0 FAIL. Perplexity, wikitext-2, same binary, --kv-vram-cells 45056:
+16k (all chunks) q4_0 7.9050 +/- 0.05444, q3_0 7.9491 +/- 0.05477 (+0.56 %); 64k (2 chunks) q4_0 7.2074 +/- 0.07120,
+q3_0 7.2098 +/- 0.07105 (+0.03 %). Matches the P100 fake-bits bound (16k +0.60 %, 64k -0.02 %). Raw server -c 8192
+(all VRAM, no drafting) 4k decode: q4_0 43.9, q3_0 43.8; 0 one-token. The 8d5b862fc build ran beside the PPL part only.
+Verdict: PASS (exact kernels; quality cost within the fake-bits bound). Bytes: 14,336 per position vs 18,432 (-22 %).
+Test launcher copy: 'q3_0' { 14336 } added to the CellBytes table (local only, not the repo launcher).
+P114 (queue 69g4, gate in its header): same binary, q4_0 vs q3_0 sweep 4k/64k/128k/192k + q3_0 160k copies/needles.
+Pass: line >= 1.2x, decode >= 1.05x at 128k/192k, 4k within 3 %, 0 one-token, min free >= 60, needles 12/12, copies >= 9/10.
+Queue: P111 (running) -> P112 -> P113 -> P114 -> P109b.
+
+## 2026-10-13 P111 (result): PASS - sparse 2.23x dense at 245k, 1.66x at 160k (OP_TIMING on); the over-commit was the cause
+Run 12:14-13:59 (queue 69g). bin-sparse7 = 3299a0b4b (MIN_HOST unset = 8d5b862fc path). FLASH_ATTN_EXT 3005/3005.
+Both arms: margin 475, loaded free 552 MiB, lookup off, f16 mask, graphs off, OP_TIMING=1, 160k cold -> 245k.
+dense_m475: 160k decode 8.9 (8.9/8.9/8.8), follow-ups 104.7/102.5, cold prefill 177.4 (159,086 tok); 245k decode 5.2
+(5.5/4.9/5.3), follow-ups 76.5/74.7, extend prefill 133.8; 166.140 ms/graph (FA 105.538, ROPE 23.490, 5120x17408 5.258,
+17408x5120 2.682); trace min free 362 MiB (311 samples). 0 one-token.
+sparse_m475: 160k decode 14.8 (15.5/14.3/14.6), follow-ups 105.1/103.2, prefill 177.1; 245k decode 11.6 (12.2/10.9/11.8),
+follow-ups 78.1/76.1, prefill 133.5; 70.730 ms/graph (FA 43.642, 5120x17408 4.631, 17408x5120 2.394); trace min free
+106 MiB (293 samples). 0 one-token.
+Gates: min free > 0 PASS (106); mat-vec <= 1.1x PASS (0.89x); 160k follow-up >= 100 PASS (105.1 / 103.2).
+Reading: the P102-P107 245k loss and the follow-up drop were entirely the over-commit. OP_TIMING depresses decode (P106),
+so clean speeds come from P112. Posted on #21. Next: P112 (running), P113, P114, P109b.
+
+## 2026-10-13 P112 (result): 160k PASS (2.15x clean), 64k FAIL (-20 %) - threshold works, FA_SPARSE costs 20 % below it
+Run 13:59-14:35 (queue 69g2). bin-sparse7 (3299a0b4b), margin 475 -> line 34,560 (staging to 116,480), lookup off, f16
+mask, graphs off, no OP_TIMING. dense: 64k 28.8 (29.2/28.5/28.6), follow-ups 195.8/193.4; 160k 9.1 (9.3/9.1/9.0),
+follow-ups 105.8/103.5; min free 362. sparse_mh32k: 64k 23.0 (23.4/22.8/22.9), follow-ups 194.9/192.1; 160k 19.6
+(19.9/19.3/19.7), follow-ups 106.5/104.2; min free 234. 0 one-token both.
+Gate: 64k within 2 % FAIL (-20 %); 160k >= 1.7x PASS (2.15x); min free > 0 PASS; 0 one-token PASS.
+The threshold is respected: first sparse_mask log line at the 160k step (host tail 122,824, keeps 128 of 1920 pages);
+at 64k the host tail is ~29.5k < 32,768. So FA_SPARSE costs ~20 % per op even with no sparse op (candidates: 85d949f5e
+MMA tile map for sparse-mask ops, a per-op host read, the mask copy) - likely most of P106's -16 %.
+The margin also costs: line 46,592 (225) -> 34,560 (475); dense 64k 34.5 (P106) -> 28.8. Posted on #21 with options
+(page 128, bounds in pinned host memory, tables that grow with depth).
+
+P115 (queue 69g5, gate in its header): dense64 vs never64 (FA_SPARSE + MIN_HOST=1e9: sparse never runs) isolates the
+64k overhead; sparse245 (MIN_HOST=32768) vs dense245, no OP_TIMING, for the clean 245k speed. Queue: P113 (running) ->
+P114 -> P115 -> P109b.
+
+## 2026-10-13 P113 (result): bundle-20261011 PASS on the 2060 SUPER
+Run 14:35-15:16 (queue 69g3). Zip 610,429,298 B, sha256 match. ADD 99/99, RMS_NORM 51/51, FLASH_ATTN_EXT 3005/3005.
+Launcher: line 62,464, staging to 144,384, packed mask, pool, lookup up to 32, ram 4096 MiB cache / 32 ckpts.
+Sweep decode 4k 53.9, 32k 47.9, 64k 38.0, 96k 27.9, 128k 16.9 (P96: 51.5 / 51.3 / 34.4 / 20.4 / 14.3); trace min free
+68 MiB. Fresh 60k 38.3 / 38.2 (min free 103). 0 one-token everywhere; lookup_ab 0 of 22.
+Gate: sha PASS; tests PASS; 4k-128k >= the range minimum - 3 % PASS; 128k >= 14.3 PASS (16.9); min free >= 60 PASS (68,
+narrow). Posted on #22 (closed by the 4070 with the release).
+
+## 2026-10-13 Audit corrections from the P108-P113 record writer (posts on #21 / #22 edited)
+- P113: the line was 62,464 cells (idle 217-220 MiB after the move); P96 had 57,600 (idle 302). So the +37 % at 96k and
+  +18 % at 128k vs P96 are part patch 0053, part 4,864 more VRAM cells. Clean 0053 number = P103 (same line both arms).
+  #22 post edited with this correction. P110 also ran at 62,464.
+- P111: each depth was a full prefill (160k: 159,086 tokens; 245k: 243,896 tokens, ttft ~1,822-1,828 s), not "160k
+  cold -> extend". #21 post edited. (Same for P112's 64k -> 160k: 160k evaluated 95,593 = an extend there.)
+- P108: the 8d5b862fc build finished 11:10:40 (during the op tests); the 3299a0b4b rebuild (11:36:29) ran beside PPL.
+- P110 gate: 64k +9.3 % is also outside "within 3 %" (faster). The 69e0-p110 copy in queue/done has the awk fix applied
+  after the run (11:06), not the exact script that ran.
+- P109 script stays named 69e2-p109-sparse-margin.sh in queue/done (not .superseded as written above).
+- P107 record: loaded free 318 MiB (run_arm line), not 216 (first trace sample); corrected in P107.md.
+- P113 header 128k floor 13.9 = P96 - 3 %; the range minimum - 3 % is 13.7 (no effect: 16.9).
