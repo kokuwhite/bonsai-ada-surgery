@@ -1,9 +1,10 @@
-# Events, 2026-10-10 to 2026-10-11 (range p090-p108)
+# Events, 2026-10-10 to 2026-10-13 (range p090-p108, and the move and resume before P109-P115)
 
 Notebook entries in this range that are not experiments: PRs, releases, issue threads, design notes, research,
 corrections, cleanups and TODOs. Source: `C:\bonsai\8gb\DECISIONS.md` (NOTEBOOK.md here) from the entry "2026-10-10
-P86b, P89b, P90b (results) and P89c / P90c (plans)" to the end. Times with "Z" are UTC as written in the notebook;
-queue times are rig local time (UTC-5). Experiment results in the same entries are in the P files (P80b/c, P86b, P87,
+P86b, P89b, P90b (results) and P89c / P90c (plans)" to the 2026-10-13 entries. E18-E22 cover the stop for the
+move (2026-10-11 11:50) to the bundle-20261011 release (2026-10-13); the P109-P115 index points here. Times with "Z"
+are UTC as written in the notebook; queue times are rig local time (UTC-5, Central; kept after the move). Experiment results in the same entries are in the P files (P80b/c, P86b, P87,
 P89b/c belong to the earlier range).
 
 - [E1 PR #18: launcher RAM budget (issue #16)](#e1-pr-18-launcher-ram-budget-issue-16)
@@ -23,6 +24,11 @@ P89b/c belong to the earlier range).
 - [E15 PR #26: DEPTH.md 8 GB sparse correction](#e15-pr-26-depthmd-8-gb-sparse-correction)
 - [E16 PR #29: research/ and receipts/ moved under docs/](#e16-pr-29-research-and-receipts-moved-under-docs)
 - [E17 Lessons recorded in this range](#e17-lessons-recorded-in-this-range)
+- [E18 2026-10-11 11:50: stop for the move](#e18-2026-10-11-1150-stop-for-the-move)
+- [E19 2026-10-13 10:54: resume](#e19-2026-10-13-1054-resume)
+- [E20 2026-10-13 11:35: check of open PRs and issues](#e20-2026-10-13-1135-check-of-open-prs-and-issues)
+- [E21 Issue #21: the 4070 finds the sparse allocations; builds 8d5b862fc and 3299a0b4b](#e21-issue-21-the-4070-finds-the-sparse-allocations-builds-8d5b862fc-and-3299a0b4b)
+- [E22 bundle-20261011 shipped; #22 closed](#e22-bundle-20261011-shipped-22-closed)
 
 ## E1 PR #18: launcher RAM budget (issue #16)
 
@@ -236,3 +242,62 @@ land"; (2) "sparse as served default: P99-style session with sparse on once spee
 - P103: log lines at INFO level do not reach the server log; engage lines must be WARN (sparse and tier-graphs).
 - P102d: on 8 GB the 262k window needs drafting mode; a no-draft arm gets the 131k window (HTTP 400 at 245k).
 - E5: when rebasing on a newer PrismML, check bf197c43d (checkpoint buffer reuse) before shipping.
+- P110 (2026-10-13): "a smoke gate needs a reference range, not one run."
+- P107 / P111 (2026-10-13): a feature that allocates at its first use (the first sparse decode step) passes a
+  load-time free-VRAM check; trace free VRAM every 10 s per arm and read wrapped values as an over-commit.
+
+## E18 2026-10-11 11:50: stop for the move
+
+| | |
+| --- | --- |
+| Date | 2026-10-11 11:50-11:58 (entry "2026-10-11 11:50 - 2026-10-13 10:54: STOP for the move (Cary: Carmel, Indiana), and resume") |
+| Cause | Cary moved the rig to Carmel, Indiana |
+| Stop | "pause.ps1 (queue\PAUSE kept, server stopped, slot 5); runner processes killed; app check-in task bonsai-8gb-checkin DISABLED; session waiters and gh watcher stopped." Queue log: 11:50:23 "PAUSED for serving", 11:50:42 "STOPPED runner (Cary moving; PAUSE file kept)" |
+| P109 | Interrupted while its first arm (sparse_m425) read the 160k prompt: no results. Only fact: loaded with free 510 MiB (P107 sparse arm: 318), so the +200 margin took effect. Partial log receipts/p109/sparse_m425.INTERRUPTED.txt. The runner logged "done 69e2-p109" when it was killed; the job went back to queue/pending (queue NOTE 11:50:36). P108 never started |
+| Backups | Fork professorpalmer/llama.cpp-ada-ternary, branches 8gb-backup/*: kv-q3-0 6a4851286, kfirst-probe 0e0dc757a, kv-fakebits 4d1c8abe0, cpu-host-attn 794462074 (new WIP commit of a test-backend-ops edit), fa-chunked-prefill d0c1d8644. fa-sparse-proto-2060 (028f606fc) and tier-graphs-2060 (4715804d6) were already on origin. All other vendor worktrees clean |
+| Not done before the cut-off | The notebook entry and the P107 record PR (both done 2026-10-13) |
+| Links | P108, P109; E19 |
+
+## E19 2026-10-13 10:54: resume
+
+| | |
+| --- | --- |
+| Date | 2026-10-13 10:54 CDT (same notebook entry as E18) |
+| Resume check | "the PC slept, last boot is still 10-07 12:31": RTX 2060 SUPER driver 591.86, 27 C, fan 100 % (slot 5), 175 W, PCIe 3.0 x16, 220 MiB used; 31.9 GB RAM; C: 303 GB free; queue: PAUSE, pending = 69e2-p109, 69f-p108, running empty; gh auth OK |
+| Queue log | 10:55:08 "runner start" (stale lock taken over); 10:56:15 "RESUMED"; 10:57:08 run 69e0-p110 |
+| GitHub during the gap | No new comments on #21 / #22; 4070 PR #34 (build_linux.sh) |
+| Time zone | "still Central (Carmel is Eastern): left as is (system setting is Cary's; keeps log times consistent)" |
+| Plan | "P110 post-move smoke first (launcher defaults, 4k/32k/64k, vs P96 51.5 / 51.3 / 34.4, temps), then P109, P108. Nothing already done needs a rerun: P1-P107 complete" |
+| Outcome | P110: no change from the move (gate as written failed on a single-run reference; P85 / P88 match within 1 %). P109 started 11:05:56 and was stopped at 11:08 (E21) |
+| Links | P110, P109 |
+
+## E20 2026-10-13 11:35: check of open PRs and issues
+
+| | |
+| --- | --- |
+| Date | 2026-10-13 11:35 (entry "Check of open PRs / issues (Cary: see if the other agent needs anything; it handles shipping)") |
+| What | PR #37 (4070 draft, depth-20261010 D17/D18 + P107): "numbers checked against the 2060 receipts, all correct; asked them to write P111 (not P110) for the 2060 run." #22: "nothing left from 8 GB (P103b closed it); suggested closing it when the bundle ships." #21: plan posted. #35 (outside 3080 Ti Linux report) and #7: 4070 threads, nothing for 8 GB. PR #34 merged by the 4070 |
+| Rule | "Shipping stays with the 4070 session." |
+
+## E21 Issue #21: the 4070 finds the sparse allocations; builds 8d5b862fc and 3299a0b4b
+
+| | |
+| --- | --- |
+| Date | 2026-10-13 16:02Z (4070 answer, 11:02 rig time), 16:32Z (3299a0b4b); 2060 entries "#21: the 4070 found the sparse allocations ..." and "11:40 fa-sparse-proto 3299a0b4b (4070) ..." |
+| Answer | Only with GGML_CUDA_FA_SPARSE, at the first sparse op (= the first decode step; prefill ops above MAXQ leave before the sparse work): (1) page-bound tables, cudaMalloc, kept, f32 max + min per page / head / dim: 227 MiB at 160k (1,753 pages), 393 MiB at 245k (3,077 pages), 2 KiB per host cell; (2) first fill = the whole host tail of K as f16, a pool temporary kept by the pool's high-water mark: 219 / 385 MiB; everything else per op < 35 MiB. Up to ~780 MiB over the dense arm at 245k = the P107 over-commit. Neither is in the launcher's VRAM budget |
+| Fix 8d5b862fc | Bounds in f16 (the selection is exactly the same; 1 KiB per host cell: 114 / 196 MiB at 160k / 245k) + first fill in chunks of GGML_CUDA_FA_SPARSE_FILL_CELLS=16384 (32 MiB at any depth). Sparse fixed cost at 245k ~230 MiB |
+| Launcher rule (proposed) | When GGML_CUDA_FA_SPARSE is set: + host cells x 1 KiB x (64 / page) + 36 MiB (host cells = context minus the VRAM line); ~230 MiB at 245k on 8 GB, ~13k fewer line cells. Until then: BONSAI_VRAM_MARGIN=475 |
+| 3299a0b4b | 8d5b862fc + GGML_CUDA_FA_SPARSE_MIN_HOST=N (dense while the host tail < N cells; default 0 = off). Reason (4070): P106, sparse -16 % at 64k, +89 % at 160k |
+| 2060 action | P109 stopped at 11:08 (2nd time, no result; superseded). prism-sparse fa-sparse-proto-2060 fast-forwarded to 8d5b862fc; build tooling/build-sparse -> bin-sparse7, try 1 OK 11:10:40 (receipts/build-sparse7-8d5b862fc.txt), beside P108's op tests. Fast-forwarded again to 3299a0b4b; rebuilt try 1 OK 11:36:29 (receipts/build-sparse7.txt). P111 (the 4070's "P110" request) and P109b planned, then P112 (MIN_HOST). Posted on #21 (6149876331) |
+| Outcome | P111 PASS (over-commit was the cause; sparse 2.23x dense at 245k with OP_TIMING). P112: 160k 2.15x clean; 64k -20 % with FA_SPARSE set and no sparse op. P115 and P109b open |
+| Links | P107, P109, P111, P112, P115, P109b |
+
+## E22 bundle-20261011 shipped; #22 closed
+
+| | |
+| --- | --- |
+| Date | 2026-10-13: release published 16:58:34Z, #22 closed 16:59:52Z (4070 session); 2060 entry "bundle-20261011 shipped by the 4070 (90ca41e40, 53 patches, patch 0053); #22 closed; P113 (plan)" |
+| What | bonsai-bundle-win-x64.zip 610,429,298 B, SHA-256 f8899cbfd98091b6830615dc83182626b0b551d8b833ceea58c4e2e52cda8bf8. Release candidate 90ca41e40, 53 patches; new: patch 0053 (CUDA graphs off only for graphs whose attention reads the host tail). Old behaviour: GGML_CUDA_KV_TIER_GRAPHS=1 |
+| 4070 on #22 | "8 GB, from this issue: no loss below the line; +8 to +16 % decode past it; 0 one-token answers (P103, P103b). 12 GB: about +25 % decode at 192k." Also posted on #21: the sparse work still needs graphs off and the f16 mask; the bundle does not change that |
+| Check | P113 on the 2060: PASS (sha match; tests pass; decode 53.9 / 47.9 / 38.0 / 27.9 / 16.9 at 4k-128k; fresh 60k 38.3 / 38.2; 0 one-token; trace min 68 MiB). Posted on #22 (6154352801) |
+| Links | P103, P103b, P113; E9 |

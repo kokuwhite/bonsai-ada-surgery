@@ -1,4 +1,4 @@
-# 8 GB research: report (2026-10-06 to 2026-10-11, ongoing)
+# 8 GB research: report (2026-10-06 to 2026-10-13, ongoing)
 
 All runs on one RTX 2060 SUPER 8 GB (Turing, PCIe 3.0, desktop on the card), unattended from a job queue. Each
 experiment has a plan and a gate written in `NOTEBOOK.md` before its result, and one record in `experiments/`.
@@ -11,7 +11,7 @@ entries for them (end of `NOTEBOOK.md`). Where a correction changes a reading, t
 Mission goal (Cary): beat the community 8 GB recipe (sudoingX's floor) on this card, 60+ tok/s, quality and stability
 to the end of the window, and make the full 262k window the worthwhile default on 8 GB.
 
-| | Start (2026-10-06) | Shipped now (`bundle-20261010` + patch 0053) |
+| | Start (2026-10-06) | Shipped now (`bundle-20261011` = `bundle-20261010` + patch 0053) |
 | --- | --- | --- |
 | Window | 64k (community recipe, all in VRAM); 120k stock tiered at 3.0 tok/s (P2) | **262,144**, the 8 GB default (P84, P85, PR #13) |
 | Decode 4k | 37.2 (floor, P13); 36.9 stock tiered (P2) | **51.5** (P96) |
@@ -27,8 +27,12 @@ Decode is above the floor at every depth the floor serves (P13, P20, P96), and t
 not reached at stock memory: decode is ~73 % ternary mat-vec at 65-80 % of DRAM peak (P36, P37). Past the VRAM line
 (~58-60k positions) decode is bound by PCIe 3.0 (~11 of ~13 GB/s at 250k, P98b), so speed falls with depth.
 
-**Experimental, not shipped:** sparse host-tail reads (#21) decode 1.9x at 160k (9.7 -> 18.5 tok/s, quality equal,
-P105, P106) but are still slower at 245k and cost 16 % at 64k. P109 tests whether VRAM over-commit causes both losses.
+**Experimental, not shipped:** sparse host-tail reads (#21). The 245k loss in P102-P107 was VRAM over-commit: the
+sparse tables were not in the VRAM budget (P107, P111). With the 4070's memory cut (8d5b862fc path) and a 475 MiB
+margin, sparse decodes 2.23x dense at 245k (11.6 vs 5.2 tok/s, op timing on, P111) and 2.15x at 160k (19.6 vs 9.1,
+P112), with follow-up prefill equal to dense. Two costs block a default: `GGML_CUDA_FA_SPARSE` costs 20 % at 64k even
+when no sparse op runs (P112), and the margin moves the VRAM line from 46,592 to 34,560 cells. The real q3_0 KV type
+costs +0.56 % PPL at 16k and +0.03 % at 64k for 22 % fewer bytes per cell (P108); its depth run is P114.
 
 ## What shipped (each with its record)
 
@@ -44,7 +48,7 @@ P105, P106) but are still slower at 245k and cost 16 % at 64k. P109 tests whethe
 | Partial staging + packed KQ mask + pool | 262k at the 131k speed: 64k 37.8 vs 30.5 | P81, P82, P84, P85 | patches 0047-0049, PR #13 |
 | Chunked flash attention for prefill | prefill x1.4 at 128k to x3.6 at 250k, PPL equal | P89 | patches 0051-0052, PR #19 |
 | RAM-budget launcher (issue #16) | 16 GB machines keep running | P90 | PR #18 |
-| Tier-graphs (CUDA graphs past the line) | +16 / +9 / +8 % at 128k / 192k / 245k | P103 | patch 0053 (4070 session) |
+| Tier-graphs (CUDA graphs past the line) | +16 / +9 / +8 % at 128k / 192k / 245k | P103, P113 | patch 0053, bundle-20261011 (4070 session) |
 | Memory clock +1000 (opt-in, never default) | +2.4-2.7 % drafting decode | P38, P42 | docs/8GB.md |
 
 ## What was rejected or did not help (each with its record)
@@ -80,8 +84,11 @@ P105, P106) but are still slower at 245k and cost 16 % at 64k. P109 tests whethe
 - **2026-10-10 (P90-P103):** RAM budget for 16 GB machines; texts compared only within one session history (P92-P94);
   CPU attention ruled out; attention is diffuse (P98); deep agent session to 259.5k (P99); 3-bit KV costs ~nothing
   (P100); sparse reads quality equal (P101); tier-graphs pass (P103).
-- **2026-10-11 (P104-P109):** no streaming heads (P104); sparse 1.9x at 160k (P105, P106); 245k op timing (P107);
-  the VRAM over-commit lead (P109); q3_0 KV tests (P108).
+- **2026-10-11 (P104-P107):** no streaming heads (P104); sparse 1.9x at 160k (P105, P106); 245k op timing finds a
+  VRAM wrap at the first sparse decode step (P107); stop for the move at 11:50 (P109 interrupted, no result).
+- **2026-10-13 (P108-P113):** post-move smoke: card unchanged (P110; its single-run gate failed at 32k); q3_0 KV
+  passes (P108); P109 superseded by the 4070's allocation answer; sparse 2.23x at 245k once VRAM is not over-committed
+  (P111); the depth threshold works, 64k still -20 % (P112); `bundle-20261011` release check PASS (P113).
 
 ## Method lessons (from the audit)
 
@@ -96,5 +103,11 @@ P105, P106) but are still slower at 245k and cost 16 % at 64k. P109 tests whethe
 
 ## Open
 
-P107 (op timing at 245k), P108 (q3_0 KV type: tests, perplexity, decode), P109 (sparse VRAM margin). The levers
-without 8 GB numbers are listed at the end of `TOOLBOX.md`.
+Done since the first version of this report: P107, P108, P110-P113. P113: `bundle-20261011` PASS on the 2060 (decode
+53.9 / 47.9 / 38.0 / 27.9 / 16.9 at 4k-128k, fresh 60k 38.3 / 38.2, 0 one-token, trace min 68 MiB); its line is
+62,464 cells vs P96's 57,600 (idle 217 vs 302 MiB), so its gain over P96 past the line is not all patch 0053.
+
+Open: P114 (q3_0 at depth: line, decode to 192k, needles and copies at 160k; running), P115 (the 64k FA_SPARSE cost;
+clean 245k sparse speed), P109b (the over-commit on the old build, margin 1025). Sparse needs the launcher term (host
+cells x 1 KiB x 64 / page + 36 MiB) and the 64k fix before it can be a default; quality on the new build is the 4070's
+D18. The levers without 8 GB numbers are listed at the end of `TOOLBOX.md`.

@@ -23,4 +23,6 @@ cleanup) are in `events-p090-p108.md`.
 | [P105](P105.md) | 2026-10-11 04:06-08:35 | The #21 candidate d6c6e9f01: sparse quality and speed at 160k and 245k | PARTIAL | 160k: copies 10/10, needles 12/12, decode 9.7 -> 18.3 tok/s (1.9x); 245k: copies 9/10 (dense 10/10), needles 12/12, not faster; MTP tail 4 not a path on 8 GB |
 | [P106](P106.md) | 2026-10-11 08:35-10:06 | 028f606fc vec warp skip; follow-up prefill diagnosis | PARTIAL | 160k 18.5 vs 9.7 (1.9x); 245k 4.9 vs 5.7; 64k 29.0 vs 34.5 (-16 %); follow-up prefill loss comes with FA_SPARSE set, not tracking |
 | [P107](P107.md) | 2026-10-11 10:32-11:42 | Per-op timing at 245k, dense vs sparse | PASS (diagnosis) | Sparse FA -30 ms/graph (91.8 -> 61.5); mat-vecs 2.5-24x slower after a VRAM wrap at the first sparse decode step; test P109 |
-| [P108](P108.md) | 2026-10-11 (queued) | First GPU tests of the q3_0 KV type | OPEN | Queued after P107 at the time of writing |
+| [P108](P108.md) | 2026-10-13 11:09-12:14 | First GPU tests of the q3_0 KV type | PASS | Op tests 14/14, 4/4, 7/7, 110/110; PPL q3_0 vs q4_0 +0.56 % at 16k, +0.03 % at 64k (P100 bound +0.60 / -0.02 %); 4k decode 43.8 vs 43.9; -22 % bytes per cell |
+
+P109 to P115 (from 2026-10-11 11:42): `index-p109-p115.md`.
