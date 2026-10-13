@@ -13,7 +13,9 @@ GUARD=$!
 trap 'touch logs/ramguard.stop; wait $GUARD 2>/dev/null; powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1' EXIT
 say "=== thinking budget on agent work: budgets ${BUDGETS:-default 4096 2048}, plan $PLAN"
 for B in ${BUDGETS:-default 4096 2048}; do
-  NAME=b$B; ENVS=""; [ "$B" != default ] && ENVS="BONSAI_THINK_BUDGET=$B"
+  # the suite sends its own per-request budget, which overrides the server's: set both (OUT_TAG keeps runs apart)
+  NAME=b$B${OUT_TAG:+_$OUT_TAG}; ENVS=""; [ "$B" != default ] && ENVS="BONSAI_THINK_BUDGET=$B"
+  if [ "$B" != default ]; then export SUITE_REASONING_BUDGET=$B; else unset SUITE_REASONING_BUDGET; fi
   powershell -NoProfile -ExecutionPolicy Bypass -File bench/stop_serve.ps1 >/dev/null 2>&1; sleep 4
   env BONSAI_LAYER=0 $ENVS powershell -NoProfile -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','$REPO\\start-server.ps1' -RedirectStandardOutput '$REPO\\logs\\budget_$NAME.launcher.log' -RedirectStandardError '$REPO\\logs\\budget_$NAME.server.log'"
   ok=0; for k in $(seq 1 90); do sleep 2; curl -s -m 2 http://127.0.0.1:8080/health | grep -q ok && { ok=1; break; }; done

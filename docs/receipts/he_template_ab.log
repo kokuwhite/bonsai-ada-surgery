@@ -62,3 +62,8 @@ clientsys_product: mean tokens 2209 median 557, over 4k: 20
 11:12 === clientsys_product done
 11:13 === clientsys_userprefix: template served_template_userprefix.jinja, root C:/Users/pwall/Projects/bonsai-2-27b-serve, kwargs none, --system-file bench/prompts/agent_system.txt, health=1
 11:50 clientsys_userprefix stopped at 154/164 by the 10-11 shutdown (partial; rerun pending)
+11:27 === clientsys_userprefix: template served_template_userprefix.jinja, root C:/Users/pwall/Projects/bonsai-2-27b-serve, kwargs none, --system-file bench/prompts/agent_system.txt, health=1
+pass@1 96.34%  (158/164)  arm=medium effort=- temp=0.0 max_tokens=24576  2411.6s
+wrote artifacts/humaneval-clientsys_userprefix\summary.json
+clientsys_userprefix: mean tokens 1476 median 635, over 4k: 10
+12:07 === clientsys_userprefix done

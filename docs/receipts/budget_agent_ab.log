@@ -1,0 +1,49 @@
+13:40 === thinking budget on agent work: budgets default 4096 2048, plan bench/plans/tools_workspace.json
+13:40 arm bdefault: health=1; listen 0.0.0.0:8080  think=True effort=medium budget=20480  harness-proofing=True  backend-sampling=True
+{"family": "workspace", "name": "copy", "seed": 3, "arm": "bdefault", "ok": false, "tokens": 933, "wall_s": 12.3, "detail": "submitted; full_pass=False"}
+
+| family | task | bdefault |
+| --- | --- | ---: |
+| workspace | chain | 3/3 |
+| workspace | copy | 1/3 |
+| workspace | dedupeH | 3/3 |
+| workspace | invoiceH | 3/3 |
+| workspace | ledgerH | 3/3 |
+| **total** | | **13/15** |
+
+completion tokens: bdefault 126,183
+
+== summary ==
+A_native_grammar   n=18 parsed=18 payload_ok=16 cut_by_max_tokens=0 median_payload_chars=19202 mean_tps=91.2
+B_json_in_content  n=18 parsed=3 payload_ok=2 cut_by_max_tokens=7 median_payload_chars=3204 mean_tps=131.4
+14:27 arm b4096: health=1; listen 0.0.0.0:8080  think=True effort=medium budget=4096  harness-proofing=True  backend-sampling=True
+{"family": "workspace", "name": "copy", "seed": 3, "arm": "b4096", "ok": false, "tokens": 933, "wall_s": 12.4, "detail": "submitted; full_pass=False"}
+
+| family | task | b4096 |
+| --- | --- | ---: |
+| workspace | chain | 3/3 |
+| workspace | copy | 1/3 |
+| workspace | dedupeH | 3/3 |
+| workspace | invoiceH | 3/3 |
+| workspace | ledgerH | 3/3 |
+| **total** | | **13/15** |
+
+completion tokens: b4096 126,183
+
+== summary ==
+A_native_grammar   n=18 parsed=17 payload_ok=10 cut_by_max_tokens=1 median_payload_chars=20957 mean_tps=90.1
+B_json_in_content  n=18 parsed=3 payload_ok=1 cut_by_max_tokens=7 median_payload_chars=3208 mean_tps=124.5
+15:16 arm b2048: health=1; listen 0.0.0.0:8080  think=True effort=medium budget=2048  harness-proofing=True  backend-sampling=True
+{"family": "workspace", "name": "copy", "seed": 3, "arm": "b2048", "ok": false, "tokens": 933, "wall_s": 12.4, "detail": "submitted; full_pass=False"}
+
+| family | task | b2048 |
+| --- | --- | ---: |
+| workspace | chain | 3/3 |
+| workspace | copy | 1/3 |
+| workspace | dedupeH | 3/3 |
+| workspace | invoiceH | 3/3 |
+| workspace | ledgerH | 3/3 |
+| **total** | | **13/15** |
+
+completion tokens: b2048 126,183
+16:01 NOTE: the three arms above (default / 4096 / 2048) all ran at a per-request reasoning_budget_tokens=20480: suite/run_suite.py sent it with every request, and it overrides the server's BONSAI_THINK_BUDGET. So the arms are identical and do not test the budget. Rerun with SUITE_REASONING_BUDGET (arm b2048_req).

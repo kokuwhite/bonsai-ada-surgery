@@ -33,7 +33,8 @@ import sandbox  # noqa: E402
 
 PROFILE = dict(temperature=1.0, top_p=0.95, top_k=20, min_p=0.05, repeat_penalty=1.0, presence_penalty=0.0,
                reasoning_format="deepseek", reasoning_effort="medium", chat_template_kwargs={"reasoning_effort": "medium"},
-               reasoning_budget_tokens=20480, stream=False, cache_prompt=True)
+               reasoning_budget_tokens=int(os.environ.get("SUITE_REASONING_BUDGET", "20480")), stream=False,
+               cache_prompt=True)   # SUITE_REASONING_BUDGET: the per-request budget (it overrides the server's)
 DEFAULT_PLAN = {
     "coding": [(c, s) for c in ("suite-tar-01", "xfer-zip-01", "xfer-mime-01") for s in (1, 2, 3, 4)],
     "computation": [(k, s) for k in ("knapsack", "digits", "lcs", "sales", "weblog") for s in (1, 2, 3)],

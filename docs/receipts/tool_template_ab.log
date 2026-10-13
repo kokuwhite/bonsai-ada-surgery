@@ -40,3 +40,39 @@ completion tokens: tpl 562,661
 A_native_grammar   n=18 parsed=18 payload_ok=14 cut_by_max_tokens=0 median_payload_chars=17511 mean_tps=93.5
 B_json_in_content  n=18 parsed=6 payload_ok=3 cut_by_max_tokens=5 median_payload_chars=3448 mean_tps=118.0
 18:27 === done
+12:07 === tool template A/B: gguf template vs served_template_userprefix.jinja, plan bench/plans/tools_workspace.json, tag up
+12:08 arm gguf: health=1
+{"family": "workspace", "name": "copy", "seed": 3, "arm": "gguf", "ok": false, "tokens": 933, "wall_s": 13.6, "detail": "submitted; full_pass=False"}
+
+| family | task | gguf |
+| --- | --- | ---: |
+| workspace | chain | 3/3 |
+| workspace | copy | 1/3 |
+| workspace | dedupeH | 3/3 |
+| workspace | invoiceH | 3/3 |
+| workspace | ledgerH | 3/3 |
+| **total** | | **13/15** |
+
+completion tokens: gguf 126,183
+
+== summary ==
+A_native_grammar   n=18 parsed=18 payload_ok=11 cut_by_max_tokens=0 median_payload_chars=21304 mean_tps=90.5
+B_json_in_content  n=18 parsed=5 payload_ok=1 cut_by_max_tokens=7 median_payload_chars=2777 mean_tps=147.5
+12:54 arm tpl: health=1
+{"family": "workspace", "name": "copy", "seed": 3, "arm": "tpl", "ok": false, "tokens": 1081, "wall_s": 14.8, "detail": "submitted; full_pass=False"}
+
+| family | task | tpl |
+| --- | --- | ---: |
+| workspace | chain | 3/3 |
+| workspace | copy | 1/3 |
+| workspace | dedupeH | 3/3 |
+| workspace | invoiceH | 2/3 |
+| workspace | ledgerH | 2/3 |
+| **total** | | **11/15** |
+
+completion tokens: tpl 119,991
+
+== summary ==
+A_native_grammar   n=18 parsed=18 payload_ok=14 cut_by_max_tokens=0 median_payload_chars=20274 mean_tps=91.9
+B_json_in_content  n=18 parsed=3 payload_ok=2 cut_by_max_tokens=9 median_payload_chars=2839 mean_tps=170.8
+13:40 === done
