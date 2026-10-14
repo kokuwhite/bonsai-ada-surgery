@@ -1,4 +1,4 @@
-# 8 GB research: report (2026-10-06 to 2026-10-13, ongoing)
+# 8 GB research: report (2026-10-06 to 2026-10-14, ongoing)
 
 All runs on one RTX 2060 SUPER 8 GB (Turing, PCIe 3.0, desktop on the card), unattended from a job queue. Each
 experiment has a plan and a gate written in `NOTEBOOK.md` before its result, and one record in `experiments/`.
@@ -11,7 +11,7 @@ entries for them (end of `NOTEBOOK.md`). Where a correction changes a reading, t
 Mission goal (Cary): beat the community 8 GB recipe (sudoingX's floor) on this card, 60+ tok/s, quality and stability
 to the end of the window, and make the full 262k window the worthwhile default on 8 GB.
 
-| | Start (2026-10-06) | Shipped now (`bundle-20261011` = `bundle-20261010` + patch 0053) |
+| | Start (2026-10-06) | Shipped now (`bundle-20261013` = `bundle-20261011` + patch 0054; on Turing 0054 changes nothing, P116 / P126b) |
 | --- | --- | --- |
 | Window | 64k (community recipe, all in VRAM); 120k stock tiered at 3.0 tok/s (P2) | **262,144**, the 8 GB default (P84, P85, PR #13) |
 | Decode 4k | 37.2 (floor, P13); 36.9 stock tiered (P2) | **51.5** (P96) |
@@ -27,12 +27,18 @@ Decode is above the floor at every depth the floor serves (P13, P20, P96), and t
 not reached at stock memory: decode is ~73 % ternary mat-vec at 65-80 % of DRAM peak (P36, P37). Past the VRAM line
 (~58-60k positions) decode is bound by PCIe 3.0 (~11 of ~13 GB/s at 250k, P98b), so speed falls with depth.
 
-**Experimental, not shipped:** sparse host-tail reads (#21). The 245k loss in P102-P107 was VRAM over-commit: the
-sparse tables were not in the VRAM budget (P107, P111). With the 4070's memory cut (8d5b862fc path) and a 475 MiB
-margin, sparse decodes 2.23x dense at 245k (11.6 vs 5.2 tok/s, op timing on, P111) and 2.15x at 160k (19.6 vs 9.1,
-P112), with follow-up prefill equal to dense. Two costs block a default: `GGML_CUDA_FA_SPARSE` costs 20 % at 64k even
-when no sparse op runs (P112), and the margin moves the VRAM line from 46,592 to 34,560 cells. The real q3_0 KV type
-costs +0.56 % PPL at 16k and +0.03 % at 64k for 22 % fewer bytes per cell (P108); its depth run is P114.
+**Experimental, not shipped (in gating):** sparse host-tail reads (#21) and the q3_0 KV type. Sparse: the 245k loss
+in P102-P107 was VRAM over-commit (P107, P111). With the sparse tables cut and counted, sparse decodes 2.68x dense at
+245k (14.2 vs 5.3 tok/s, no op timing, P115) and 2.15x at 160k (P112), with follow-up prefill equal to dense. The
+always-on 64k cost (-20.6 %, P115; all in FLASH_ATTN_EXT, P118) was a routing bug: below MIN_HOST the attention op lost
+its tier prefetch. The 4070 fixed it in product-sparse 3ab0af3c2 (P123: 0 sparse ops at 64k). What is left is the
+launcher's page-bound reserve: it must cover the whole window, so it costs 13,824 VRAM cells at every depth (P122:
+sparse only 1.02x at 96k; P123: 64k -7.0 % vs sparse off). int8 bounds (c8bbb1898, 514 B per host cell) halve it;
+P127 / P128 decide the default under the 4070's rule (64k within ~5 % of sparse off). Patch 0055 (draft PR #56) and
+launcher PR #49 wait for them and for one quality question: at 245k sparse B 8192 loses one exact copy that dense
+keeps (4070 D22 control; P105 here); P133 checks it on c8bbb1898. q3_0: line 1.31x, decode +23 % at 128k and +15 % at 192k, -6.5 % at 64k, copies 10/10
+and needles 12/12 at 160k (P114), HumanEval 160/164 (P117). Cary's order: sparse first, q3_0 in a later bundle; the
+port (4dbfe57d4) gets the same set as P129-P132.
 
 ## What shipped (each with its record)
 
@@ -86,9 +92,18 @@ costs +0.56 % PPL at 16k and +0.03 % at 64k for 22 % fewer bytes per cell (P108)
   (P100); sparse reads quality equal (P101); tier-graphs pass (P103).
 - **2026-10-11 (P104-P107):** no streaming heads (P104); sparse 1.9x at 160k (P105, P106); 245k op timing finds a
   VRAM wrap at the first sparse decode step (P107); stop for the move at 11:50 (P109 interrupted, no result).
-- **2026-10-13 (P108-P113):** post-move smoke: card unchanged (P110; its single-run gate failed at 32k); q3_0 KV
-  passes (P108); P109 superseded by the 4070's allocation answer; sparse 2.23x at 245k once VRAM is not over-committed
-  (P111); the depth threshold works, 64k still -20 % (P112); `bundle-20261011` release check PASS (P113).
+- **2026-10-13 (P108-P118, P109b, P121-P123, P126):** post-move smoke: card unchanged (P110; its single-run gate
+  failed at 32k); q3_0 KV passes (P108); P109 superseded by the 4070's allocation answer; sparse 2.23x at 245k once
+  VRAM is not over-committed (P111); the depth threshold works, 64k still -20 % (P112); `bundle-20261011` release check
+  PASS (P113). q3_0 at depth: line 1.31x, +23 % at 128k, +15 % at 192k, quality held (P114); HumanEval 160/164 (P117).
+  Patch 0054 skips cleanly on sm_75 (P116, P116b). Clean 245k sparse 2.68x; the 64k cost is always-on (P115) and sits
+  in FLASH_ATTN_EXT (P118). P109b infeasible (margin 1025 leaves 3,328 cells). Crossover on the old build 1.45x at
+  96k, 1.78x at 128k (P121). product-sparse builds and passes op tests; the launcher reserve costs 13,824 cells
+  (P122); the routing fix holds, 64k -7.0 % from the line (P123). A power cut (~21:27) and a Windows servicing crash
+  (~23:56) cut P126 and P126b; P126 read 4-7 % low at 64k-128k against P113 (another session).
+- **2026-10-14 (P126b; P124 running):** bundle-20261013 = bundle-20261011 within 1.5 % in one session, so the
+  bundle-20261013 release check passes (P126b). P124 (product-sparse release-style sweep) running: 4k-128k so far
+  52.8 / 47.4 / 35.2 / 27.0 / 26.0.
 
 ## Method lessons (from the audit)
 
@@ -100,14 +115,25 @@ costs +0.56 % PPL at 16k and +0.03 % at 64k for 22 % fewer bytes per cell (P108)
 - **Check free VRAM in every arm, and read wrapped values.** The sparse arms' "min free 4194274 MiB" was an
   over-commit that nobody read for five runs (P102-P106).
 - **Texts differ across session history** with lookup drafting (P94): compare texts only inside one server's history.
+- **Compare releases only inside one session.** P126 read bundle-20261013 4-7 % below P113 at 64k-128k; the same two
+  bundles alternated in one session differed by -1.0 to +1.5 % (P126b). Across sessions (reboots, idle VRAM, the line)
+  this card moved ~5 % at 64k. A release check gates on a same-session A/B against the previous release.
+- **A launcher reserve sized for the full window costs the line at every depth.** The sparse page bounds (244-245 MiB
+  at 262k) moved the line from 62,464 to 48,640 cells: sparse lost its 96k gain (1.02x, P122) and ran 64k 7.0 % below
+  sparse off (P123). The reserve cannot be sized by depth (the line is fixed at load), so shrink its bytes (int8
+  bounds) and check the line cost at the shallow depths, not only the gain at the deep ones.
 
 ## Open
 
-Done since the first version of this report: P107, P108, P110-P113. P113: `bundle-20261011` PASS on the 2060 (decode
-53.9 / 47.9 / 38.0 / 27.9 / 16.9 at 4k-128k, fresh 60k 38.3 / 38.2, 0 one-token, trace min 68 MiB); its line is
-62,464 cells vs P96's 57,600 (idle 217 vs 302 MiB), so its gain over P96 past the line is not all patch 0053.
+Done since the last version of this report: P109b (VOID, infeasible), P114, P115, P116, P116b, P117, P118, P121,
+P122, P123, P126, P126b. bundle-20261013 passes on the 2060 (P126 + P126b).
 
-Open: P114 (q3_0 at depth: line, decode to 192k, needles and copies at 160k; running), P115 (the 64k FA_SPARSE cost;
-clean 245k sparse speed), P109b (the over-commit on the old build, margin 1025). Sparse needs the launcher term (host
-cells x 1 KiB x 64 / page + 36 MiB) and the 64k fix before it can be a default; quality on the new build is the 4070's
-D18. The levers without 8 GB numbers are listed at the end of `TOOLBOX.md`.
+Open (2026-10-14 01:54, in queue order): P124 (product-sparse 3ab0af3c2 release-style sweep, 160k / 245k vs sparse
+off, 245k trace minimum; running), P127 (int8 bounds c8bbb1898: build, 64k vs sparse off, the 4070's 5 % rule), P133
+(245k copies and needles on c8bbb1898: dense, sparse B 8192, sparse B 16384), P128 (release-style sweep on c8bbb1898),
+P129-P132 (q3_0 on 4dbfe57d4: op tests and PPL, depth with sparse off, HumanEval, sparse on with q3_0 vs q4_0), P125
+(HumanEval on product-sparse), P119 / P120 (the P99 deep agent session on bundle-20261011 and on c8bbb1898). The sparse
+default on 8 GB, patch 0055 (draft PR #56) and launcher PR #49 wait for P124 / P127 / P128 and for the 245k copy
+question: at 245k sparse B 8192 loses one exact copy that dense keeps (4070 D22 control; P105 on this card).
+q3_0 needs a launcher CellBytes entry (14,336 B) and the P129-P132 results before any default. The levers without 8 GB
+numbers are listed at the end of `TOOLBOX.md`.
