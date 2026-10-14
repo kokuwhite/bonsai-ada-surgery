@@ -117,6 +117,16 @@ the tiered-KV runtime are detected and get the previous 96k all-VRAM recipe.
 
 ### Upgrading from an older bundle
 
+`bundle-20261014` adds **sparse host-tail reads for deep sessions on 8 GB cards** (patch 0055, opt-in:
+`BONSAI_SPARSE=1`). Past the VRAM line, a decode attention op reads only the system-RAM pages whose int8 page bounds
+score highest (a budget that grows with the host tail, at least 12,288 cells) plus the last 1,024 cells, not the whole
+host tail. Exact copies and needles are equal to dense at 160k, 200k and 245k on both test cards. RTX 2060 SUPER,
+8 GB recipe, 262k window: 160k 10.6 -> 17.5 tok/s (1.65x), 245k 6.3 -> 13.7 (2.17x). The page bounds take VRAM
+(about 170 MiB at 262k), so the VRAM line moves down and decode below about 100k is about 8 % slower on PCIe 3.0
+(2.6 % on PCIe 4.0): that is why it is opt-in, and the launcher prints the trade. Off (the default), nothing changes.
+Also in this bundle: with a separate draft model (`-md`) the launcher turns the shared CUDA pool off (it aborted at
+start), and a [Vision (images)](#vision-images) section.
+
 `bundle-20261013` makes **prefill faster on RTX 30 and 40 cards** (patch 0054, a port of ggml-org/llama.cpp#29353).
 The 48 gated-delta-net layers now process a prompt in chunks with tensor-core (BF16 MMA) math instead of one token
 after another. RTX 4070, 12 GB recipe, prefill: 4k 1197 -> 1280, 32k 1020 -> 1082, 128k 583 -> 602 tok/s (+3 to
@@ -590,7 +600,7 @@ python bench\mtp_identity.py                   # greedy draft-on vs draft-off
 
 | Path | What |
 | --- | --- |
-| `patches/` | the 54-commit stack on PrismML `adfffbe`, `git am`-able |
+| `patches/` | the 55-commit stack on PrismML `adfffbe`, `git am`-able |
 | `start-server.ps1`, `start-remote.ps1` | the recipe (LAN / Cloudflare tunnel) |
 | `build/build_linux.sh`, `start-linux.sh` | Linux build from the pinned base + patches, first-run launcher |
 | `tests/`, `.github/workflows/` | Linux setup tests, Linux CUDA compile and PDL code-generation CI |
