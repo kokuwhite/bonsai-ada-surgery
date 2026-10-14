@@ -1,10 +1,10 @@
-# 8 GB research, 2026-10-06 to 2026-10-13 (ongoing)
+# 8 GB research, 2026-10-06 to 2026-10-14 (ongoing)
 
 How to make Bonsai 2 27B (PTQ1_0 ternary, 48 gated-delta-net + 16 attention layers, MTP head) fast, correct and stable on
 one 8 GB card, to the end of its 262,144-token window. All runs on one RTX 2060 SUPER 8 GB (Turing, sm_75, PCIe 3.0)
-with the Windows desktop on the same card, unattended, from a job queue. Each experiment (P1 to P113; P109b, P114 and
-P115 open) has a plan and a gate written before its result; the timestamped plan is in `NOTEBOOK.md` before the
-result entry.
+with the Windows desktop on the same card, unattended, from a job queue. Each experiment (P1 to P126b; P119, P120,
+P124, P125 and P127-P132 open) has a plan and a gate written before its result; the timestamped plan is in
+`NOTEBOOK.md` before the result entry.
 
 The companion folder `../depth-20261010/` (RTX 4070 12 GB, D01-D17) has the 12 GB side of the depth work: the sparse
 host-tail reads and tier-graphs were built there and checked here on 8 GB (P101-P107).

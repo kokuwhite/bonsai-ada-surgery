@@ -2561,3 +2561,220 @@ narrow). Posted on #22 (closed by the 4070 with the release).
 - P109 script stays named 69e2-p109-sparse-margin.sh in queue/done (not .superseded as written above).
 - P107 record: loaded free 318 MiB (run_arm line), not 216 (first trace sample); corrected in P107.md.
 - P113 header 128k floor 13.9 = P96 - 3 %; the range minimum - 3 % is 13.7 (no effect: 16.9).
+
+## 2026-10-13 P114 (partial, speed done) and P116 (plan): PR #40 patch 0054 on Turing (4070 request on #21)
+P114 speed (same binary bin-q3kv, 262k launcher): q4_0 4k 53.1 / 64k 38.5 / 128k 12.7 / 192k 8.2; q3_0 52.6 / 36.0 / 15.6 /
+9.4 (+23 % at 128k, +15 % at 192k; -6.5 % at 64k: to explain when P114 ends). Quality phase running.
+4070 (#21, 21:35Z): PR #40 = patch 0054 (chunked GDN MMA prefill, port of ggml-org/llama.cpp#29353), branch product-0054
+e63ce36d9 (= 90ca41e40 + 0054). Must not run on sm_75. Built in prism-tiergraphs (branch product-0054-2060) +
+tooling/build-tiergraphs beside P114's quality phase (not CPU-sensitive). Code reading: on sm_75 it allocates
+temporaries (and activates raw gates) before ggml_cuda_gdn_mma_launch fails -> logs "not taken (shape or device)"
+(not "skipped"); small wasted work per GDN prefill op; the 32k gate covers it.
+P116 (queue 69g45, before P115; gates in its header): GATED_DELTA_NET op tests; 0054 log has skipped / not taken and no
+engaged; 32k prefill and decode 0054 vs bundle-20261011 (0053) alternated x2 within 3 %. Result goes to PR #40.
+
+## 2026-10-13 P114 (result): q3_0 KV at depth PASS - line 1.31x, +23 % at 128k, +15 % at 192k, quality held
+Run 15:16-16:57 (queue 69g4). Same binary bin-q3kv; lines q4_0 62,720 (staging to 144,640) / q3_0 82,176 (to 164,096);
+loaded free 269 / 291. Decode q4 / q3: 4k 53.1 / 52.6, 64k 38.5 / 36.0, 128k 12.7 / 15.6, 192k 8.2 / 9.4; 192k prefill
+167.5 / 170.2 (191,010 tok). Min free 67 / 97 MiB. 0 one-token. q3_0 160k: copies 10/10, needles 12/12.
+Gates all PASS (line 1.31x; 1.23x / 1.15x; 4k -0.9 %; quality; min free).
+64k -6.5 %: both nearly all in VRAM there, so it is the q3_0 dequant cost in the attention kernel (kernel work item).
+The P114 q3_0 code-copy run ran while e63ce36d9 built (16:3x-16:56): scores unaffected, not a speed reading.
+Next (asked on #21): rebase kv-q3-0 onto 0053 / 0054 / sparse; q3_0 HumanEval on the 8 GB launcher before any default.
+
+P117 (queue 69i, after P109b; gate in its header): HumanEval 164 medium, temp 0, 8 GB 262k launcher, q3_0 (bin-q3kv).
+Pass: >= 157/164 (lowest q4_0 8 GB result, P31); report failures vs P87 (158/164).
+
+## 2026-10-13 P116 (result): PR #40 patch 0054 on Turing PASS (posted on #40)
+Run 16:57-17:08 (queue 69g45). bin-0054 (e63ce36d9, 75-real) vs bundle-20261011 bin; line 62,464; 32k alternated x2.
+GATED_DELTA_NET 55/55. 0054 log once per server: "chunked GDN prefill (MMA) not taken (shape or device): 512 tokens (510 by
+MMA), K 2, H 48, H_k 16, raw 1, gather 1, seqs 1"; 0 engaged; 0053 no GDN lines. Code prefill 344.4 / 343.9 / 344.1 /
+344.0; decode 44.8 / 44.9 / 44.8 / 44.7 (0053 r1, 0054 r1, 0053 r2, 0054 r2). 0 one-token. All 3 gates PASS.
+Note on #40: on sm_75 the branch allocates temporaries and activates raw gates before the launch fails (not "skipped");
+no measurable cost; suggested a device check before the allocations.
+
+## 2026-10-13 PR #40 merged by the 4070 with the P116 note applied (0054 = de873117e: device check before temporaries,
+'skipped: device cc N' line). prism-tiergraphs product-0054-2060 -> de873117e. P116b (queue 69g6, after P115; gates in
+its header; builds inside the job so P115's 245k speed arms run without build load): op tests, 'skipped: device cc' line
+and no 'not taken'/'engaged', 32k within 3 % of P116 and of bundle-20261011. Posted to #40 when done.
+
+## 2026-10-13 P115 (result): 245k sparse 2.68x dense (14.2 vs 5.3, clean); the 64k cost is an always-on FA_SPARSE overhead
+Run 17:08-18:26 (queue 69g5). bin-sparse7, margin 475 (line 34,560), lookup off, f16 mask, graphs off, no OP_TIMING.
+dense64 28.7 (29.1/28.4/28.5), follow-ups 195.6/193.1, min free 369, sparse lines 0.
+never64 (FA_SPARSE + MIN_HOST=1e9) 22.8 (23.2/22.6/22.4), follow-ups 193.3/190.5, min free 366, sparse lines 0 -> -20.6 %.
+sparse245 (MIN_HOST=32768) 14.2 (14.9/13.3/14.3), follow-ups 78.7/76.6, prefill 134.6 (243,896 tok), min free 106, 11 lines.
+dense245 5.3 (5.6/5.0/5.4), follow-ups 77.0/75.2, prefill 134.6, min free 362. 0 one-token in all arms.
+Gate: never64 >= 5 % below dense64 -> YES: always-on overhead of FA_SPARSE (engine, 4070). 245k: 2.68x.
+Posted on #21 with candidates (85d949f5e MMA tile map, per-op entry work before the min_host check, mask copy) and an
+offer to run an OP_TIMING diff of dense64 vs never64.
+
+P118 (queue 69g7, after P116b): OP_TIMING diff dense64 vs never64 (P115 env) -> which op carries the always-on -20.6 %.
+
+## 2026-10-13 P116b (result): merged 0054 de873117e on sm_75 PASS (posted on #40)
+Run 18:26-18:33 (queue 69g6; build try 1, 18:27:41). GATED_DELTA_NET 55/55. Log once: "chunked GDN prefill (MMA) skipped:
+device cc 750 has no supported BF16 MMA schedule; recurrent kernel"; not taken 0, engaged 0. 32k: bundle-20261011 prefill
+347.3, follow-ups 264.7/263.2, decode 45.1 (45.6/44.6/45.1); bin-0054b prefill 344.9, 263.1/263.2, decode 44.8
+(45.4/44.3/44.8). Within 0.7 %. 0 one-token. All gates PASS.
+
+## 2026-10-13 P118 (result): the FA_SPARSE always-on cost is in FLASH_ATTN_EXT (7.8 -> 22.8 ms/graph, +15 ms) at 64k
+Run 18:33-18:44 (queue 69g7). P115 env + OP_TIMING. dense64 39.736 ms/graph (FA x8 7.819, 5120x17408 5.062, 17408x5120
+2.546, GDN 1.009), decode 21.1 with timing; never64 49.593 ms/graph (FA x8 22.822, 4.641, 2.401, GDN 0.738), decode 17.2.
+All other ops equal or lower. Reading: with FA_SPARSE set, attention takes a slower path for every op even when no sparse
+mask is built (likely 85d949f5e routing keyed on the config). Suggested on #21: route to the sparse path only when the
+op's mask was built (same condition as min_host). Offered to run the fix (64k / 160k / 245k).
+
+## 2026-10-13 P109b (result): VOID - infeasible; not rerun
+Run 18:44-18:49 (queue 69h). bin-sparse6 (028f606fc), margin 1025, 262k window: the launcher threw "Tiered KV: only 3328
+cells fit in VRAM" (idle 217 MiB). So the old build's sparse cost (~780 MiB at 245k) cannot be covered by margin on an
+8 GB card at a 262k window: the line would collapse to ~3k cells. Not rerun: the cause is already shown by the P107 VRAM
+trace (wrap at the first sparse decode step), the 4070's allocation sizes (#21), and P111 (the fix 8d5b862fc + margin 475:
+min free 106 MiB, mat-vecs at dense times, 2.23x at 245k). Next: P117 (q3_0 HumanEval, running).
+
+P119 / P120 (queue 69j / 69k, after P117; gates in their headers): the P99 deep agent session (150k start, 25 turns x 2.5k)
+on bundle-20261011 (P119) and with sparse (bin-sparse7, margin 475, MIN_HOST=32768, f16 mask, graphs off, lookup on;
+P120). Answers Cary's 'usable at depth?' with per-turn walls: P99 vs P119 vs P120.
+
+## 2026-10-14 00:1x #21: the 4070's D18 PASS (copies 10/10, needles 12/12, sparse_edit 0 stale, -391 MiB peak); they re-asked
+for 'P110 on 3299a0b4b' (= our P111, done, PASS) and for 96k / 128k (MIN_HOST crossover). Replied with P111 / P112 / P115 /
+P118 links. P121 (queue 69ia, after P117, before P119 / P120): dense vs sparse MIN_HOST=0 at 96k -> 128k, margin 475.
+
+## 2026-10-13 P117 (result): q3_0 HumanEval 160/164 (97.56 %) on the 8 GB launcher - PASS
+Run 18:49-19:36 (queue 69i). bin-q3kv, 262k test launcher, BONSAI_CTK=q3_0, line 81,920 (staging to 163,840), layer off,
+medium, temp 0, max tokens 20480, 2,810.3 s. Failed: 32, 39, 132, 145. P87 (q4_0, 158/164) failed 32, 40, 92, 93, 145,
+160. Common 32 / 145. Reading: no loss on code (greedy flips), not a gain. Gate >= 157: PASS.
+q3_0 summary (all PASS): P108 kernels + PPL, P114 depth speed + copies / needles, P117 HumanEval. Asked the 4070 on #21
+to rebase kv-q3-0 onto the current engine; then a release-style check here. Next: P121 (running), P119, P120.
+
+## 2026-10-14 ~00:5x Cary: ship sparse first, q3_0 later, unless the 4070 has critiques. Posted the proposal on #21 (remaining
+steps: P118 routing fix, launcher sparse-memory term + MIN_HOST from P121, gates; then the q3_0 rebase). Waiting for reply.
+
+## 2026-10-14 00:53Z 4070 agreed: sparse first, q3_0 after. P118 root cause found (by the 4070)
+Graph setup (ggml-cuda.cu, tier prefetch) leaves out every attention op that ggml_cuda_fa_sparse_eligible() accepts; that
+check ignores MIN_HOST. Below the threshold: no sparse mask AND no prefetch -> with STAGE_MIN_Q=9 the decode op reads the
+whole host tail in place over PCIe = P118's 7.8 -> 22.8 ms, P115's -20.6 %. Fix: one eligibility check for both places.
+Graphs: on a 0053 base the sparse env needs no DISABLE_GRAPHS (0053 turns graphs off per graph exactly where K reaches the
+host tail). f16 mask: decode / verify ops <= 31 queries get an f16 mask even with --kq-mask-packed, so packed can stay on.
+Their plan today: eligibility fix; product-sparse = product-0054 + sparse as patch 0055 (no slot-keep prototype), sm_75/86/89;
+D18 quality set; then my release-style gates (graphs ON, packed ON); launcher term + MIN_HOST from P121 rerun.
+P121 (MIN_HOST=0) unaffected by the bug; rerun on product-sparse anyway (0053 moves the dense arm).
+
+## 2026-10-14 01:00Z product-sparse 3ab0af3c2 + launcher PR #49 (4070); P122-P125 (plans), P120 rewritten
+3ab0af3c2 = product-0054 de873117e + sparse (patch 0055 candidate, incl. the MIN_HOST eligibility fix 9d9a968d9).
+Launcher draft PR #49 (launcher-sparse c1908b7): on 8 GB with this engine sets FA_SPARSE=8192,64,1024, FAST=1,
+MIN_HOST=32768; counts page bounds ((Ctx - N) x SparseCellBytes + 36 MiB) in the line; no DISABLE_GRAPHS, no mask change.
+Test copy: start-server-sparsetest.ps1 = c1908b7 + the BONSAI_BIN $Bin line (local only). prism-tiergraphs branch
+product-sparse-2060 = 3ab0af3c2; builds in tooling/build-tiergraphs inside P122 -> bin-psparse.
+Queue (gates in each header): P122 build + FA / GDN op tests + crossover (96k->128k, BONSAI_SPARSE=0 vs MIN_HOST=0);
+P123 64k routing check x2 (within 2 %); P124 sweep 4k-128k (>= P113 - 3 %), 160k->245k (>= 1.8x), fresh 60k x2, min free
+>= 60; P125 HumanEval (>= 157); then P119 (bundle-20261011 deep session) and P120 (rewritten before it ran: bin-psparse +
+launcher-sparse defaults; was bin-sparse7, margin 475, f16, graphs off). Posted on #21.
+
+## 2026-10-14 01:14Z PR #50 (4070): docs/research/q3port-20261013 - q3_0 on the current engine, gates before runs
+q3-on-sparse bae6dccfe (fork) = product-sparse 3ab0af3c2 + q3_0; fallback q3-on-0054 80b4eab7a (local). 4070 gates Q03 op
+tests, Q04 PPL (q3_0 within 1 % of q4_0), Q05 sparse + q3_0 at 160k (copies 10/10, needles 12/12); then Q06 = the 2060
+repeats P108 / P114 / P117 on the new build (same results within noise). Waiting for their go; queue it after P120.
+
+## 2026-10-13 P121 (result): crossover on the old build - sparse 1.45x at 96k, 1.78x at 128k
+Run 19:36-20:17 (queue 69ia). bin-sparse7, margin 475 (line 34,560), lookup off, f16, graphs off. dense 96k 15.9 (16.3/15.5/
+15.7), 128k 11.7 (12.0/11.3/11.7); sparse0 (MIN_HOST=0) 96k 23.0 (23.5/22.4/23.2), 128k 20.8 (21.5/19.8/21.1). Prefill
+238.0/235.8 (96k), 203.7/203.5 (128k). Min free 362 / 234; 21 sparse lines; 0 one-token.
+With P106 64k (host ~18k: -16 %): crossover between ~18k and ~61k host cells; MIN_HOST=32768 in range. Posted on #21.
+
+## 2026-10-14 01:53Z PR #51 merged: release commit for bundle-20261013 (patch 0054); 4070 gates G05-G07 pass (HumanEval 158/164,
+prefill +3-7 %, decode within 1.6 %). Release not yet published at 20:55 local; queue P126 (release check, from P113) when it is.
+
+P126 (queue 69ia2, next after P122; gate in its header): bundle-20261013 release check (zip 610,554,885 B, sha256 dda336ab...5a51):
+tests; sweep 4k-128k within 3 % of P113; fresh 60k x2; lookup_ab; 0 one-token; min free >= 60; 'skipped: device cc 750' line.
+
+## 2026-10-13 P122 (result): product-sparse 3ab0af3c2 built and tested; with the launcher defaults sparse 1.02x at 96k, 1.17x at 128k
+Run 20:17-21:12 (queue 69ib). Build try 1 (20:28:28). FLASH_ATTN_EXT 3005/3005, GATED_DELTA_NET 55/55. Launcher-sparse test copy
+(graphs on, packed on, lookup on). dense (BONSAI_SPARSE=0): line 62,464, loaded free 266; 96k 24.6 (25.3/24.1/24.4), 128k 21.3
+(19.2/15.5/29.1); prefill 247.6 / 204.9; min free 70. sparse0 (MIN_HOST=0): "244 MiB of page bounds counted", line 48,640,
+loaded free 525; 96k 25.0 (25.5/24.6/24.8), 128k 25.0 (28.8/22.8/23.4); prefill 244.8 / 213.5; min free 195; 21 sparse lines.
+0 one-token both. Reading: accounting works (a little generous); the reserve costs ~14k cells at every depth, which eats the
+96k gain; dense much stronger with graphs + lookup + bigger line. Predicted P123 2 % gate fail from the line, not routing.
+Suggested on #21: reserve bounds only beyond MIN_HOST / grow with depth, page 128, or bounds in pinned host memory.
+
+## 2026-10-14 02:2xZ int8 page bounds (4070): product-sparse c8bbb1898 + launcher 8a47ffe; P127 / P128 (plans); references
+4070 replies on #21 / #49: the launcher reserve is for the full window (line fixed at load); bounds beyond MIN_HOST only saves
+~2k cells; pinned host bounds too slow (~218 MB/token over PCIe 3 ~ 18 ms); page 128 has no quality data; their pick:
+int8 bounds at page 64, one f16 scale per page and head, rounded outward (still an upper bound): 514 B per host cell,
+~124 MiB at 262k, ~7k cells back. Built: c8bbb1898 (on 3ab0af3c2). Launcher 8a47ffe detects 'bounds int8' and counts 514 B;
+summary prints 'VRAM line <dense> -> <sparse>' and the depth trade. Default rule: 64k within ~5 % of BONSAI_SPARSE=0 ->
+sparse on by default on 8 GB. Reference for the sparse gates is now bundle-20261013 (P126).
+Changes before the runs: P124 gate reference -> P126 (was P113). P120 -> bin-psparse8 + launcher 8a47ffe.
+P127 (queue 69if): build c8bbb1898 (prism-tiergraphs product-sparse-int8-2060) + op tests + P123 again (64k x2; 5 % rule,
+2 % reported). P128 (queue 69ig): P124 again on c8bbb1898. Launcher test copy start-server-sparsetest2.ps1. All arms now also
+capture the 'VRAM line' summary line. Queue: P126 (running) -> P123 -> P124 -> P125 -> P127 -> P128 -> P119 -> P120.
+
+## 2026-10-13 ~21:35 power cut; reboot 21:40; resumed 21:59
+After the reboot: GPU 42 C, fan 40 % (slot 5 not applied), memory stock, PCIe 3 x16; BonsaiQueue task Ready (runner not
+running). P126 was mid-sweep (sha match + tests done; sweep to ~64k): receipts moved to receipts/p126-interrupted-power, the
+job back to pending and rerun from the start (zip and x/ already on disk). Slot 3 -> 5 re-applied (fan 100 %). resume.ps1:
+runner took over the stale lock, P126 running 21:59:26. Nothing else lost: P121 / P122 complete before the cut.
+
+## 2026-10-13 P126 (result): bundle-20261013 release check - sha / tests / skip line / stability PASS; 64k-128k -4 to -7 % vs P113
+Run 21:59-22:40 (queue 69ia2, rerun after the power cut). Zip 610,554,885 B, sha256 match. ADD 99/99, RMS_NORM 51/51,
+FLASH_ATTN_EXT 3005/3005. Launcher line 61,696 (staging to 143,616), idle 233 MiB, loaded free 314. Log has "chunked GDN
+prefill (MMA) skipped: device cc 750 ..." once (err.log; the summary's 0 is a quoting bug in my grep). Sweep decode 4k 53.7
+(53.8/52.7/54.7), 32k 47.5 (45.1/50.6/46.8), 64k 36.1 (35.9/36.0/36.5), 96k 26.0 (23.1/30.1/24.6), 128k 16.3 (15.8/14.3/
+18.7); prefill 128k 155.0 (P113 146.6). Min free 112. Fresh 60k 38.4 / 38.3. 0 one-token; lookup_ab 0 of 22.
+Gate "within 3 % of P113" FAILS at 64k (-5.0 %), 96k (-6.8 %), 128k (-3.6 %); every item lower by a similar amount.
+Confound: the line is 768 cells shorter (idle 233 vs 217 MiB after the reboot). P126b (queue 69ic2, after P123): 1011 vs 1013
+alternated x2 in one session at 64k / 96k / 128k, gate within 3 %. Not posted yet (waiting for P126b).
+
+## 2026-10-13 P123 (result): routing fix confirmed (0 sparse ops at 64k); 64k -7.0 % from the shorter line - gate FAIL (2 % / 5 %)
+Run 22:40-23:03 (queue 69ic). bin-psparse (3ab0af3c2), launcher c1908b7 test copy. off_r1 line 61,696, 36.2 (36.9/35.9/
+35.8), min free 120; def_r1 line 47,872 ("245 MiB of page bounds counted", from 32768 host cells), 34.7 (35.7/34.1/34.3),
+min free 319; off_r2 61,952, 38.0 (38.7/37.7/37.6), min free 91; def_r2 48,128, 34.3 (35.2/33.7/34.0), min free 316.
+Means 37.1 vs 34.5 = -7.0 % (rounds -4.1 / -9.7 %). 0 one-token. Sparse lines: 1 per default arm = the warmup "needs an f16
+mask ... off" (prefill), not a sparse op. Per the 4070's rule: wait for int8 bounds -> P127. Posted on #21.
+
+## 2026-10-13 23:40:37 system crash (bugcheck 0x3B), reboot 23:56; resumed 00:1x
+Event log: Kernel-Power 41; WER 1001 "rebooted from a bugcheck 0x0000003b (0xc0000005, 0xfffff800ee14fb24, ...)"; 6008
+unexpected shutdown 23:40:37. Minidump C:\Windows\Minidump\101326-9656-01.dmp (4,310,942 B, PAGEDU64 triage), parsed by hand
+(no debugger installed): faulting IP = ntoskrnl.exe+0x34fb24; process (EPROCESS) = TiWorker.exe (Windows Modules Installer,
+Windows Update servicing); stack modules ntoskrnl only (+ two unnamed); no nvlddmkm / dxgkrnl / llama-server frame. WinREAgent
+hive events at 23:52 (servicing). Reading: a Windows servicing crash, not the GPU workload (stock clocks, slot 5).
+The 21:40 reboot: Kernel-Power 41 + 6008, no bugcheck / no dump = the power cut Cary reported.
+P126b was running (23:03 start): partial receipts -> receipts/p126b-interrupted-crash; job back to pending; rerun.
+Slot 3 -> 5 re-applied. Suggest to Cary: let Windows finish / pause updates during long runs (his call, system setting).
+
+## 2026-10-14 06:0xZ #21 / #49 / #56: D22 int8 bounds PASS on the 4070 (160k 27.3 vs 27.5; 245k 24.5 vs 23.0; copies/needles same;
+245k miss _pydecimal _convert_other in both, dense control queued there); q3-on-sparse 4dbfe57d4 op tests pass, PPL q3_0 +0.58 %
+vs q4_0; patch 0055 = draft PR #56 (product-0055 578262610), drafts until P124 / P127 pass on c8bbb1898. They asked for the 245k
+trace minimum sparse vs dense (in P124 / P128 already). Replied.
+
+## 2026-10-14 P126b (result): bundle-20261013 = bundle-20261011 in one session - release check PASS (posted on #40)
+Rerun 00:10-01:04 (queue 69ic2). Lines 61,184-61,440, loaded free 305. 1011 r1 36.2/26.0/16.6, 1013 r1 36.2/26.0/17.1, 1011 r2
+35.8/26.0/17.1, 1013 r2 35.1/25.9/17.1 (64k/96k/128k). Means 1011 36.0/26.0/16.85 vs 1013 35.65/25.95/17.1: -1.0/-0.2/+1.5 %.
+0 one-token. Interrupted run (before the bugcheck): 1011 38.2/27.6/17.7, 1013 38.3/27.5/17.7. Session-to-session ~5 % at 64k
+(idle VRAM, line). Verdict: P126 = PASS (the 64k-128k gap was the session: post-power-cut, TiWorker servicing active).
+Lesson: release-vs-release only inside one session (alternated); a release check gates on the same-session A/B.
+
+## 2026-10-14 06:11Z the 4070's q3_0 request (Q06) on q3-on-sparse 4dbfe57d4 -> P129-P132 (plans)
+4070 (PR #58): 4dbfe57d4 = c8bbb1898 + q3_0 (clean pick of 6a4851286). Op tests FA 3115/3115 (110 q3_0), SET_ROWS 177/177,
+CPY 259/259, GET_ROWS 123/123; PPL -c 2048 x32: q8_0 8.0733, q4_0 8.0900, q3_0 8.1366 (+0.58 %); sparse + q3_0 160k copies
+10/10, needles 12/12. Launcher #49 has no q3_0 CellBytes yet (falls back to q8_0 size).
+Rig: prism-q3kv -> branch q3-on-sparse-2060 = 4dbfe57d4 (separate worktree / build dir build-q3kv, so P127's build in
+prism-tiergraphs is not touched). Launcher test copy start-server-sparsetest2q3.ps1 = sparsetest2 + 'q3_0' { 14336 }.
+Queue (gates in headers): P129 build + op tests + PPL 16k/64k; P130 P114 set (sparse off); P131 HumanEval q3_0; P132 sparse on,
+q4_0 vs q3_0, 160k -> 245k. P119 / P120 renamed 69m / 69n to run after them. Posted on #21.
+
+## 2026-10-14 06:43Z 4070: sparse 245k copy miss (_pydecimal _convert_other, 44 %) with int8 and f16 bounds, dense 10/10;
+#56 / #49 wait. Rig answer from P105 (d6c6e9f01): 245k sparse 9/10, miss _strptime _calc_julian_from_U_or_W (0.554); dense
+10/10; item sets differ (local pycode.raw). P133 (queue 69if2, after P127; reading in its header): 245k copies + needles on
+c8bbb1898, dense vs sparse B 8192 vs B 16384, per-item misses. P125 moved to 69il (after the q3_0 set). Posted on #21.
+Queue: P124 (running) -> P127 -> P133 -> P128 -> P129-P132 -> P125 -> P119 -> P120.
+
+## 2026-10-14 Audit corrections from the P114-P132 record writer (posts on #40 / #21 edited)
+- Power cut: ~21:27 (P126 trace ends 21:27:23, server log ~21:27:14; reboot 21:40:26), not ~21:35 / 21:40.
+- Crash: ~23:56 (P126b 1013 r2 server ran 23:43:58 -> 23:55:54; dump written 23:56:24), not 23:40:37 (stale event 6008 time;
+  6008 was stale for the power cut too: 20:48:43). The queue log has no NOTE for the crash (added in the record).
+- P126 cut run: it reached 4k-96k (53.8 / 47.9 / 38.0 / 27.9 = P113), not "~64k".
+- "TiWorker active during P126" (my #40 post): not shown - no servicing events 21:51-23:46. The session effect is real
+  (P126b), the cause is unknown. Pattern: 64k ~38 when the server loaded at 7,523 MiB, ~36 at 7,460-7,464 MiB. #40 edited.
+- P114 post (#21): q3_0 does NOT cut the page bounds (514 B per host cell has no KV-type term); only cells and staging. Edited.
+- P118: a few small ops rose by up to 0.09 ms ("all other ops equal or lower" is not exact).
+- P121 header says 128k extends; P121 / P122 did a full 127,340-token prefill. P120 header: rewritten twice (10-13 rig time).
+  P125 header names P113 as a HumanEval reference; P113 had no HumanEval.
